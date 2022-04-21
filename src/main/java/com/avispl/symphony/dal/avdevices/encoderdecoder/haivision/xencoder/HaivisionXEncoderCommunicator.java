@@ -301,6 +301,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			case VIDEO_CONFIG:
 				retrieveVideoConfig(metric);
 			case ACCOUNT:
+				break;
 			case ROLE_BASED:
 				break;
 			default:
