@@ -1,7 +1,7 @@
 /*
  *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
  */
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto;
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.audio;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

@@ -101,5 +101,7 @@ public class HaivisionConstant {
 	public static final String AUDIO_ENCODER = "Audio Encoder ";
 	public static final String HEX_PREFIX = "0x";
 	public static final String ANY = "Any";
+	public static final String REGEX_DATA = "\r\n";
+	public static final String REGEX_SPLIT_DATA = "\r\n\r";
 
 }

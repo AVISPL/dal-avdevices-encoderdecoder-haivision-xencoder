@@ -50,8 +50,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Tag("RealDevice")
 	@Test
 	void testHaivisionX4DecoderCommunicatorGetMonitoringDataSuccessful() throws Exception {
-		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionX4DecoderCommunicator.getMultipleStatistics().get(0);
-		Map<String, String> stats = extendedStatistics.getStatistics();
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionX4DecoderCommunicator.getMultipleStatistics().get(0);Map<String, String> stats = extendedStatistics.getStatistics();
 
 	}
 }

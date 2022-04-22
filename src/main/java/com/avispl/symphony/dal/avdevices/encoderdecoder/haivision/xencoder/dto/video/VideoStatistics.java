@@ -1,4 +1,7 @@
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto;
+/*
+ *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
+ */
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.video;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -7,7 +10,7 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
 
 /**
- * VideoStatistics
+ * VideoStatistics DTO class
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022

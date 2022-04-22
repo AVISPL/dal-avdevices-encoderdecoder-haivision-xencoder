@@ -1,17 +1,20 @@
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto;
+/*
+ *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
+ */
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.video;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * VideoConfig
+ * VideoConfig DTO class
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022
  * @since 1.0.0
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VideoConfig {
+public class VideoConfig  {
 
 	@JsonAlias("Encoder ID")
 	private String id;

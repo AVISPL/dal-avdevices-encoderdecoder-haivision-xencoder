@@ -1,10 +1,13 @@
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto;
+/*
+ *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
+ */
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.audio;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * AudioConfig
+ * AudioConfig DTO class
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022

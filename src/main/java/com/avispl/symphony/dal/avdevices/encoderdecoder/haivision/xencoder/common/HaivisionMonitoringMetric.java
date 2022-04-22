@@ -1,7 +1,10 @@
+/*
+ *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
+ */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
- * HaivisionMonitoringMetric
+ * HaivisionMonitoringMetric class defined the enum for the monitoring process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022
@@ -9,13 +12,15 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.comm
  */
 public enum HaivisionMonitoringMetric {
 
-	ROLE_BASED("RoleBased",false),
-	ACCOUNT("Account",false),
+	ROLE_BASED("RoleBased", false),
+	ACCOUNT("Account", false),
 	SYSTEM_INFORMATION("SystemInformation", true),
 	AUDIO_STATISTICS("AudioStatistics", true),
 	AUDIO_CONFIG("AudioConfig", true),
 	VIDEO_STATISTICS("AudioStatistics", true),
-	VIDEO_CONFIG("AudioConfig", true);
+	VIDEO_CONFIG("AudioConfig", true),
+	STREAM_STATISTICS("StreamStatistics", true),
+	STREAM_CONFIG("StreamConfig", true);
 
 	private final String name;
 	private final boolean isMonitoring;
