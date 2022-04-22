@@ -323,12 +323,28 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			case STREAM_STATISTICS:
 				popularStreamStatisticsData(stats);
 				break;
+			case AUDIO_CONFIG:
+				popularAudioConfigData(stats,advancedControllableProperties);
+				break;
 			default:
 				if (logger.isDebugEnabled()) {
 					logger.debug("The metric not support popular data" + haivisionMonitoringMetric.getName());
 				}
 		}
 	}
+
+	/**
+	 * Populate audio config
+	 *
+	 * @param stats list statistics property
+	 * @param advancedControllableProperties the advancedControllableProperties is list AdvancedControllableProperties
+	 */
+	private void popularAudioConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
+		Objects.requireNonNull(stats);
+		Objects.requireNonNull(advancedControllableProperties);
+		//TODO
+	}
+
 
 	/**
 	 * Populate stream statistics
