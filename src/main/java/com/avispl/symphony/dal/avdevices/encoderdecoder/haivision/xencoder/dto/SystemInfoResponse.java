@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 
-
 /**
  * SystemInfoResponse Response DTO class
  *

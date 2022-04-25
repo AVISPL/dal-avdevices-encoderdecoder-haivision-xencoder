@@ -24,8 +24,8 @@ import com.avispl.symphony.api.dal.dto.monitor.ExtendedStatistics;
 import com.avispl.symphony.api.dal.dto.monitor.Statistics;
 import com.avispl.symphony.api.dal.error.ResourceNotReachableException;
 import com.avispl.symphony.api.dal.monitor.Monitorable;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionCommand;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioMonitoringMetric;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionCommand;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionConstant;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionUtil;
@@ -73,7 +73,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private Map<String, String> failedMonitor = new HashMap<>();
 	ObjectMapper objectMapper = new ObjectMapper();
 
-	private final String uuidDay = UUID.randomUUID().toString().replace(HaivisionConstant.DASH, "");
+	private final String uuidDay = UUID.randomUUID().toString().replace(HaivisionConstant.DASH, HaivisionConstant.EMPTY_STRING);
 
 	//The properties adapter
 	private String streamNameFilter;
@@ -204,7 +204,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private List<StreamConfig> streamConfigList = new ArrayList<>();
 
 	/**
-	 * Constructor
+	 * HaivisionXEncoderCommunicator constructor
 	 */
 	public HaivisionXEncoderCommunicator() {
 		this.setCommandErrorList(Collections.singletonList("~"));
@@ -324,7 +324,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				popularStreamStatisticsData(stats);
 				break;
 			case AUDIO_CONFIG:
-				popularAudioConfigData(stats,advancedControllableProperties);
+				popularAudioConfigData(stats, advancedControllableProperties);
+				break;
+			case ACCOUNT:
+			case SYSTEM_INFORMATION:
+			case ROLE_BASED:
 				break;
 			default:
 				if (logger.isDebugEnabled()) {
@@ -354,7 +358,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void popularStreamStatisticsData(Map<String, String> stats) {
 		for (StreamStatistics streamStatistics : streamStatisticsList) {
 			String streamName = streamStatistics.getName();
-			String metricName = streamName + HaivisionConstant.SPACE + HaivisionConstant.STATISTICS + HaivisionConstant.HASH;
+			if (HaivisionConstant.NONE_STREAM_NAME.equals(streamName)) {
+				streamName = handleStreamNameIsEmpty(streamStatistics.getId());
+			}
+			String metricName = HaivisionConstant.STREAM + HaivisionConstant.SPACE + streamName + HaivisionConstant.SPACE + HaivisionConstant.STATISTICS + HaivisionConstant.HASH;
 			for (StreamMonitoringMetric streamMonitoringMetric : StreamMonitoringMetric.values()) {
 				String value = checkForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
 				if (StreamMonitoringMetric.UPTIME.equals(streamMonitoringMetric)) {
@@ -584,9 +591,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				for (String responseDataItem : responseDataList) {
 
 					if (HaivisionMonitoringMetric.STREAM_CONFIG.equals(metric) || HaivisionMonitoringMetric.STREAM_STATISTICS.equals(metric)) {
-						result = popularConvertDataToObject(responseDataItem.replace("\r\n\t\t\t", "").replace("\t", ""), request, false);
+						result = popularConvertDataToObject(responseDataItem.replace("\r\n\t\t\t", HaivisionConstant.EMPTY_STRING).replace("\t", HaivisionConstant.EMPTY_STRING), request, false);
 					} else {
-						result = popularConvertDataToObject(responseDataItem.replace("\t", ""), request, false);
+						result = popularConvertDataToObject(responseDataItem.replace("\t", HaivisionConstant.EMPTY_STRING), request, false);
 					}
 					if (!result.isEmpty() && result.get("Name") != null) {
 						retrieveDataDetails(result, metric);
@@ -693,7 +700,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String response = send(request);
 			AuthenticationRole authenticationRole = null;
 			if (response != null) {
-				//subString from command request to value
 				Map<String, String> result = popularConvertDataToObject(response, request, true);
 				authenticationRole = objectMapper.convertValue(result, AuthenticationRole.class);
 			}
@@ -716,17 +722,57 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private Map<String, String> popularConvertDataToObject(String responseData, String request, boolean option) {
 		try {
 			if (option) {
-				responseData = responseData.substring(request.length() + 2, responseData.lastIndexOf(HaivisionConstant.REGEX_DATA)).replace("\t", "");
+				responseData = responseData.substring(request.length() + 2, responseData.lastIndexOf(HaivisionConstant.REGEX_DATA)).replace("\t", HaivisionConstant.EMPTY_STRING);
 			}
 			return Arrays.stream(responseData.split(HaivisionConstant.REGEX_DATA))
 					.map(item -> item.split(HaivisionConstant.COLON, 2))
 					.collect(Collectors.toMap(
-							key -> key[0].trim().replace("\"", ""),
-							value -> value.length == 2 ? value[1].trim().replace("\"", "") : ""
+							key -> replaceDoubleQuotes(key[0]),
+							//handle case attribute is empty such as Statistics: or Configuration:
+							value -> value.length == 2 ? replaceDoubleQuotes(value[1]) : HaivisionConstant.EMPTY_STRING
 					));
 		} catch (Exception e) {
 			return Collections.emptyMap();
 		}
+	}
+
+	/**
+	 * Parsing stream name empty to default name ( {protocol}://{address}:{(port)} )
+	 *
+	 * @param streamId the streamId is ID of stream
+	 * @return String is name of stream output
+	 */
+	private String handleStreamNameIsEmpty(String streamId) {
+		String streamName = HaivisionConstant.EMPTY_STRING;
+		for (StreamConfig streamConfigItem : streamConfigList) {
+			if (streamConfigItem.getId().equals(streamId)) {
+				String protocol = streamConfigItem.getEncapsulation();
+				String address = streamConfigItem.getAddress();
+				String port = streamConfigItem.getPort();
+				streamName = protocol + "://" + address + "(" + port + ")";
+				break;
+			}
+		}
+		return streamName;
+	}
+
+	/**
+	 * Format value by double quotes
+	 *
+	 * @param value the value is String
+	 * @return value the value has been replaced with double quotes if exit
+	 */
+	private String replaceDoubleQuotes(String value) {
+		value = value.trim();
+		if (!StringUtils.isNullOrEmpty(value)) {
+			int len = value.length() - 1;
+			String firstQuotes = value.substring(0, 1);
+			String lastQuotes = value.substring(len);
+			if (HaivisionConstant.QUOTES.equals(firstQuotes) && HaivisionConstant.QUOTES.equals(lastQuotes)) {
+				value = value.substring(1, len);
+			}
+		}
+		return value;
 	}
 
 	/**
