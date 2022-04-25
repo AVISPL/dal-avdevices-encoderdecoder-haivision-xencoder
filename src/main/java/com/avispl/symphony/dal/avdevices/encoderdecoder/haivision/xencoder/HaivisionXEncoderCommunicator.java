@@ -34,6 +34,7 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.AuthenticationRole;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.SystemInfoResponse;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.TemperatureStatus;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.audio.AudioConfig;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.audio.AudioStatistics;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream.StreamConfig;
@@ -326,6 +327,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			case AUDIO_CONFIG:
 				popularAudioConfigData(stats, advancedControllableProperties);
 				break;
+			case TEMPERATURE:
 			case ACCOUNT:
 			case SYSTEM_INFORMATION:
 			case ROLE_BASED:
@@ -559,6 +561,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			case SYSTEM_INFORMATION:
 				retrieveSystemInfoStatus(stats);
 				break;
+			case TEMPERATURE:
+				retrieveTemperatureStatus(stats);
+				break;
 			case AUDIO_STATISTICS:
 			case VIDEO_STATISTICS:
 			case AUDIO_CONFIG:
@@ -572,6 +577,32 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			default:
 				throw new IllegalArgumentException("Do not support haivisionStatisticsMetric: " + metric.name());
+		}
+	}
+
+	/**
+	 * Retrieve temperature status encoder
+	 *
+	 * @param stats list statistics property
+	 */
+	private void retrieveTemperatureStatus(Map<String, String> stats) {
+		try {
+			String request = String.valueOf(HaivisionUtil.getMonitorCommand(HaivisionMonitoringMetric.TEMPERATURE));
+			String responseData = send(request);
+			if (responseData != null) {
+				TemperatureStatus systemInfoResponse = objectMapper.convertValue(popularConvertDataToObject(responseData, request, true), TemperatureStatus.class);
+				String temperatureStatus = checkForNullData(systemInfoResponse.getTemperature());
+				int index = temperatureStatus.indexOf(HaivisionConstant.SPACE);
+				if (index != -1) {
+					temperatureStatus = temperatureStatus.substring(0, index);
+				}
+				stats.put(HaivisionMonitoringMetric.TEMPERATURE.getName(), temperatureStatus);
+			} else {
+				stats.put(HaivisionMonitoringMetric.TEMPERATURE.getName(), HaivisionConstant.NONE);
+			}
+		} catch (Exception e) {
+			contributeNoneValueForSystemInfo(stats);
+			failedMonitor.put(HaivisionMonitoringMetric.TEMPERATURE.getName(), e.getMessage());
 		}
 	}
 
@@ -595,7 +626,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					} else {
 						result = popularConvertDataToObject(responseDataItem.replace("\t", HaivisionConstant.EMPTY_STRING), request, false);
 					}
-					if (!result.isEmpty() && result.get("Name") != null) {
+					if (!result.isEmpty() && result.get(HaivisionConstant.NAME) != null) {
 						retrieveDataDetails(result, metric);
 					}
 				}

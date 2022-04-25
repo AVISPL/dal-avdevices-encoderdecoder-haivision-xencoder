@@ -38,6 +38,8 @@ public class HaivisionUtil {
 				return HaivisionCommand.STREAM.getName() + HaivisionCommand.GET.getName() + HaivisionCommand.ALL.getName() + HaivisionCommand.STATS.getName();
 			case STREAM_CONFIG:
 				return HaivisionCommand.STREAM.getName() + HaivisionCommand.GET.getName() + HaivisionCommand.ALL.getName() + HaivisionCommand.CONFIG.getName();
+			case TEMPERATURE:
+				return HaivisionCommand.TEMPERATURE.getName() + HaivisionCommand.GET.getName();
 			case ACCOUNT:
 			case ROLE_BASED:
 				break;

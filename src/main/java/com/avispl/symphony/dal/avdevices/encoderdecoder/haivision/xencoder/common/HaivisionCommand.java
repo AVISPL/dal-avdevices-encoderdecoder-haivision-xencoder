@@ -25,7 +25,8 @@ public enum HaivisionCommand {
 	HAIVERSION("haiversion"),
 	STATUS("status "),
 	AUDENC("audenc "),
-	ACCOUNT("account ");
+	ACCOUNT("account "),
+	TEMPERATURE("temperature ");
 
 	private final String name;
 

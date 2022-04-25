@@ -22,7 +22,7 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
 
 /**
- * Unit test for HaivisionX4DecoderCommunicator
+ * Unit test for HaivisionXEncoderCommunicator
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022
@@ -118,5 +118,18 @@ public class HaivisionXEncoderCommunicatorTest {
 		for (StreamMonitoringMetric metric : StreamMonitoringMetric.values()) {
 			Assertions.assertNotNull(stats.get("Stream Ivantest02 Statistics" + HaivisionConstant.HASH + metric.getName()));
 		}
+	}
+
+	/**
+	 * Test get statistics: with temperatures status
+	 *
+	 * @throws Exception When fail to getMultipleStatistics
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testGetMultipleStatisticsWithTemperatureStatus() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionX4DecoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNotNull(stats.get(HaivisionMonitoringMetric.TEMPERATURE.getName()));
 	}
 }

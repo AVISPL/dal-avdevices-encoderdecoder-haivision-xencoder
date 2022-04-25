@@ -14,6 +14,7 @@ public enum HaivisionMonitoringMetric {
 
 	ROLE_BASED("RoleBased", false),
 	ACCOUNT("Account", false),
+	TEMPERATURE("TemperatureStatus", true),
 	SYSTEM_INFORMATION("SystemInformation", true),
 	AUDIO_STATISTICS("AudioStatistics", true),
 	AUDIO_CONFIG("AudioConfig", true),

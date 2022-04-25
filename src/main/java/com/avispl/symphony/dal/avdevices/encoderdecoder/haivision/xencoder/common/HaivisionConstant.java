@@ -33,4 +33,5 @@ public class HaivisionConstant {
 	public static final String REGEX_SPLIT_DATA = "\r\n\r";
 	public static final String NONE_STREAM_NAME = "(None)";
 	public static final String QUOTES = "\"";
+	public static final String NAME = "Name";
 }
