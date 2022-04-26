@@ -354,12 +354,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 			String metricName = EncoderConstant.STREAM + EncoderConstant.SPACE + streamName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (StreamMonitoringMetric streamMonitoringMetric : StreamMonitoringMetric.values()) {
-				String value = getDefaultValueForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
+				String streamValue = getDefaultValueForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
+				String streamKeyName = metricName + streamMonitoringMetric.getName();
 				if (StreamMonitoringMetric.UPTIME.equals(streamMonitoringMetric)) {
-					stats.put(metricName + streamMonitoringMetric.getName(), formatTimeData(value));
+					stats.put(streamKeyName, formatTimeData(streamValue));
 					continue;
 				}
-				stats.put(metricName + streamMonitoringMetric.getName(), replaceCommaByEmptyString(value));
+				stats.put(streamKeyName, replaceCommaByEmptyString(streamValue));
 			}
 		}
 	}
@@ -374,11 +375,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String audioName = audioStatistics.getName();
 			String metricName = audioName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (AudioMonitoringMetric audioMetric : AudioMonitoringMetric.values()) {
-				String value = getDefaultValueForNullData(audioStatistics.getValueByMetric(audioMetric));
+				String audioValue = getDefaultValueForNullData(audioStatistics.getValueByMetric(audioMetric));
+				String audioKeyName = metricName + audioMetric.getName();
 				if (audioMetric.equals(AudioMonitoringMetric.ENCODED_BYTES) || audioMetric.equals(AudioMonitoringMetric.ENCODED_FRAMES)) {
-					stats.put(metricName + audioMetric.getName(), replaceCommaByEmptyString(value));
+					stats.put(audioKeyName, replaceCommaByEmptyString(audioValue));
 				} else {
-					stats.put(metricName + audioMetric.getName(), value);
+					stats.put(audioKeyName, audioValue);
 				}
 			}
 		}
@@ -394,11 +396,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String videoName = videoStatistics.getName();
 			String metricName = videoName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (VideoMonitoringMetric videoMetric : VideoMonitoringMetric.values()) {
-				String value = getDefaultValueForNullData(videoStatistics.getValueByMetric(videoMetric));
+				String videoValue = getDefaultValueForNullData(videoStatistics.getValueByMetric(videoMetric));
+				String videoKeyName = metricName + videoMetric.getName();
 				if (VideoMonitoringMetric.UPTIME.equals(videoMetric)) {
-					stats.put(metricName + videoMetric.getName(), formatTimeData(value));
+					stats.put(videoKeyName, formatTimeData(videoValue));
 				} else {
-					stats.put(metricName + videoMetric.getName(), value);
+					stats.put(videoKeyName, videoValue);
 				}
 			}
 		}
@@ -418,7 +421,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Format time data
+	 * Format time data such as x day(s) x hour(s) x minute(s) x minute(s)
 	 *
 	 * @param time the time is String
 	 * @return String
