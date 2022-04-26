@@ -25,10 +25,10 @@ import com.avispl.symphony.api.dal.dto.monitor.Statistics;
 import com.avispl.symphony.api.dal.error.ResourceNotReachableException;
 import com.avispl.symphony.api.dal.monitor.Monitorable;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioMonitoringMetric;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionCommand;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionConstant;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionMonitoringMetric;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionUtil;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderCommand;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderMonitoringMetric;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderUtil;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
@@ -69,11 +69,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private String roleBased;
 	private boolean isConfigManagement;
 	private ExtendedStatistics localExtendedStatistics;
-	private Integer countMonitoringNumber = null;
+	private Integer noOfMonitoringMetric = 0;
 	private Map<String, String> failedMonitor = new HashMap<>();
 	ObjectMapper objectMapper = new ObjectMapper();
 
-	private final String uuidDay = UUID.randomUUID().toString().replace(HaivisionConstant.DASH, HaivisionConstant.EMPTY_STRING);
+	private final String uuidDay = UUID.randomUUID().toString().replace(EncoderConstant.DASH, EncoderConstant.EMPTY_STRING);
 
 	//The properties adapter
 	private String streamNameFilter;
@@ -222,19 +222,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	@Override
 	public List<Statistics> getMultipleStatistics() {
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Getting statistics from the device X at host %s with port %s", this.host, this.getPort()));
+			logger.debug(String.format("Getting statistics from Makito X Encoder at host %s with port %s", this.host, this.getPort()));
 		}
 		ExtendedStatistics extendedStatistics = new ExtendedStatistics();
 		Map<String, String> stats = new HashMap<>();
 		List<AdvancedControllableProperty> advancedControllableProperties = new ArrayList<>();
 
-		if (!StringUtils.isNullOrEmpty(getPassword()) && !StringUtils.isNullOrEmpty(getLogin())) {
-			roleBased = retrieveUserRole();
-		}
-		isConfigManagement = handleAdapterPropertyIsConfigManagementFromUser();
-
+		roleBased = retrieveUserRole();
+		isConfigManagement = isConfigManagementProperties();
 		populateInformationFromDevice(stats, advancedControllableProperties);
-		if (HaivisionConstant.OPERATOR.equals(roleBased) || HaivisionConstant.ADMIN.equals(roleBased) && isConfigManagement) {
+		if (EncoderConstant.OPERATOR.equals(roleBased) || EncoderConstant.ADMIN.equals(roleBased) && isConfigManagement) {
 			extendedStatistics.setControllableProperties(advancedControllableProperties);
 		}
 		extendedStatistics.setStatistics(stats);
@@ -276,17 +273,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param advancedControllableProperties the advancedControllableProperties is list AdvancedControllableProperties
 	 */
 	private void populateInformationFromDevice(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
-		roleBased = retrieveUserRole();
-		for (HaivisionMonitoringMetric haivisionMonitoringMetric : HaivisionMonitoringMetric.values()) {
-			if (HaivisionMonitoringMetric.ACCOUNT.equals(haivisionMonitoringMetric)) {
+		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
+			if (EncoderMonitoringMetric.ACCOUNT.equals(encoderMonitoringMetric)) {
 				continue;
 			}
-			retrieveDataByMetric(stats, haivisionMonitoringMetric);
+			retrieveDataByMetric(stats, encoderMonitoringMetric);
 		}
-		if (countMonitoringNumber == null) {
-			countMonitoringNumber = getNumberMonitoringMetric();
+		if (noOfMonitoringMetric == 0) {
+			noOfMonitoringMetric = getNumberMonitoringMetric();
 		}
-		if (failedMonitor.size() == countMonitoringNumber) {
+		if (failedMonitor.size() == noOfMonitoringMetric) {
 			StringBuilder stringBuilder = new StringBuilder();
 			for (Map.Entry<String, String> messageFailed : failedMonitor.entrySet()) {
 				stringBuilder.append(messageFailed.getValue());
@@ -295,8 +291,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			throw new ResourceNotReachableException("Get monitoring data failed: " + stringBuilder);
 		}
 		getFilteredForEncoderStatistics();
-		for (HaivisionMonitoringMetric haivisionMonitoringMetric : HaivisionMonitoringMetric.values()) {
-			populateDataByMetric(stats, advancedControllableProperties, haivisionMonitoringMetric);
+		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
+			populateDataByMetric(stats, advancedControllableProperties, encoderMonitoringMetric);
 		}
 	}
 
@@ -305,10 +301,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 *
 	 * @param stats list statistics property
 	 * @param advancedControllableProperties the advancedControllableProperties is list AdvancedControllableProperties
-	 * @param haivisionMonitoringMetric is instance in HaivisionMonitoringMetric
+	 * @param encoderMonitoringMetric is instance in EncoderMonitoringMetric
 	 */
-	private void populateDataByMetric(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, HaivisionMonitoringMetric haivisionMonitoringMetric) {
-		switch (haivisionMonitoringMetric) {
+	private void populateDataByMetric(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, EncoderMonitoringMetric encoderMonitoringMetric) {
+		switch (encoderMonitoringMetric) {
 			case AUDIO_STATISTICS:
 				populateAudioStatisticsData(stats);
 				break;
@@ -328,7 +324,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			default:
 				if (logger.isDebugEnabled()) {
-					logger.debug("The metric not support populate data" + haivisionMonitoringMetric.getName());
+					logger.debug("The metric not support populate data" + encoderMonitoringMetric.getName());
 				}
 		}
 	}
@@ -353,10 +349,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void populateStreamStatisticsData(Map<String, String> stats) {
 		for (StreamStatistics streamStatistics : streamStatisticsList) {
 			String streamName = streamStatistics.getName();
-			if (HaivisionConstant.NONE_STREAM_NAME.equals(streamName)) {
+			if (EncoderConstant.NONE_STREAM_NAME.equals(streamName)) {
 				streamName = handleStreamNameIsEmpty(streamStatistics.getId());
 			}
-			String metricName = HaivisionConstant.STREAM + HaivisionConstant.SPACE + streamName + HaivisionConstant.SPACE + HaivisionConstant.STATISTICS + HaivisionConstant.HASH;
+			String metricName = EncoderConstant.STREAM + EncoderConstant.SPACE + streamName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (StreamMonitoringMetric streamMonitoringMetric : StreamMonitoringMetric.values()) {
 				String value = getDefaultValueForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
 				if (StreamMonitoringMetric.UPTIME.equals(streamMonitoringMetric)) {
@@ -376,7 +372,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void populateAudioStatisticsData(Map<String, String> stats) {
 		for (AudioStatistics audioStatistics : audioStatisticsList) {
 			String audioName = audioStatistics.getName();
-			String metricName = audioName + HaivisionConstant.SPACE + HaivisionConstant.STATISTICS + HaivisionConstant.HASH;
+			String metricName = audioName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (AudioMonitoringMetric audioMetric : AudioMonitoringMetric.values()) {
 				String value = getDefaultValueForNullData(audioStatistics.getValueByMetric(audioMetric));
 				if (audioMetric.equals(AudioMonitoringMetric.ENCODED_BYTES) || audioMetric.equals(AudioMonitoringMetric.ENCODED_FRAMES)) {
@@ -396,7 +392,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void populateVideoStatisticsData(Map<String, String> stats) {
 		for (VideoStatistics videoStatistics : videoStatisticsList) {
 			String videoName = videoStatistics.getName();
-			String metricName = videoName + HaivisionConstant.SPACE + HaivisionConstant.STATISTICS + HaivisionConstant.HASH;
+			String metricName = videoName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (VideoMonitoringMetric videoMetric : VideoMonitoringMetric.values()) {
 				String value = getDefaultValueForNullData(videoStatistics.getValueByMetric(videoMetric));
 				if (VideoMonitoringMetric.UPTIME.equals(videoMetric)) {
@@ -416,9 +412,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private String replaceCommaByEmptyString(String value) {
 		if (StringUtils.isNullOrEmpty(value)) {
-			return HaivisionConstant.NONE;
+			return EncoderConstant.NONE;
 		}
-		return value.replace(HaivisionConstant.COMMA, HaivisionConstant.EMPTY_STRING);
+		return value.replace(EncoderConstant.COMMA, EncoderConstant.EMPTY_STRING);
 	}
 
 	/**
@@ -428,15 +424,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @return String
 	 */
 	private String formatTimeData(String time) {
-		if (HaivisionConstant.NONE.equals(time)) {
-			return HaivisionConstant.NONE;
+		if (EncoderConstant.NONE.equals(time)) {
+			return EncoderConstant.NONE;
 		}
-		int index = time.indexOf(HaivisionConstant.SPACE);
+		int index = time.indexOf(EncoderConstant.SPACE);
 		if (index > -1) {
 			time = time.substring(0, index);
 		}
-		return time.replace("d", uuidDay).replace("s", HaivisionConstant.SECOND).replace(uuidDay, HaivisionConstant.DAY)
-				.replace("h", HaivisionConstant.HOUR).replace("m", HaivisionConstant.MINUTE);
+		return time.replace("d", uuidDay).replace("s", EncoderConstant.SECOND).replace(uuidDay, EncoderConstant.DAY)
+				.replace("h", EncoderConstant.HOUR).replace("m", EncoderConstant.MINUTE);
 	}
 
 	/**
@@ -517,7 +513,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private List<String> extractListNameFilter(String filterName) {
 		List<String> listName = new ArrayList<>();
 		if (!StringUtils.isNullOrEmpty(filterName)) {
-			String[] nameStringFilter = filterName.split(HaivisionConstant.COMMA);
+			String[] nameStringFilter = filterName.split(EncoderConstant.COMMA);
 			for (String listNameItem : nameStringFilter) {
 				listName.add(listNameItem.trim());
 			}
@@ -532,7 +528,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private int getNumberMonitoringMetric() {
 		int countMonitoringMetric = 0;
-		for (HaivisionMonitoringMetric metric : HaivisionMonitoringMetric.values()) {
+		for (EncoderMonitoringMetric metric : EncoderMonitoringMetric.values()) {
 			if (metric.isMonitoring()) {
 				countMonitoringMetric++;
 			}
@@ -546,7 +542,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param metric list metric of device
 	 * @param stats stats list statistics property
 	 */
-	private void retrieveDataByMetric(Map<String, String> stats, HaivisionMonitoringMetric metric) {
+	private void retrieveDataByMetric(Map<String, String> stats, EncoderMonitoringMetric metric) {
 		Objects.requireNonNull(metric);
 
 		switch (metric) {
@@ -568,7 +564,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			case ROLE_BASED:
 				break;
 			default:
-				throw new IllegalArgumentException("Do not support haivisionStatisticsMetric: " + metric.name());
+				throw new IllegalArgumentException("Do not support encoderStatisticsMetric: " + metric.name());
 		}
 	}
 
@@ -579,46 +575,46 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void retrieveTemperatureStatus(Map<String, String> stats) {
 		try {
-			String request = String.valueOf(HaivisionUtil.getMonitorCommand(HaivisionMonitoringMetric.TEMPERATURE));
+			String request = String.valueOf(EncoderUtil.getMonitorCommand(EncoderMonitoringMetric.TEMPERATURE));
 			String responseData = send(request);
 			if (responseData != null) {
 				TemperatureStatus systemInfoResponse = objectMapper.convertValue(populateConvertDataToObject(responseData, request, true), TemperatureStatus.class);
 				String temperatureStatus = getDefaultValueForNullData(systemInfoResponse.getTemperature());
-				int index = temperatureStatus.indexOf(HaivisionConstant.SPACE);
+				int index = temperatureStatus.indexOf(EncoderConstant.SPACE);
 				if (index != -1) {
 					temperatureStatus = temperatureStatus.substring(0, index);
 				}
-				stats.put(HaivisionMonitoringMetric.TEMPERATURE.getName(), temperatureStatus);
+				stats.put(EncoderMonitoringMetric.TEMPERATURE.getName(), temperatureStatus);
 			} else {
-				stats.put(HaivisionMonitoringMetric.TEMPERATURE.getName(), HaivisionConstant.NONE);
+				stats.put(EncoderMonitoringMetric.TEMPERATURE.getName(), EncoderConstant.NONE);
 			}
 		} catch (Exception e) {
 			contributeNoneValueForSystemInfo(stats);
-			failedMonitor.put(HaivisionMonitoringMetric.TEMPERATURE.getName(), e.getMessage());
+			failedMonitor.put(EncoderMonitoringMetric.TEMPERATURE.getName(), e.getMessage());
 		}
 	}
 
 	/**
 	 * Retrieve video encoder configure
 	 *
-	 * @param metric the metric is instance HaivisionMonitoringMetric
+	 * @param metric the metric is instance encoderMonitoringMetric
 	 */
-	private void populateRetrieveDataByMetric(HaivisionMonitoringMetric metric) {
+	private void populateRetrieveDataByMetric(EncoderMonitoringMetric metric) {
 		try {
-			String request = String.valueOf(HaivisionUtil.getMonitorCommand(metric));
+			String request = String.valueOf(EncoderUtil.getMonitorCommand(metric));
 			String responseData = send(request);
 			Map<String, String> result;
 			if (responseData != null) {
-				responseData = responseData.substring(request.length() + 2, responseData.lastIndexOf(HaivisionConstant.REGEX_DATA));
-				String[] responseDataList = responseData.split(HaivisionConstant.REGEX_SPLIT_DATA);
+				responseData = responseData.substring(request.length() + EncoderConstant.NUMBER_TWO, responseData.lastIndexOf(EncoderConstant.REGEX_DATA));
+				String[] responseDataList = responseData.split(EncoderConstant.REGEX_SPLIT_DATA);
 				for (String responseDataItem : responseDataList) {
 
-					if (HaivisionMonitoringMetric.STREAM_CONFIG.equals(metric) || HaivisionMonitoringMetric.STREAM_STATISTICS.equals(metric)) {
-						result = populateConvertDataToObject(responseDataItem.replace("\r\n\t\t\t", HaivisionConstant.EMPTY_STRING).replace("\t", HaivisionConstant.EMPTY_STRING), request, false);
+					if (EncoderMonitoringMetric.STREAM_CONFIG.equals(metric) || EncoderMonitoringMetric.STREAM_STATISTICS.equals(metric)) {
+						result = populateConvertDataToObject(responseDataItem.replace("\r\n\t\t\t", EncoderConstant.EMPTY_STRING).replace("\t", EncoderConstant.EMPTY_STRING), request, false);
 					} else {
-						result = populateConvertDataToObject(responseDataItem.replace("\t", HaivisionConstant.EMPTY_STRING), request, false);
+						result = populateConvertDataToObject(responseDataItem.replace("\t", EncoderConstant.EMPTY_STRING), request, false);
 					}
-					if (!result.isEmpty() && result.get(HaivisionConstant.NAME) != null) {
+					if (!result.isEmpty() && result.get(EncoderConstant.NAME) != null) {
 						retrieveDataDetails(result, metric);
 					}
 				}
@@ -632,9 +628,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * Retrieve data by metric
 	 *
 	 * @param mappingData is Map<String,String> instance
-	 * @param metric the metric is instance HaivisionMonitoringMetric
+	 * @param metric the metric is instance encoderMonitoringMetric
 	 */
-	private void retrieveDataDetails(Map<String, String> mappingData, HaivisionMonitoringMetric metric) {
+	private void retrieveDataDetails(Map<String, String> mappingData, EncoderMonitoringMetric metric) {
 		switch (metric) {
 			case AUDIO_STATISTICS:
 				AudioStatistics audioStatistics = objectMapper.convertValue(mappingData, AudioStatistics.class);
@@ -661,7 +657,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				streamConfigList.add(streamConfig);
 				break;
 			default:
-				throw new IllegalArgumentException("Do not support haivisionStatisticsMetric: " + metric.name());
+				throw new IllegalArgumentException("Do not support encoderStatisticsMetric: " + metric.name());
 		}
 	}
 
@@ -672,7 +668,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void retrieveSystemInfoStatus(Map<String, String> stats) {
 		try {
-			String request = String.valueOf(HaivisionUtil.getMonitorCommand(HaivisionMonitoringMetric.SYSTEM_INFORMATION));
+			String request = String.valueOf(EncoderUtil.getMonitorCommand(EncoderMonitoringMetric.SYSTEM_INFORMATION));
 			String responseData = send(request);
 			if (responseData != null) {
 				SystemInfoResponse systemInfoResponse = objectMapper.convertValue(populateConvertDataToObject(responseData, request, true), SystemInfoResponse.class);
@@ -684,7 +680,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 		} catch (Exception e) {
 			contributeNoneValueForSystemInfo(stats);
-			failedMonitor.put(HaivisionConstant.SYSTEM_INFO_STATUS, e.getMessage());
+			failedMonitor.put(EncoderConstant.SYSTEM_INFO_STATUS, e.getMessage());
 		}
 	}
 
@@ -696,7 +692,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private String getDefaultValueForNullData(String value) {
 		if (StringUtils.isNullOrEmpty(value)) {
-			return HaivisionConstant.NONE;
+			return EncoderConstant.NONE;
 		}
 		return value;
 	}
@@ -708,7 +704,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void contributeNoneValueForSystemInfo(Map<String, String> stats) {
 		for (SystemMonitoringMetric systemInfoMetric : SystemMonitoringMetric.values()) {
-			stats.put(systemInfoMetric.getName(), HaivisionConstant.NONE);
+			stats.put(systemInfoMetric.getName(), EncoderConstant.NONE);
 		}
 	}
 
@@ -719,7 +715,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private String retrieveUserRole() {
 		try {
-			String request = HaivisionCommand.ACCOUNT.getName() + getLogin() + HaivisionConstant.SPACE + HaivisionCommand.GET.getName();
+			String request = EncoderCommand.ADMIN_ACCOUNT.getName() + getLogin() + EncoderConstant.SPACE + EncoderCommand.GET.getName();
 			String response = send(request);
 			AuthenticationRole authenticationRole = null;
 			if (response != null) {
@@ -746,16 +742,19 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private Map<String, String> populateConvertDataToObject(String responseData, String request, boolean option) {
 		try {
 			if (option) {
-				responseData = responseData.substring(request.length() + 2, responseData.lastIndexOf(HaivisionConstant.REGEX_DATA)).replace("\t", HaivisionConstant.EMPTY_STRING);
+				responseData = responseData.substring(request.length() + EncoderConstant.NUMBER_TWO, responseData.lastIndexOf(EncoderConstant.REGEX_DATA)).replace("\t", EncoderConstant.EMPTY_STRING);
 			}
-			return Arrays.stream(responseData.split(HaivisionConstant.REGEX_DATA))
-					.map(item -> item.split(HaivisionConstant.COLON, 2))
+			return Arrays.stream(responseData.split(EncoderConstant.REGEX_DATA))
+					.map(item -> item.split(EncoderConstant.COLON, EncoderConstant.NUMBER_TWO))
 					.collect(Collectors.toMap(
 							key -> replaceDoubleQuotes(key[0]),
 							//handle case attribute is empty such as Statistics: or Configuration:
-							value -> value.length == 2 ? replaceDoubleQuotes(value[1]) : HaivisionConstant.EMPTY_STRING
+							value -> value.length == EncoderConstant.NUMBER_TWO ? replaceDoubleQuotes(value[1]) : EncoderConstant.EMPTY_STRING
 					));
 		} catch (Exception e) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Parsing data failed: " + e);
+			}
 			return Collections.emptyMap();
 		}
 	}
@@ -767,7 +766,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @return String is name of stream output
 	 */
 	private String handleStreamNameIsEmpty(String streamId) {
-		String streamName = HaivisionConstant.EMPTY_STRING;
+		String streamName = EncoderConstant.EMPTY_STRING;
 		for (StreamConfig streamConfigItem : streamConfigList) {
 			if (streamConfigItem.getId().equals(streamId)) {
 				String protocol = streamConfigItem.getEncapsulation();
@@ -792,7 +791,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			int len = value.length() - 1;
 			String firstQuotes = value.substring(0, 1);
 			String lastQuotes = value.substring(len);
-			if (HaivisionConstant.QUOTES.equals(firstQuotes) && HaivisionConstant.QUOTES.equals(lastQuotes)) {
+			if (EncoderConstant.QUOTES.equals(firstQuotes) && EncoderConstant.QUOTES.equals(lastQuotes)) {
 				value = value.substring(1, len);
 			}
 		}
@@ -800,12 +799,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * This method is used to handle  input from adapter properties in case is config management
+	 * This method is used to handle input from adapter properties in case is config management
 	 *
 	 * @return boolean is configManagement
 	 */
-	private boolean handleAdapterPropertyIsConfigManagementFromUser() {
-		return !StringUtils.isNullOrEmpty(configManagement) && HaivisionConstant.TRUE.equalsIgnoreCase(configManagement);
+	private boolean isConfigManagementProperties() {
+		return !StringUtils.isNullOrEmpty(configManagement) && EncoderConstant.TRUE.equalsIgnoreCase(configManagement);
 	}
 	//region perform controls
 	//--------------------------------------------------------------------------------------------------------------------------------

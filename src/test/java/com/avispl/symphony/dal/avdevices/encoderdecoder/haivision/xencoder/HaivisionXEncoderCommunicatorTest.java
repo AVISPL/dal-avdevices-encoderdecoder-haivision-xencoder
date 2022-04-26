@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 
 import com.avispl.symphony.api.dal.dto.monitor.ExtendedStatistics;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioMonitoringMetric;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionConstant;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionMonitoringMetric;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
@@ -29,25 +29,25 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
  * @since 1.0.0
  */
 public class HaivisionXEncoderCommunicatorTest {
-	private HaivisionXEncoderCommunicator haivisionX4DecoderCommunicator;
+	private HaivisionXEncoderCommunicator haivisionXEncoderCommunicator;
 
 	@BeforeEach()
 	public void setUp() throws Exception {
-		haivisionX4DecoderCommunicator = new HaivisionXEncoderCommunicator();
-		haivisionX4DecoderCommunicator.setHost("***REMOVED***");
-		haivisionX4DecoderCommunicator.setPort(22);
-		haivisionX4DecoderCommunicator.setLogin("admin");
-		haivisionX4DecoderCommunicator.setPassword("AVIadm1n");
-		haivisionX4DecoderCommunicator.setCommandErrorList(Collections.singletonList("~"));
-		haivisionX4DecoderCommunicator.setCommandSuccessList(Collections.singletonList("~$ "));
-		haivisionX4DecoderCommunicator.setLoginSuccessList(Collections.singletonList("~$ "));
-		haivisionX4DecoderCommunicator.init();
-		haivisionX4DecoderCommunicator.connect();
+		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
+		haivisionXEncoderCommunicator.setHost("***REMOVED***");
+		haivisionXEncoderCommunicator.setPort(22);
+		haivisionXEncoderCommunicator.setLogin("admin");
+		haivisionXEncoderCommunicator.setPassword("AVIadm1n");
+		haivisionXEncoderCommunicator.setCommandErrorList(Collections.singletonList("~"));
+		haivisionXEncoderCommunicator.setCommandSuccessList(Collections.singletonList("~$ "));
+		haivisionXEncoderCommunicator.setLoginSuccessList(Collections.singletonList("~$ "));
+		haivisionXEncoderCommunicator.init();
+		haivisionXEncoderCommunicator.connect();
 	}
 
 	@AfterEach()
 	public void destroy() throws Exception {
-		haivisionX4DecoderCommunicator.disconnect();
+		haivisionXEncoderCommunicator.disconnect();
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testGetMultipleStatisticsWithSystemInfo() throws Exception {
-		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionX4DecoderCommunicator.getMultipleStatistics().get(0);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		for (SystemMonitoringMetric metric : SystemMonitoringMetric.values()) {
 			Assertions.assertNotNull(stats.get(metric.getName()));
@@ -73,17 +73,17 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testGetMultipleStatisticsWithAudioStatistics() throws Exception {
-		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionX4DecoderCommunicator.getMultipleStatistics().get(0);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		for (AudioMonitoringMetric metric : AudioMonitoringMetric.values()) {
-			Assertions.assertNotNull(stats.get("Audio Encoder 0 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("Audio Encoder 1 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("Audio Encoder 2 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("Audio Encoder 3 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("Audio Encoder 4 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("Audio Encoder 5 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("Audio Encoder 6 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("Audio Encoder 7 Statistics" + HaivisionConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("Audio Encoder 0 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("Audio Encoder 1 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("Audio Encoder 2 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("Audio Encoder 3 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("Audio Encoder 4 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("Audio Encoder 5 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("Audio Encoder 6 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("Audio Encoder 7 Statistics" + EncoderConstant.HASH + metric.getName()));
 		}
 	}
 
@@ -95,13 +95,13 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testGetMultipleStatisticsWithVideoStatistics() throws Exception {
-		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionX4DecoderCommunicator.getMultipleStatistics().get(0);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		for (VideoMonitoringMetric metric : VideoMonitoringMetric.values()) {
-			Assertions.assertNotNull(stats.get("HD Video Encoder 0 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("HD Video Encoder 1 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("HD Video Encoder 2 Statistics" + HaivisionConstant.HASH + metric.getName()));
-			Assertions.assertNotNull(stats.get("HD Video Encoder 3 Statistics" + HaivisionConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("HD Video Encoder 0 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("HD Video Encoder 1 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("HD Video Encoder 2 Statistics" + EncoderConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("HD Video Encoder 3 Statistics" + EncoderConstant.HASH + metric.getName()));
 		}
 	}
 
@@ -113,10 +113,10 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testGetMultipleStatisticsWithStreamStatistics() throws Exception {
-		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionX4DecoderCommunicator.getMultipleStatistics().get(0);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		for (StreamMonitoringMetric metric : StreamMonitoringMetric.values()) {
-			Assertions.assertNotNull(stats.get("Stream Ivantest02 Statistics" + HaivisionConstant.HASH + metric.getName()));
+			Assertions.assertNotNull(stats.get("Stream Ivantest02 Statistics" + EncoderConstant.HASH + metric.getName()));
 		}
 	}
 
@@ -128,8 +128,8 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testGetMultipleStatisticsWithTemperatureStatus() throws Exception {
-		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionX4DecoderCommunicator.getMultipleStatistics().get(0);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
-		Assertions.assertNotNull(stats.get(HaivisionMonitoringMetric.TEMPERATURE.getName()));
+		Assertions.assertNotNull(stats.get(EncoderMonitoringMetric.TEMPERATURE.getName()));
 	}
 }

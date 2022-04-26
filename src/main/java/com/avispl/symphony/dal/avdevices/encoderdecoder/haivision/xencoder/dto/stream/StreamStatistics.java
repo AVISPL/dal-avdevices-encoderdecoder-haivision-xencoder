@@ -6,7 +6,7 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionConstant;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 
 /**
@@ -647,7 +647,7 @@ public class StreamStatistics {
 			case LATENCY:
 				return getLatency();
 			default:
-				return HaivisionConstant.NONE;
+				return EncoderConstant.NONE;
 		}
 	}
 }

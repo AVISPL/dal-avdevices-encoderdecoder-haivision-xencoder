@@ -22,7 +22,6 @@ public enum SystemMonitoringMetric {
 	FIRMWARE_DATE("FirmwareDate"),
 	FIRMWARE_VERSION("FirmwareVersion"),
 	FIRMWARE_OPTIONS("FirmwareOptions"),
-	CHIPSET_LOAD("ChipsetLoad"),
 	TEMPERATURE("Temperature");
 
 	private final String name;

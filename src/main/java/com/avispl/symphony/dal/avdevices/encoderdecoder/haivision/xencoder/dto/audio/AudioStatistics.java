@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioMonitoringMetric;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.HaivisionConstant;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
 
 /**
  * Audio Statistic DTO class
@@ -235,7 +235,7 @@ public class AudioStatistics {
 			case NAME:
 				return getName();
 			default:
-				return HaivisionConstant.NONE;
+				return EncoderConstant.NONE;
 		}
 	}
 }

@@ -4,13 +4,13 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
- * HaivisionMonitoringMetric class defined the enum for the monitoring process
+ * EncoderMonitoringMetric class defined the enum for the monitoring process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022
  * @since 1.0.0
  */
-public enum HaivisionMonitoringMetric {
+public enum EncoderMonitoringMetric {
 
 	ROLE_BASED("RoleBased", false),
 	ACCOUNT("Account", false),
@@ -27,12 +27,12 @@ public enum HaivisionMonitoringMetric {
 	private final boolean isMonitoring;
 
 	/**
-	 * AxisMonitoringMetric instantiation
+	 * EncoderMonitoringMetric instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param isMonitoring {@code {@link #isMonitoring}}
 	 */
-	HaivisionMonitoringMetric(String name, boolean isMonitoring) {
+	EncoderMonitoringMetric(String name, boolean isMonitoring) {
 		this.name = name;
 		this.isMonitoring = isMonitoring;
 	}
