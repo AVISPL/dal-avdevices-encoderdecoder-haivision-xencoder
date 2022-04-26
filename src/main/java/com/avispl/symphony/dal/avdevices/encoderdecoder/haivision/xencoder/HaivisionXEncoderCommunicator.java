@@ -753,7 +753,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					));
 		} catch (Exception e) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Parsing data failed: " + e);
+				logger.debug("Convert data failed: " + e);
 			}
 			return Collections.emptyMap();
 		}

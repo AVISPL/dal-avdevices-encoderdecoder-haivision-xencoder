@@ -1,3 +1,6 @@
+/*
+ *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
+ */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
@@ -8,6 +11,7 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.comm
  * @since 1.0.0
  */
 public enum StreamMonitoringMetric {
+
 	STATE("State"),
 	UPTIME("UpTime"),
 	NAME("Name"),
