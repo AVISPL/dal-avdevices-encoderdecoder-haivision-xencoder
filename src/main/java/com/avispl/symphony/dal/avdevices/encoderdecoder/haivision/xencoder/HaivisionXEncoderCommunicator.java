@@ -358,7 +358,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 			String metricName = HaivisionConstant.STREAM + HaivisionConstant.SPACE + streamName + HaivisionConstant.SPACE + HaivisionConstant.STATISTICS + HaivisionConstant.HASH;
 			for (StreamMonitoringMetric streamMonitoringMetric : StreamMonitoringMetric.values()) {
-				String value = checkForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
+				String value = getDefaultValueForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
 				if (StreamMonitoringMetric.UPTIME.equals(streamMonitoringMetric)) {
 					stats.put(metricName + streamMonitoringMetric.getName(), formatTimeData(value));
 					continue;
@@ -378,7 +378,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String audioName = audioStatistics.getName();
 			String metricName = audioName + HaivisionConstant.SPACE + HaivisionConstant.STATISTICS + HaivisionConstant.HASH;
 			for (AudioMonitoringMetric audioMetric : AudioMonitoringMetric.values()) {
-				String value = checkForNullData(audioStatistics.getValueByMetric(audioMetric));
+				String value = getDefaultValueForNullData(audioStatistics.getValueByMetric(audioMetric));
 				if (audioMetric.equals(AudioMonitoringMetric.ENCODED_BYTES) || audioMetric.equals(AudioMonitoringMetric.ENCODED_FRAMES)) {
 					stats.put(metricName + audioMetric.getName(), replaceCommaByEmptyString(value));
 				} else {
@@ -398,7 +398,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String videoName = videoStatistics.getName();
 			String metricName = videoName + HaivisionConstant.SPACE + HaivisionConstant.STATISTICS + HaivisionConstant.HASH;
 			for (VideoMonitoringMetric videoMetric : VideoMonitoringMetric.values()) {
-				String value = checkForNullData(videoStatistics.getValueByMetric(videoMetric));
+				String value = getDefaultValueForNullData(videoStatistics.getValueByMetric(videoMetric));
 				if (VideoMonitoringMetric.UPTIME.equals(videoMetric)) {
 					stats.put(metricName + videoMetric.getName(), formatTimeData(value));
 				} else {
@@ -583,7 +583,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String responseData = send(request);
 			if (responseData != null) {
 				TemperatureStatus systemInfoResponse = objectMapper.convertValue(populateConvertDataToObject(responseData, request, true), TemperatureStatus.class);
-				String temperatureStatus = checkForNullData(systemInfoResponse.getTemperature());
+				String temperatureStatus = getDefaultValueForNullData(systemInfoResponse.getTemperature());
 				int index = temperatureStatus.indexOf(HaivisionConstant.SPACE);
 				if (index != -1) {
 					temperatureStatus = temperatureStatus.substring(0, index);
@@ -677,7 +677,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			if (responseData != null) {
 				SystemInfoResponse systemInfoResponse = objectMapper.convertValue(populateConvertDataToObject(responseData, request, true), SystemInfoResponse.class);
 				for (SystemMonitoringMetric systemInfoMetric : SystemMonitoringMetric.values()) {
-					stats.put(systemInfoMetric.getName(), checkForNullData(systemInfoResponse.getValueByMetric(systemInfoMetric)));
+					stats.put(systemInfoMetric.getName(), getDefaultValueForNullData(systemInfoResponse.getValueByMetric(systemInfoMetric)));
 				}
 			} else {
 				contributeNoneValueForSystemInfo(stats);
@@ -689,12 +689,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * check for null data
+	 * Get default None if the value is Null or Empty
 	 *
 	 * @param value the value of monitoring properties
 	 * @return String (none/value)
 	 */
-	private String checkForNullData(String value) {
+	private String getDefaultValueForNullData(String value) {
 		if (StringUtils.isNullOrEmpty(value)) {
 			return HaivisionConstant.NONE;
 		}
@@ -804,7 +804,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 *
 	 * @return boolean is configManagement
 	 */
-	public boolean handleAdapterPropertyIsConfigManagementFromUser() {
+	private boolean handleAdapterPropertyIsConfigManagementFromUser() {
 		return !StringUtils.isNullOrEmpty(configManagement) && HaivisionConstant.TRUE.equalsIgnoreCase(configManagement);
 	}
 	//region perform controls
