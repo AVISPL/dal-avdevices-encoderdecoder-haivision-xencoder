@@ -752,9 +752,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 							value -> value.length == EncoderConstant.NUMBER_TWO ? replaceDoubleQuotes(value[1]) : EncoderConstant.EMPTY_STRING
 					));
 		} catch (Exception e) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Convert data failed: " + e);
-			}
+			logger.error("Error while convert data: ", e);
 			return Collections.emptyMap();
 		}
 	}
