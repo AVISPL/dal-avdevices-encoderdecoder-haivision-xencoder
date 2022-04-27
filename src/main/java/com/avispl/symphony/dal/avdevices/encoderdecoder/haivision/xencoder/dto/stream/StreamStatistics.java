@@ -606,7 +606,7 @@ public class StreamStatistics {
 				return getsSRC();
 			case SENT_PACKETS:
 				return getSentPackets();
-			case SENTBYTES:
+			case SENT_BYTES:
 				return getSentBytes();
 			case BITRATE:
 				return getBitrate();

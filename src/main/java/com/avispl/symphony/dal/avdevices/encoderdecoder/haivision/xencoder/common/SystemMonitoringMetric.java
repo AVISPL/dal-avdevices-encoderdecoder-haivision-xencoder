@@ -12,17 +12,17 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.comm
  */
 public enum SystemMonitoringMetric {
 
-	UPTIME("Uptime"),
+	FIRMWARE_TIME("FirmwareTime"),
 	SERIAL_NUMBER("SerialNumber"),
 	HARDWARE_COMPATIBILITY("HardwareCompatibility"),
-	CPLD_VEVISION("CpldVevision"),
+	CPLD_VERSION("CpldVersion"),
 	BOOT_VERSION("BootVersion"),
 	CARD_TYPE("CardType"),
 	PART_NUMBER("PartNumber"),
 	FIRMWARE_DATE("FirmwareDate"),
 	FIRMWARE_VERSION("FirmwareVersion"),
 	FIRMWARE_OPTIONS("FirmwareOptions"),
-	TEMPERATURE("Temperature");
+	HARDWARE_VERSION("HardwareVersion");
 
 	private final String name;
 

@@ -35,4 +35,14 @@ public class EncoderConstant {
 	public static final String QUOTES = "\"";
 	public static final String NAME = "Name";
 	public static final int NUMBER_TWO = 2;
+	public static final String EDITED = "Edited";
+	public static final String FALSE = "False";
+	public static final String AUDIO = "Audio";
+	public static final String CANCEL = "Cancel";
+	public static final String APPLY = "Apply";
+	public static final String APPLYING = "Applying";
+	public static final String UNKNOWN = "Unknown";
+	public static final String NO_INPUT = "No Input";
+	public static final String INVALID = "Invalid";
+	public static final String PERCENT = "%";
 }

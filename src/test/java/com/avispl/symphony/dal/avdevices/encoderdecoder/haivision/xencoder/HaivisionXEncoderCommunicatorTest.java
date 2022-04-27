@@ -128,6 +128,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testGetMultipleStatisticsWithTemperatureStatus() throws Exception {
+		haivisionXEncoderCommunicator.setConfigManagement("true");
 		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		Assertions.assertNotNull(stats.get(EncoderMonitoringMetric.TEMPERATURE.getName()));

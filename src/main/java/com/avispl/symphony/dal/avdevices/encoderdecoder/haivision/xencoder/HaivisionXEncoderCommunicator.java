@@ -6,6 +6,7 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.avispl.symphony.api.dal.dto.monitor.ExtendedStatistics;
 import com.avispl.symphony.api.dal.dto.monitor.Statistics;
 import com.avispl.symphony.api.dal.error.ResourceNotReachableException;
 import com.avispl.symphony.api.dal.monitor.Monitorable;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioControllingMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderCommand;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
@@ -32,6 +34,16 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AlgorithmDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AudioActionDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AudioLevel;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AudioStateDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.BitRateDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.ChannelModeDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.DropdownList;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.InputDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.LanguageDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.SampleRateDropdown;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.AuthenticationRole;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.SystemInfoResponse;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.TemperatureStatus;
@@ -72,8 +84,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private Integer noOfMonitoringMetric = 0;
 	private Map<String, String> failedMonitor = new HashMap<>();
 	ObjectMapper objectMapper = new ObjectMapper();
+	private boolean isEmergencyDelivery;
 
 	private final String uuidDay = UUID.randomUUID().toString().replace(EncoderConstant.DASH, EncoderConstant.EMPTY_STRING);
+
+	Map<String, AudioStatistics> nameToAudioStatistics = new HashMap<>();
 
 	//The properties adapter
 	private String streamNameFilter;
@@ -174,6 +189,24 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
+	 * Retrieves {@code {@link #configManagement}}
+	 *
+	 * @return value of {@link #configManagement}
+	 */
+	public String getConfigManagement() {
+		return configManagement;
+	}
+
+	/**
+	 * Sets {@code configManagement}
+	 *
+	 * @param configManagement the {@code java.lang.String} field
+	 */
+	public void setConfigManagement(String configManagement) {
+		this.configManagement = configManagement;
+	}
+
+	/**
 	 * List of audio statistics
 	 */
 	private final List<AudioStatistics> audioStatisticsList = new ArrayList<>();
@@ -228,14 +261,17 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		Map<String, String> stats = new HashMap<>();
 		List<AdvancedControllableProperty> advancedControllableProperties = new ArrayList<>();
 
-		roleBased = retrieveUserRole();
-		isConfigManagement = isConfigManagementProperties();
-		populateInformationFromDevice(stats, advancedControllableProperties);
-		if (EncoderConstant.OPERATOR.equals(roleBased) || EncoderConstant.ADMIN.equals(roleBased) && isConfigManagement) {
-			extendedStatistics.setControllableProperties(advancedControllableProperties);
+		if (!isEmergencyDelivery) {
+			roleBased = retrieveUserRole();
+			isConfigManagement = isConfigManagementProperties();
+			localExtendedStatistics = new ExtendedStatistics();
+			populateInformationFromDevice(stats, advancedControllableProperties);
+			if ((EncoderConstant.OPERATOR.equals(roleBased) || EncoderConstant.ADMIN.equals(roleBased)) && isConfigManagement) {
+				extendedStatistics.setControllableProperties(advancedControllableProperties);
+			}
+			extendedStatistics.setStatistics(stats);
+			localExtendedStatistics = extendedStatistics;
 		}
-		extendedStatistics.setStatistics(stats);
-		localExtendedStatistics = extendedStatistics;
 
 		return Collections.singletonList(localExtendedStatistics);
 	}
@@ -251,6 +287,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			logger.debug("controlProperty property" + property);
 			logger.debug("controlProperty value" + value);
 		}
+		if (localExtendedStatistics == null) {
+			return;
+		}
+		Map<String, String> extendedStatistics = localExtendedStatistics.getStatistics();
+		List<AdvancedControllableProperty> advancedControllableProperties = localExtendedStatistics.getControllableProperties();
+		String propertiesAudioAndVideo = property.substring(0, EncoderConstant.AUDIO.length());
+		if (EncoderConstant.AUDIO.equals(propertiesAudioAndVideo)) {
+			controlAudioProperty(property, value, extendedStatistics, advancedControllableProperties);
+		}
 	}
 
 	/**
@@ -263,6 +308,46 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		}
 		for (ControllableProperty controllableProperty : list) {
 			controlProperty(controllableProperty);
+		}
+	}
+
+	/**
+	 * Control Audio encoder
+	 *
+	 * @param property the property is the filed name of controlling metric
+	 * @param value the value is value of metric
+	 * @param extendedStatistics list extendedStatistics
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 */
+	private void controlAudioProperty(String property, String value, Map<String, String> extendedStatistics, List<AdvancedControllableProperty> advancedControllableProperties) {
+		String[] audioProperty = property.split(EncoderConstant.HASH);
+		String audioName = audioProperty[0];
+		String propertyName = audioProperty[1];
+		AudioControllingMetric audioControllingMetric = AudioControllingMetric.getByName(propertyName);
+		isEmergencyDelivery = true;
+		switch (audioControllingMetric) {
+			case INPUT:
+				String[] inputDropdown = DropdownList.Names(InputDropdown.class);
+				AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(extendedStatistics, inputDropdown, property, value);
+				addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
+				break;
+			case CANCEL:
+				isEmergencyDelivery = false;
+				break;
+			default:
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Controlling audio group config %s is not supported.", audioControllingMetric.getName()));
+				}
+		}
+		//Editing
+		if (isEmergencyDelivery) {
+			propertyName = audioName;
+			extendedStatistics.put(propertyName + EncoderConstant.HASH + AudioControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.EMPTY_STRING);
+			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + AudioControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.APPLY, EncoderConstant.APPLYING, 0));
+
+			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.TRUE);
+			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.EMPTY_STRING);
+			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.CANCEL, EncoderConstant.CANCEL, 0));
 		}
 	}
 
@@ -338,7 +423,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void populateAudioConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 		Objects.requireNonNull(stats);
 		Objects.requireNonNull(advancedControllableProperties);
-		//TODO
+		if ((EncoderConstant.ADMIN.equals(roleBased) || EncoderConstant.OPERATOR.equals(roleBased)) && isConfigManagement) {
+			for (AudioConfig audioConfig : audioConfigList) {
+				addControlAudioConfig(stats, advancedControllableProperties, audioConfig);
+			}
+		}
 	}
 
 	/**
@@ -356,11 +445,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			for (StreamMonitoringMetric streamMonitoringMetric : StreamMonitoringMetric.values()) {
 				String streamValue = getDefaultValueForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
 				String streamKeyName = metricName + streamMonitoringMetric.getName();
-				if (StreamMonitoringMetric.UPTIME.equals(streamMonitoringMetric)) {
+				if (StreamMonitoringMetric.UPTIME.equals(streamMonitoringMetric) || StreamMonitoringMetric.OCCURRED.equals(streamMonitoringMetric)) {
 					stats.put(streamKeyName, formatTimeData(streamValue));
 					continue;
 				}
-				stats.put(streamKeyName, replaceCommaByEmptyString(streamValue));
+				if (StreamMonitoringMetric.BITRATE.equals(streamMonitoringMetric)) {
+					stats.put(streamKeyName, extractValueByIndexOfIsSpace(streamValue));
+				} else {
+					stats.put(streamKeyName, replaceCommaByEmptyString(streamValue));
+				}
 			}
 		}
 	}
@@ -377,6 +470,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			for (AudioMonitoringMetric audioMetric : AudioMonitoringMetric.values()) {
 				String audioValue = getDefaultValueForNullData(audioStatistics.getValueByMetric(audioMetric));
 				String audioKeyName = metricName + audioMetric.getName();
+				if (audioMetric.equals(AudioMonitoringMetric.ENCODED_BITRATE)) {
+					stats.put(audioKeyName, extractValueByIndexOfIsSpace(audioValue));
+					continue;
+				}
 				if (audioMetric.equals(AudioMonitoringMetric.ENCODED_BYTES) || audioMetric.equals(AudioMonitoringMetric.ENCODED_FRAMES)) {
 					stats.put(audioKeyName, replaceCommaByEmptyString(audioValue));
 				} else {
@@ -398,10 +495,21 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			for (VideoMonitoringMetric videoMetric : VideoMonitoringMetric.values()) {
 				String videoValue = getDefaultValueForNullData(videoStatistics.getValueByMetric(videoMetric));
 				String videoKeyName = metricName + videoMetric.getName();
-				if (VideoMonitoringMetric.UPTIME.equals(videoMetric)) {
-					stats.put(videoKeyName, formatTimeData(videoValue));
+
+				if (VideoMonitoringMetric.INPUT_FORMAT.equals(videoMetric) && (videoValue.equals(EncoderConstant.NONE) || videoValue.equals(EncoderConstant.UNKNOWN))) {
+					stats.put(videoKeyName, EncoderConstant.NO_INPUT);
+				} else if (VideoMonitoringMetric.INPUT_TYPE.equals(videoMetric) && (videoValue.equals(EncoderConstant.NONE))) {
+					stats.put(videoKeyName, EncoderConstant.INVALID);
 				} else {
-					stats.put(videoKeyName, videoValue);
+					if (VideoMonitoringMetric.ENCODER_LOAD.equals(videoMetric) || VideoMonitoringMetric.ENCODER_BITRATE.equals(videoMetric)) {
+						stats.put(videoKeyName, extractValueByIndexOfIsSpace(videoValue).replace(EncoderConstant.PERCENT, EncoderConstant.EMPTY_STRING));
+						continue;
+					}
+					if (VideoMonitoringMetric.UPTIME.equals(videoMetric)) {
+						stats.put(videoKeyName, formatTimeData(videoValue));
+					} else {
+						stats.put(videoKeyName, videoValue);
+					}
 				}
 			}
 		}
@@ -592,7 +700,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				stats.put(EncoderMonitoringMetric.TEMPERATURE.getName(), EncoderConstant.NONE);
 			}
 		} catch (Exception e) {
-			contributeNoneValueForSystemInfo(stats);
+			stats.put(EncoderMonitoringMetric.TEMPERATURE.getName(), EncoderConstant.NONE);
 			failedMonitor.put(EncoderMonitoringMetric.TEMPERATURE.getName(), e.getMessage());
 		}
 	}
@@ -637,6 +745,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		switch (metric) {
 			case AUDIO_STATISTICS:
 				AudioStatistics audioStatistics = objectMapper.convertValue(mappingData, AudioStatistics.class);
+				nameToAudioStatistics.put(audioStatistics.getName(), audioStatistics);
 				audioStatisticsList.add(audioStatistics);
 				break;
 			case AUDIO_CONFIG:
@@ -800,6 +909,20 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
+	 * Convert String by index of is space
+	 *
+	 * @param value the value is string value
+	 * @return value extracted
+	 */
+	private String extractValueByIndexOfIsSpace(String value) {
+		try {
+			return value.substring(0, value.indexOf(EncoderConstant.SPACE));
+		} catch (Exception e) {
+			return value;
+		}
+	}
+
+	/**
 	 * This method is used to handle input from adapter properties in case is config management
 	 *
 	 * @return boolean is configManagement
@@ -809,6 +932,187 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 	//region perform controls
 	//--------------------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Add control monitoring data for audio config
+	 *
+	 * @param stats list statistics property
+	 * @param advancedControllableProperties the advancedControllableProperties is list AdvancedControllableProperties
+	 * @param audioConfig is instance in AudioConfig DTO
+	 */
+	private void addControlAudioConfig(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, AudioConfig audioConfig) {
+
+		String[] dropdownInput = DropdownList.Names(InputDropdown.class);
+		String[] dropdownMode = DropdownList.Names(ChannelModeDropdown.class);
+		String[] dropdownAlgorithm = DropdownList.Names(AlgorithmDropdown.class);
+		String[] dropdownSampleRate = DropdownList.Names(SampleRateDropdown.class);
+		String[] dropdownLanguage = DropdownList.Names(LanguageDropdown.class);
+		String[] dropdownLevel = DropdownList.Names(AudioLevel.class);
+		String[] dropdownAction = AudioActionDropdown.namesIsStartAction();
+		String[] dropdownBitRate = BitRateDropdown.namesIsMono();
+		Map<String, String> languageDropdown = LanguageDropdown.getNameToValueMap();
+		Map<String, String> stateDropdown = AudioStateDropdown.getNameToValueMap();
+		String audioName = audioConfig.getName();
+		String value;
+		for (AudioControllingMetric audioMetric : AudioControllingMetric.values()) {
+			String audioKeyName = audioName + EncoderConstant.HASH + audioMetric.getName();
+			switch (audioMetric) {
+				case STATE:
+					String stateAudio = nameToAudioStatistics.get(audioConfig.getName()).getState();
+					stats.put(audioKeyName, stateAudio);
+					break;
+				case INPUT:
+					value = audioConfig.getInterfaceName();
+					AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(stats, dropdownInput, audioKeyName, value);
+					addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
+					break;
+				case CHANGE_MODE:
+					value = audioConfig.getMode();
+					AdvancedControllableProperty channelModeControlProperty = controlDropdown(stats, dropdownMode, audioKeyName, value);
+					addAdvanceControlProperties(advancedControllableProperties, channelModeControlProperty);
+					break;
+				case BITRATE:
+					value = audioConfig.getBitRate();
+					String mode = audioConfig.getMode();
+					if (mode.equals(ChannelModeDropdown.STEREO.getName())) {
+						dropdownBitRate = BitRateDropdown.namesIsStereo();
+					}
+					AdvancedControllableProperty bitRateControlProperty = controlDropdown(stats, dropdownBitRate, audioKeyName, value);
+					addAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
+					break;
+				case SAMPLE_RATE:
+					value = audioConfig.getSampleRate();
+					AdvancedControllableProperty samPleRateControlProperty = controlDropdown(stats, dropdownSampleRate, audioKeyName, value);
+					addAdvanceControlProperties(advancedControllableProperties, samPleRateControlProperty);
+					break;
+				case ALGORITHM:
+					value = audioConfig.getAlgorithm();
+					AdvancedControllableProperty algorithmControlProperty = controlDropdown(stats, dropdownAlgorithm, audioKeyName, value);
+					addAdvanceControlProperties(advancedControllableProperties, algorithmControlProperty);
+					break;
+				case LANGUAGE:
+					String language = audioConfig.getLang();
+					value = languageDropdown.get(language);
+					if (StringUtils.isNullOrEmpty(value)) {
+						value = EncoderConstant.NONE;
+					}
+					AdvancedControllableProperty languageControlProperty = controlDropdownAcceptNoneValue(stats, dropdownLanguage, audioKeyName, value);
+					addAdvanceControlProperties(advancedControllableProperties, languageControlProperty);
+					break;
+				case ACTION:
+					stateAudio = audioConfig.getState();
+					//define action = Start
+					if (AudioStateDropdown.STOPPED.getValue().equalsIgnoreCase(stateAudio)) {
+						dropdownAction = AudioActionDropdown.namesIsStopAction();
+					}
+					value = stateDropdown.get(stateAudio);
+					AdvancedControllableProperty actionDropdownControlProperty = controlDropdownAcceptNoneValue(stats, dropdownAction, audioKeyName, value);
+					addAdvanceControlProperties(advancedControllableProperties, actionDropdownControlProperty);
+					break;
+				case LEVEL:
+					if (InputDropdown.ANALOG.getName().equals(audioConfig.getInterfaceName())) {
+						value = audioConfig.getLevel();
+						int len = value.indexOf(EncoderConstant.SPACE);
+						//subString the value by space IfAbsent
+						if (len > -1) {
+							value = value.substring(0, len);
+						}
+						AdvancedControllableProperty levelDropdownControlProperty = controlDropdownAcceptNoneValue(stats, dropdownLevel, audioKeyName, value);
+						addAdvanceControlProperties(advancedControllableProperties, levelDropdownControlProperty);
+					}
+					break;
+				case CANCEL:
+				case APPLY_CHANGE:
+					break;
+				default:
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format("Controlling audio group config %s is not supported.", audioMetric.getName()));
+					}
+			}
+		}
+		stats.put(audioName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.FALSE);
+	}
+
+	/**
+	 * Add advancedControllableProperties if  advancedControllableProperties different empty
+	 *
+	 * @param advancedControllableProperties advancedControllableProperties is the list that store all controllable properties
+	 * @param property the property is item advancedControllableProperties
+	 */
+	private void addAdvanceControlProperties(List<AdvancedControllableProperty> advancedControllableProperties, AdvancedControllableProperty property) {
+		if (property != null) {
+			advancedControllableProperties.removeIf(item -> item.getName().equals(property.getName()));
+			advancedControllableProperties.add(property);
+		}
+	}
+
+	/**
+	 * Add dropdown is control property for metric
+	 *
+	 * @param stats list statistic
+	 * @param options list select
+	 * @param name String name of metric
+	 * @return AdvancedControllableProperty dropdown instance if add dropdown success else will is null
+	 */
+	private AdvancedControllableProperty controlDropdownAcceptNoneValue(Map<String, String> stats, String[] options, String name, String value) {
+
+		//handle case accept None value
+		String nameMetric = name.split(EncoderConstant.HASH)[1];
+		if (nameMetric.equals(AudioControllingMetric.ACTION.getName())) {
+			stats.put(name, EncoderConstant.NONE);
+			return createDropdown(name, options, EncoderConstant.NONE);
+		}
+		stats.put(name, value);
+		return createDropdown(name, options, value);
+	}
+
+	/**
+	 * Add dropdown is control property for metric
+	 *
+	 * @param stats list statistic
+	 * @param options list select
+	 * @param name String name of metric
+	 * @return AdvancedControllableProperty dropdown instance if add dropdown success else will is null
+	 */
+	private AdvancedControllableProperty controlDropdown(Map<String, String> stats, String[] options, String name, String value) {
+		stats.put(name, value);
+		if (!EncoderConstant.NONE.equals(value)) {
+			return createDropdown(name, options, value);
+		}
+		return null;
+	}
+
+	/***
+	 * Create dropdown advanced controllable property
+	 *
+	 * @param name the name of the control
+	 * @param initialValue initial value of the control
+	 * @return AdvancedControllableProperty dropdown instance
+	 */
+	private AdvancedControllableProperty createDropdown(String name, String[] values, String initialValue) {
+		AdvancedControllableProperty.DropDown dropDown = new AdvancedControllableProperty.DropDown();
+		dropDown.setOptions(values);
+		dropDown.setLabels(values);
+
+		return new AdvancedControllableProperty(name, new Date(), dropDown, initialValue);
+	}
+
+	/**
+	 * Create a button.
+	 *
+	 * @param name name of the button
+	 * @param label label of the button
+	 * @param labelPressed label of the button after pressing it
+	 * @param gracePeriod grace period of button
+	 * @return This returns the instance of {@link AdvancedControllableProperty} type Button.
+	 */
+	private AdvancedControllableProperty createButton(String name, String label, String labelPressed, long gracePeriod) {
+		AdvancedControllableProperty.Button button = new AdvancedControllableProperty.Button();
+		button.setLabel(label);
+		button.setLabelPressed(labelPressed);
+		button.setGracePeriod(gracePeriod);
+		return new AdvancedControllableProperty(name, new Date(), button, "");
+	}
 	//--------------------------------------------------------------------------------------------------------------------------------
 	//endregion
 }

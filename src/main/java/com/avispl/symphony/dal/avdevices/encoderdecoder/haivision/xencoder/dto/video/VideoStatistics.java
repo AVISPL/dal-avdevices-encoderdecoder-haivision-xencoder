@@ -70,6 +70,21 @@ public class VideoStatistics {
 	@JsonAlias("Timecode")
 	private String timeCode;
 
+	@JsonAlias("Extracted CC Bytes")
+	private String extractedCCBytes;
+
+	@JsonAlias("CC Errors")
+	private String ccErrors;
+
+	@JsonAlias("Extracted CSD Bytes")
+	private String extractedCSDBytes;
+
+	@JsonAlias("Input Type")
+	private String inputType;
+
+	@JsonAlias("Input Format")
+	private String inputFormat;
+
 	/**
 	 * Retrieves {@code {@link #name}}
 	 *
@@ -377,6 +392,96 @@ public class VideoStatistics {
 	}
 
 	/**
+	 * Retrieves {@code {@link #extractedCCBytes}}
+	 *
+	 * @return value of {@link #extractedCCBytes}
+	 */
+	public String getExtractedCCBytes() {
+		return extractedCCBytes;
+	}
+
+	/**
+	 * Sets {@code extractedCCBytes}
+	 *
+	 * @param extractedCCBytes the {@code java.lang.String} field
+	 */
+	public void setExtractedCCBytes(String extractedCCBytes) {
+		this.extractedCCBytes = extractedCCBytes;
+	}
+
+	/**
+	 * Retrieves {@code {@link #ccErrors}}
+	 *
+	 * @return value of {@link #ccErrors}
+	 */
+	public String getCcErrors() {
+		return ccErrors;
+	}
+
+	/**
+	 * Sets {@code ccErrors}
+	 *
+	 * @param ccErrors the {@code java.lang.String} field
+	 */
+	public void setCcErrors(String ccErrors) {
+		this.ccErrors = ccErrors;
+	}
+
+	/**
+	 * Retrieves {@code {@link #extractedCSDBytes}}
+	 *
+	 * @return value of {@link #extractedCSDBytes}
+	 */
+	public String getExtractedCSDBytes() {
+		return extractedCSDBytes;
+	}
+
+	/**
+	 * Sets {@code extractedCSDBytes}
+	 *
+	 * @param extractedCSDBytes the {@code java.lang.String} field
+	 */
+	public void setExtractedCSDBytes(String extractedCSDBytes) {
+		this.extractedCSDBytes = extractedCSDBytes;
+	}
+
+	/**
+	 * Retrieves {@code {@link #inputType}}
+	 *
+	 * @return value of {@link #inputType}
+	 */
+	public String getInputType() {
+		return inputType;
+	}
+
+	/**
+	 * Sets {@code inputType}
+	 *
+	 * @param inputType the {@code java.lang.String} field
+	 */
+	public void setInputType(String inputType) {
+		this.inputType = inputType;
+	}
+
+	/**
+	 * Retrieves {@code {@link #inputFormat}}
+	 *
+	 * @return value of {@link #inputFormat}
+	 */
+	public String getInputFormat() {
+		return inputFormat;
+	}
+
+	/**
+	 * Sets {@code inputFormat}
+	 *
+	 * @param inputFormat the {@code java.lang.String} field
+	 */
+	public void setInputFormat(String inputFormat) {
+		this.inputFormat = inputFormat;
+	}
+
+	/**
 	 * Get the value by the metric monitoring
 	 *
 	 * @param metric the metric is metric monitoring
@@ -416,6 +521,16 @@ public class VideoStatistics {
 				return getTimeCodeSource();
 			case TIME_CODE:
 				return getTimeCode();
+			case EXTRACTED_CC_BYTES:
+				return getExtractedCCBytes();
+			case CC_ERRORS:
+				return getCcErrors();
+			case EXTRACTED_CSD_BYTES:
+				return getExtractedCSDBytes();
+			case INPUT_FORMAT:
+				return getInputFormat();
+			case INPUT_TYPE:
+				return getInputType();
 			default:
 				return EncoderConstant.NONE;
 		}

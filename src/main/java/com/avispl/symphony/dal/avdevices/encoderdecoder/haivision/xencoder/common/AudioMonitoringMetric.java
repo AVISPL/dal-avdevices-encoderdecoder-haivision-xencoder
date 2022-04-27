@@ -18,7 +18,7 @@ public enum AudioMonitoringMetric {
 	ENCODED_FRAMES("EncodedFrames"),
 	STC_SOURCE_INTERFACE("STCSourceInterface"),
 	ENCODER_ERRORS("EncoderErrors"),
-	ENCODED_BITRATE("EncodedBitrate"),
+	ENCODED_BITRATE("EncodedBitrate (kbps)"),
 	MAX_SAMPLE_VALUE("MaxSampleValue"),
 	NAME("Name");
 
