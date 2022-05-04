@@ -974,9 +974,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String[] dropdownLevel = DropdownList.getArrayOfEnumNames(AudioLevel.class);
 		String[] dropdownAction = AudioActionDropdown.getArrayOfNameByStartOrStopAction(true);
 		String[] dropdownBitRate = BitRateDropdown.getArrayOfNameByStereoOrMonoMode(false);
-		Map<String, String> nameToValueLanguageMap = LanguageDropdown.getNameToValueOrValueToNameMap(true);
+		Map<String, String> languageMap = LanguageDropdown.getNameToValueOrValueToNameMap(true);
 		Map<String, String> stateDropdown = AudioStateDropdown.getNameToValueMap();
-		Map<String, String> nameToValueInputMap = InputDropdown.getNameToValueOrValueToNameMap(true);
+		Map<String, String> inputMap = InputDropdown.getNameToValueOrValueToNameMap(true);
 		Map<String, String> algorithmName = AlgorithmDropdown.getNameToValueOrParamValueToValueMap(true);
 		String audioName = audioConfig.getName();
 		String value;
@@ -988,7 +988,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					stats.put(audioKeyName, stateAudio);
 					break;
 				case INPUT:
-					value = nameToValueInputMap.get(audioConfig.getInterfaceName());
+					value = inputMap.get(audioConfig.getInterfaceName());
 					AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(stats, dropdownInput, audioKeyName, value);
 					addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
 					break;
@@ -1018,7 +1018,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					break;
 				case LANGUAGE:
 					String language = audioConfig.getLang();
-					value = nameToValueLanguageMap.get(language);
+					value = languageMap.get(language);
 					if (StringUtils.isNullOrEmpty(value)) {
 						value = EncoderConstant.NONE;
 					}
@@ -1199,14 +1199,14 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private AudioConfig convertAudioByValue(Map<String, String> extendedStatistics, String audioName) {
 		AudioConfig audioConfig = new AudioConfig();
-		Map<String, String> valueToNameLanguageMap = LanguageDropdown.getNameToValueOrValueToNameMap(false);
+		Map<String, String> languageMap = LanguageDropdown.getNameToValueOrValueToNameMap(false);
 		Map<String, String> channelModeMap = ChannelModeDropdown.getValueToNameMap();
 		Map<String, String> bitRateMap = BitRateDropdown.getValueToNameMap();
 		Map<String, String> algorithmParamMap = AlgorithmDropdown.getNameToValueOrParamValueToValueMap(false);
-		Map<String, String> valueToNameInputMap = InputDropdown.getNameToValueOrValueToNameMap(false);
+		Map<String, String> inputMap = InputDropdown.getNameToValueOrValueToNameMap(false);
 		String id = EncoderConstant.EMPTY_STRING;
 		AudioConfig audio = nameToAudioConfig.get(audioName);
-		String language = valueToNameLanguageMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LANGUAGE.getName()));
+		String language = languageMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LANGUAGE.getName()));
 		if (!EncoderConstant.NONE.equals(language) || EncoderConstant.EMPTY_STRING.equals(language)) {
 			audioConfig.setLang(language);
 		}
@@ -1214,7 +1214,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			id = audio.getId();
 		}
 		audioConfig.setId(id);
-		audioConfig.setInterfaceName(valueToNameInputMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.INPUT.getName())));
+		audioConfig.setInterfaceName(inputMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.INPUT.getName())));
 		audioConfig.setBitRate(bitRateMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.BITRATE.getName())));
 		audioConfig.setMode(channelModeMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.CHANGE_MODE.getName())));
 		audioConfig.setAlgorithm(algorithmParamMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.ALGORITHM.getName())));
