@@ -34,6 +34,7 @@ public class EncoderConstant {
 	public static final String NONE_STREAM_NAME = "(None)";
 	public static final String QUOTES = "\"";
 	public static final String NAME = "Name";
+	public static final int NUMBER_ONE = 1;
 	public static final int NUMBER_TWO = 2;
 	public static final String EDITED = "Edited";
 	public static final String FALSE = "False";
@@ -45,4 +46,8 @@ public class EncoderConstant {
 	public static final String NO_INPUT = "No Input";
 	public static final String INVALID = "Invalid";
 	public static final String PERCENT = "%";
+	public static final String LESS_THAN = "<";
+	public static final String DEFAULT_AUDIO_LEVEL = "6";
+	public static final String SUCCESS_RESPONSE = "successfully";
+
 }

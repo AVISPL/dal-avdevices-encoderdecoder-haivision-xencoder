@@ -85,6 +85,12 @@ public class VideoStatistics {
 	@JsonAlias("Input Format")
 	private String inputFormat;
 
+	@JsonAlias("Aspect Ratio")
+	private String aspectRatio;
+
+	@JsonAlias("Output Resolution")
+	private String outputResolution;
+
 	/**
 	 * Retrieves {@code {@link #name}}
 	 *
@@ -482,6 +488,42 @@ public class VideoStatistics {
 	}
 
 	/**
+	 * Retrieves {@code {@link #aspectRatio}}
+	 *
+	 * @return value of {@link #aspectRatio}
+	 */
+	public String getAspectRatio() {
+		return aspectRatio;
+	}
+
+	/**
+	 * Sets {@code aspectRatio}
+	 *
+	 * @param aspectRatio the {@code java.lang.String} field
+	 */
+	public void setAspectRatio(String aspectRatio) {
+		this.aspectRatio = aspectRatio;
+	}
+
+	/**
+	 * Retrieves {@code {@link #outputResolution}}
+	 *
+	 * @return value of {@link #outputResolution}
+	 */
+	public String getOutputResolution() {
+		return outputResolution;
+	}
+
+	/**
+	 * Sets {@code outputResolution}
+	 *
+	 * @param outputResolution the {@code java.lang.String} field
+	 */
+	public void setOutputResolution(String outputResolution) {
+		this.outputResolution = outputResolution;
+	}
+
+	/**
 	 * Get the value by the metric monitoring
 	 *
 	 * @param metric the metric is metric monitoring
@@ -531,6 +573,10 @@ public class VideoStatistics {
 				return getInputFormat();
 			case INPUT_TYPE:
 				return getInputType();
+			case RESOLUTION:
+				return getOutputResolution();
+			case ASPECT_RATIO:
+				return getAspectRatio();
 			default:
 				return EncoderConstant.NONE;
 		}

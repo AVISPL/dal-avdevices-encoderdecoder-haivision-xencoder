@@ -3,8 +3,6 @@
  */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-
 /**
  * VideoMonitoringMetric class defined the enum for the monitoring process
  *
@@ -21,7 +19,7 @@ public enum VideoMonitoringMetric {
 	ENCODER_BYTES("EncodedBytes"),
 	ENCODER_FRAME_RATE("EncodedFrameRate"),
 	DROPPED_FRAMES("DroppedFrames"),
-	ENCODER_BITRATE("EncodeBitrate (kbps)"),
+	ENCODER_BITRATE("EncodedBitrate (kbps)"),
 	ENCODER_RESETS("EncoderResets"),
 	ENCODER_PTS("EncoderPTS"),
 	ENCODER_LOAD("EncoderLoad (%)"),
@@ -34,7 +32,9 @@ public enum VideoMonitoringMetric {
 	CC_ERRORS("CCErrors"),
 	EXTRACTED_CSD_BYTES("ExtractedCSDBytes"),
 	INPUT_TYPE("InputType"),
-	INPUT_FORMAT("InputFormat");
+	INPUT_FORMAT("InputFormat"),
+	ASPECT_RATIO("AspectRatio"),
+	RESOLUTION("OutputResolution");
 
 	public final String name;
 

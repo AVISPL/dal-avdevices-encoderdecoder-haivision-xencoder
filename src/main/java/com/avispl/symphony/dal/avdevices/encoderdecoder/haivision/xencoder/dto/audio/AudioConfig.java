@@ -6,6 +6,9 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioControllingMetric;
+import com.avispl.symphony.dal.util.StringUtils;
+
 /**
  * AudioConfig DTO class
  *
@@ -44,6 +47,7 @@ public class AudioConfig {
 	private String level;
 
 	private String state;
+	private String action;
 
 	/**
 	 * Retrieves {@code {@link #id}}
@@ -223,5 +227,76 @@ public class AudioConfig {
 	 */
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	/**
+	 * Retrieves {@code {@link #action}}
+	 *
+	 * @return value of {@link #action}
+	 */
+	public String getAction() {
+		return action;
+	}
+
+	/**
+	 * Sets {@code action}
+	 *
+	 * @param action the {@code java.lang.String} field
+	 */
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	/**
+	 * Get the value by the metric monitoring
+	 *
+	 * @param metric the metric is metric monitoring
+	 * @return String value of encoder monitoring properties by metric
+	 */
+	public void getValueByMetric(AudioControllingMetric metric, String value) {
+		switch (metric) {
+			case STATE:
+				setState(value);
+			case INPUT:
+				setInterfaceName(value);
+			case CHANGE_MODE:
+				setMode(value);
+			case BITRATE:
+				setBitRate(value);
+			case SAMPLE_RATE:
+				setSampleRate(value);
+			case ALGORITHM:
+				setAlgorithm(value);
+			case ACTION:
+				setAction(value);
+			case LANGUAGE:
+				setLang(value);
+			case LEVEL:
+				setLevel(value);
+			default:
+				throw new IllegalArgumentException("The metric is not exits");
+		}
+	}
+
+	/**
+	 * Convert Audio config
+	 *
+	 * @return payLoad the payload is String by Audio config
+	 */
+	public String retrieveAudioPayloadData() {
+		String levelValue = "";
+		if (!StringUtils.isNullOrEmpty(level)) {
+			levelValue = " level=" + level;
+		}
+		String languageValue = "";
+		if (!StringUtils.isNullOrEmpty(lang)) {
+			languageValue = " lang=" + lang;
+		}
+		return " input=" + interfaceName +
+				" bitRate=" + bitRate +
+				" mode=" + mode +
+				" algorithm=" + algorithm +
+				languageValue +
+				levelValue;
 	}
 }

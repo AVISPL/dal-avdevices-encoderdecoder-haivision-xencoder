@@ -23,6 +23,7 @@ import com.avispl.symphony.api.dal.dto.control.AdvancedControllableProperty;
 import com.avispl.symphony.api.dal.dto.control.ControllableProperty;
 import com.avispl.symphony.api.dal.dto.monitor.ExtendedStatistics;
 import com.avispl.symphony.api.dal.dto.monitor.Statistics;
+import com.avispl.symphony.api.dal.error.CommandFailureException;
 import com.avispl.symphony.api.dal.error.ResourceNotReachableException;
 import com.avispl.symphony.api.dal.monitor.Monitorable;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioControllingMetric;
@@ -89,6 +90,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private final String uuidDay = UUID.randomUUID().toString().replace(EncoderConstant.DASH, EncoderConstant.EMPTY_STRING);
 
 	Map<String, AudioStatistics> nameToAudioStatistics = new HashMap<>();
+	Map<String, AudioConfig> nameToAudioConfig = new HashMap<>();
+	Map<String, VideoConfig> nameToVideoConfig = new HashMap<>();
 
 	//The properties adapter
 	private String streamNameFilter;
@@ -312,46 +315,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Control Audio encoder
-	 *
-	 * @param property the property is the filed name of controlling metric
-	 * @param value the value is value of metric
-	 * @param extendedStatistics list extendedStatistics
-	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
-	 */
-	private void controlAudioProperty(String property, String value, Map<String, String> extendedStatistics, List<AdvancedControllableProperty> advancedControllableProperties) {
-		String[] audioProperty = property.split(EncoderConstant.HASH);
-		String audioName = audioProperty[0];
-		String propertyName = audioProperty[1];
-		AudioControllingMetric audioControllingMetric = AudioControllingMetric.getByName(propertyName);
-		isEmergencyDelivery = true;
-		switch (audioControllingMetric) {
-			case INPUT:
-				String[] inputDropdown = DropdownList.Names(InputDropdown.class);
-				AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(extendedStatistics, inputDropdown, property, value);
-				addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
-				break;
-			case CANCEL:
-				isEmergencyDelivery = false;
-				break;
-			default:
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Controlling audio group config %s is not supported.", audioControllingMetric.getName()));
-				}
-		}
-		//Editing
-		if (isEmergencyDelivery) {
-			propertyName = audioName;
-			extendedStatistics.put(propertyName + EncoderConstant.HASH + AudioControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.EMPTY_STRING);
-			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + AudioControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.APPLY, EncoderConstant.APPLYING, 0));
-
-			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.TRUE);
-			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.EMPTY_STRING);
-			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.CANCEL, EncoderConstant.CANCEL, 0));
-		}
-	}
-
-	/**
 	 * Retrieve data and add to stats of the device
 	 *
 	 * @param stats list statistics property
@@ -445,14 +408,55 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			for (StreamMonitoringMetric streamMonitoringMetric : StreamMonitoringMetric.values()) {
 				String streamValue = getDefaultValueForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
 				String streamKeyName = metricName + streamMonitoringMetric.getName();
-				if (StreamMonitoringMetric.UPTIME.equals(streamMonitoringMetric) || StreamMonitoringMetric.OCCURRED.equals(streamMonitoringMetric)) {
-					stats.put(streamKeyName, formatTimeData(streamValue));
-					continue;
-				}
-				if (StreamMonitoringMetric.BITRATE.equals(streamMonitoringMetric)) {
-					stats.put(streamKeyName, extractValueByIndexOfIsSpace(streamValue));
-				} else {
-					stats.put(streamKeyName, replaceCommaByEmptyString(streamValue));
+
+				//Normalize for the stream metric
+				switch (streamMonitoringMetric) {
+					case UPTIME:
+						stats.put(streamKeyName, formatTimeData(streamValue));
+						break;
+					case OCCURRED:
+						int len = streamValue.lastIndexOf(EncoderConstant.SPACE);
+						if (len > 1) {
+							streamValue = streamValue.substring(0, len);
+						}
+						stats.put(streamKeyName, formatTimeData(streamValue));
+						break;
+					case BITRATE:
+					case LATENCY:
+					case MAX_BANDWIDTH:
+					case PATH_MAX_BANDWIDTH:
+						streamValue = convertValueByIndexOfIsSpace(streamValue);
+						if (EncoderConstant.UNKNOWN.equals(streamValue)) {
+							streamValue = String.valueOf(EncoderConstant.NUMBER_ONE);
+						}
+						stats.put(streamKeyName, streamValue);
+						break;
+					case RTT:
+						streamValue = convertValueByIndexOfIsSpace(streamValue);
+						boolean isValidValueOrLessThanOne = EncoderConstant.NONE.equals(streamName) && Integer.parseInt(streamValue) < EncoderConstant.NUMBER_ONE;
+						if (isValidValueOrLessThanOne) {
+							streamValue = EncoderConstant.LESS_THAN + EncoderConstant.SPACE + EncoderConstant.NUMBER_ONE;
+						}
+						stats.put(streamKeyName, streamValue);
+						break;
+					case LOCAL_BUFFER_LEVEL:
+						stats.put(streamKeyName, convertValueByIndexOfIsSpace(streamValue));
+						break;
+					case RESENT_PACKET:
+					case RESENT_BYTES:
+					case DROPPED_BYTES:
+					case DROPPED_PACKETS:
+					case RECEIVED_ACKS:
+					case RECEIVED_NAKS:
+					case SENT_BYTES:
+					case SENT_PACKETS:
+					case UNSENT_BYTES:
+					case UNSENT_PACKETS:
+						stats.put(streamKeyName, replaceCommaByEmptyString(streamValue));
+						break;
+					default:
+						stats.put(streamKeyName, streamValue);
+						break;
 				}
 			}
 		}
@@ -471,7 +475,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				String audioValue = getDefaultValueForNullData(audioStatistics.getValueByMetric(audioMetric));
 				String audioKeyName = metricName + audioMetric.getName();
 				if (audioMetric.equals(AudioMonitoringMetric.ENCODED_BITRATE)) {
-					stats.put(audioKeyName, extractValueByIndexOfIsSpace(audioValue));
+					stats.put(audioKeyName, convertValueByIndexOfIsSpace(audioValue));
 					continue;
 				}
 				if (audioMetric.equals(AudioMonitoringMetric.ENCODED_BYTES) || audioMetric.equals(AudioMonitoringMetric.ENCODED_FRAMES)) {
@@ -496,20 +500,37 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				String videoValue = getDefaultValueForNullData(videoStatistics.getValueByMetric(videoMetric));
 				String videoKeyName = metricName + videoMetric.getName();
 
-				if (VideoMonitoringMetric.INPUT_FORMAT.equals(videoMetric) && (videoValue.equals(EncoderConstant.NONE) || videoValue.equals(EncoderConstant.UNKNOWN))) {
-					stats.put(videoKeyName, EncoderConstant.NO_INPUT);
-				} else if (VideoMonitoringMetric.INPUT_TYPE.equals(videoMetric) && (videoValue.equals(EncoderConstant.NONE))) {
-					stats.put(videoKeyName, EncoderConstant.INVALID);
-				} else {
-					if (VideoMonitoringMetric.ENCODER_LOAD.equals(videoMetric) || VideoMonitoringMetric.ENCODER_BITRATE.equals(videoMetric)) {
-						stats.put(videoKeyName, extractValueByIndexOfIsSpace(videoValue).replace(EncoderConstant.PERCENT, EncoderConstant.EMPTY_STRING));
-						continue;
-					}
-					if (VideoMonitoringMetric.UPTIME.equals(videoMetric)) {
-						stats.put(videoKeyName, formatTimeData(videoValue));
-					} else {
+				//Normalize for the video metric
+				switch (videoMetric) {
+					case INPUT_FORMAT:
+						boolean isValidValue = videoValue.equals(EncoderConstant.NONE) || videoValue.equals(EncoderConstant.UNKNOWN);
+						if (isValidValue) {
+							videoValue = EncoderConstant.NO_INPUT;
+						}
 						stats.put(videoKeyName, videoValue);
-					}
+						break;
+					case INPUT_TYPE:
+						if (videoValue.equals(EncoderConstant.NONE)) {
+							videoValue = EncoderConstant.INVALID;
+						}
+						stats.put(videoKeyName, videoValue);
+						break;
+					case ENCODER_LOAD:
+					case ENCODER_BITRATE:
+						stats.put(videoKeyName, convertValueByIndexOfIsSpace(videoValue).replace(EncoderConstant.PERCENT, EncoderConstant.EMPTY_STRING));
+						break;
+					case UPTIME:
+						stats.put(videoKeyName, formatTimeData(videoValue));
+						break;
+					case RESOLUTION:
+						if (EncoderConstant.NONE.equals(videoValue)) {
+							videoValue = nameToVideoConfig.get(videoName).getResolution();
+						}
+						stats.put(videoKeyName, videoValue);
+						break;
+					default:
+						stats.put(videoKeyName, videoValue);
+						break;
 				}
 			}
 		}
@@ -750,6 +771,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			case AUDIO_CONFIG:
 				AudioConfig audioConfig = objectMapper.convertValue(mappingData, AudioConfig.class);
+				nameToAudioConfig.put(audioConfig.getName(), audioConfig);
 				audioConfigList.add(audioConfig);
 				break;
 			case VIDEO_STATISTICS:
@@ -758,6 +780,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			case VIDEO_CONFIG:
 				VideoConfig videoConfigResponse = objectMapper.convertValue(mappingData, VideoConfig.class);
+				nameToVideoConfig.put(videoConfigResponse.getName(), videoConfigResponse);
 				videoConfigList.add(videoConfigResponse);
 				break;
 			case STREAM_STATISTICS:
@@ -870,7 +893,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Parsing stream name empty to default name ( {protocol}://{address}:{(port)} )
+	 * Parsing stream name empty to default name ( {protocol}://@{address}:{(port)} )
 	 *
 	 * @param streamId the streamId is ID of stream
 	 * @return String is name of stream output
@@ -882,7 +905,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				String protocol = streamConfigItem.getEncapsulation();
 				String address = streamConfigItem.getAddress();
 				String port = streamConfigItem.getPort();
-				streamName = protocol + "://" + address + "(" + port + ")";
+				streamName = protocol + "://@" + address + "(" + port + ")";
 				break;
 			}
 		}
@@ -914,7 +937,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param value the value is string value
 	 * @return value extracted
 	 */
-	private String extractValueByIndexOfIsSpace(String value) {
+	private String convertValueByIndexOfIsSpace(String value) {
 		try {
 			return value.substring(0, value.indexOf(EncoderConstant.SPACE));
 		} catch (Exception e) {
@@ -930,6 +953,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private boolean isConfigManagementProperties() {
 		return !StringUtils.isNullOrEmpty(configManagement) && EncoderConstant.TRUE.equalsIgnoreCase(configManagement);
 	}
+
 	//region perform controls
 	//--------------------------------------------------------------------------------------------------------------------------------
 
@@ -952,6 +976,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String[] dropdownBitRate = BitRateDropdown.namesIsMono();
 		Map<String, String> languageDropdown = LanguageDropdown.getNameToValueMap();
 		Map<String, String> stateDropdown = AudioStateDropdown.getNameToValueMap();
+		Map<String, String> inputMap = InputDropdown.getNameToValueMap();
+		Map<String, String> algorithmName = AlgorithmDropdown.getNameToValueMap();
 		String audioName = audioConfig.getName();
 		String value;
 		for (AudioControllingMetric audioMetric : AudioControllingMetric.values()) {
@@ -962,7 +988,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					stats.put(audioKeyName, stateAudio);
 					break;
 				case INPUT:
-					value = audioConfig.getInterfaceName();
+					value = inputMap.get(audioConfig.getInterfaceName());
 					AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(stats, dropdownInput, audioKeyName, value);
 					addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
 					break;
@@ -986,7 +1012,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addAdvanceControlProperties(advancedControllableProperties, samPleRateControlProperty);
 					break;
 				case ALGORITHM:
-					value = audioConfig.getAlgorithm();
+					value = algorithmName.get(audioConfig.getAlgorithm());
 					AdvancedControllableProperty algorithmControlProperty = controlDropdown(stats, dropdownAlgorithm, audioKeyName, value);
 					addAdvanceControlProperties(advancedControllableProperties, algorithmControlProperty);
 					break;
@@ -1000,7 +1026,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addAdvanceControlProperties(advancedControllableProperties, languageControlProperty);
 					break;
 				case ACTION:
-					stateAudio = audioConfig.getState();
+					stateAudio = nameToAudioStatistics.get(audioConfig.getName()).getState();
 					//define action = Start
 					if (AudioStateDropdown.STOPPED.getValue().equalsIgnoreCase(stateAudio)) {
 						dropdownAction = AudioActionDropdown.namesIsStopAction();
@@ -1010,7 +1036,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addAdvanceControlProperties(advancedControllableProperties, actionDropdownControlProperty);
 					break;
 				case LEVEL:
-					if (InputDropdown.ANALOG.getName().equals(audioConfig.getInterfaceName())) {
+					if (InputDropdown.ANALOG.getName().equalsIgnoreCase(audioConfig.getInterfaceName())) {
 						value = audioConfig.getLevel();
 						int len = value.indexOf(EncoderConstant.SPACE);
 						//subString the value by space IfAbsent
@@ -1031,6 +1057,189 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 		}
 		stats.put(audioName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.FALSE);
+	}
+
+	/**
+	 * Control Audio encoder
+	 *
+	 * @param property the property is the filed name of controlling metric
+	 * @param value the value is value of metric
+	 * @param extendedStatistics list extendedStatistics
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 */
+	private void controlAudioProperty(String property, String value, Map<String, String> extendedStatistics, List<AdvancedControllableProperty> advancedControllableProperties) {
+		String[] audioProperty = property.split(EncoderConstant.HASH);
+		String audioName = audioProperty[0];
+		String propertyName = audioProperty[1];
+		AudioControllingMetric audioControllingMetric = AudioControllingMetric.getByName(propertyName);
+		String levelName = audioName + EncoderConstant.HASH + AudioControllingMetric.LEVEL.getName();
+		String bitRateName = audioName + EncoderConstant.HASH + AudioControllingMetric.BITRATE.getName();
+		isEmergencyDelivery = true;
+		switch (audioControllingMetric) {
+			case LEVEL:
+				nameToAudioConfig.get(audioName).setLevel(value);
+				updateValueForTheControllableProperty(property, value, extendedStatistics, advancedControllableProperties);
+				break;
+			case ACTION:
+			case BITRATE:
+			case LANGUAGE:
+			case ALGORITHM:
+			case SAMPLE_RATE:
+				updateValueForTheControllableProperty(property, value, extendedStatistics, advancedControllableProperties);
+				break;
+			case INPUT:
+				String[] inputDropdown = DropdownList.Names(InputDropdown.class);
+				String[] levelDropdown = DropdownList.Names(AudioLevel.class);
+				AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(extendedStatistics, inputDropdown, property, value);
+				addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
+				String level = nameToAudioConfig.get(audioName).getLevel();
+				if (StringUtils.isNullOrEmpty(level)) {
+					level = EncoderConstant.DEFAULT_AUDIO_LEVEL;
+				}
+				if (InputDropdown.ANALOG.getName().equalsIgnoreCase(value)) {
+					AdvancedControllableProperty levelProperty = controlDropdown(extendedStatistics, levelDropdown, levelName, level);
+					addAdvanceControlProperties(advancedControllableProperties, levelProperty);
+				} else {
+					extendedStatistics.remove(levelName);
+					advancedControllableProperties.removeIf(item -> item.getName().equals(levelName));
+				}
+				break;
+			case CHANGE_MODE:
+				String[] dropdownMode = DropdownList.Names(ChannelModeDropdown.class);
+				AdvancedControllableProperty channelModeControlProperty = controlDropdown(extendedStatistics, dropdownMode, property, value);
+				addAdvanceControlProperties(advancedControllableProperties, channelModeControlProperty);
+
+				//Update bitRate with channel mode
+				String bitRate = extendedStatistics.get(bitRateName);
+				String defaultBitrate = BitRateDropdown.getDefaultBitRate(bitRate, value);
+
+				//default channel mode is IsStereo
+				String[] dropdownBitRate = BitRateDropdown.namesIsStereo();
+				if (!ChannelModeDropdown.STEREO.getName().equals(value)) {
+					dropdownBitRate = BitRateDropdown.namesIsMono();
+				}
+				AdvancedControllableProperty bitRateControlProperty = controlDropdown(extendedStatistics, dropdownBitRate, bitRateName, defaultBitrate);
+				addAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
+				break;
+			case APPLY_CHANGE:
+				AudioConfig audioConfig = convertAudioByValue(extendedStatistics, audioName);
+
+				// sent request to apply all change for all metric
+				setAudioApplyChange(audioConfig.retrieveAudioPayloadData(), audioConfig.getId());
+
+				//sent request to action for the metric
+				setActionAudioControl(audioConfig);
+				isEmergencyDelivery = false;
+				break;
+			case CANCEL:
+				isEmergencyDelivery = false;
+				break;
+			default:
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Controlling audio group config %s is not supported.", audioControllingMetric.getName()));
+				}
+		}
+		//Editing
+		if (isEmergencyDelivery) {
+			propertyName = audioName;
+			extendedStatistics.put(propertyName + EncoderConstant.HASH + AudioControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.EMPTY_STRING);
+			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + AudioControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.APPLY, EncoderConstant.APPLYING, 0));
+
+			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.TRUE);
+			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.EMPTY_STRING);
+			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.CANCEL, EncoderConstant.CANCEL, 0));
+		}
+	}
+
+	/**
+	 * Sent request to action audio
+	 *
+	 * @param audioConfig is instance AudioConfig DTO
+	 */
+	private void setActionAudioControl(AudioConfig audioConfig) {
+		String audioId = audioConfig.getId();
+		String action = audioConfig.getAction();
+		String request = EncoderCommand.OPERATION_AUDENC.getName() + audioId + EncoderConstant.SPACE + action;
+		if (!EncoderConstant.NONE.equals(action)) {
+			try {
+				String responseData = send(request);
+				if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
+					throw new CommandFailureException(this.getHost(), request, responseData);
+				}
+			} catch (Exception e) {
+				throw new CommandFailureException(this.getHost(), request, "Error while setting action audio config: " + e.getMessage(), e);
+			}
+		}
+	}
+
+	/**
+	 * Save audio apply change
+	 *
+	 * @param data the data is request param
+	 * @param audioId the audioId is id of audio encoder
+	 */
+	private void setAudioApplyChange(String data, String audioId) {
+		String request = EncoderCommand.OPERATION_AUDENC.getName() + audioId + EncoderConstant.SPACE + EncoderCommand.SET + data;
+		try {
+			String responseData = send(request);
+			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
+				throw new CommandFailureException(this.getHost(), request, responseData);
+			}
+		} catch (Exception e) {
+			throw new CommandFailureException(this.getHost(), request, "Error while setting audio config: " + e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Change audioConfig by value
+	 *
+	 * @param extendedStatistics list extendedStatistics
+	 * @param audioName the audio name is name of audio
+	 * @return AudioConfig is instance in AudioConfig
+	 */
+	private AudioConfig convertAudioByValue(Map<String, String> extendedStatistics, String audioName) {
+		AudioConfig audioConfig = new AudioConfig();
+		Map<String, String> languageMap = LanguageDropdown.getValueToNameMap();
+		Map<String, String> channelModeMap = ChannelModeDropdown.getValueToNameMap();
+		Map<String, String> bitRateMap = BitRateDropdown.getValueToNameMap();
+		Map<String, String> algorithmParamMap = AlgorithmDropdown.getParamValueToValueNameMap();
+		Map<String, String> inputMap = InputDropdown.getValueToNameMap();
+		String id = EncoderConstant.EMPTY_STRING;
+		AudioConfig audio = nameToAudioConfig.get(audioName);
+		String language = languageMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LANGUAGE.getName()));
+		if (!EncoderConstant.NONE.equals(language) || EncoderConstant.EMPTY_STRING.equals(language)) {
+			audioConfig.setLang(language);
+		}
+		if (audio != null) {
+			id = audio.getId();
+		}
+		audioConfig.setId(id);
+		audioConfig.setInterfaceName(inputMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.INPUT.getName())));
+		audioConfig.setBitRate(bitRateMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.BITRATE.getName())));
+		audioConfig.setMode(channelModeMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.CHANGE_MODE.getName())));
+		audioConfig.setAlgorithm(algorithmParamMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.ALGORITHM.getName())));
+		audioConfig.setLevel(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LEVEL.getName()));
+		audioConfig.setAction(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.ACTION.getName()));
+
+		return audioConfig;
+	}
+
+	/**
+	 * Update the value for the control metric
+	 *
+	 * @param property is name of the metric
+	 * @param value the value is value of properties
+	 * @param extendedStatistics list statistics property
+	 * @param advancedControllableProperties the advancedControllableProperties is list AdvancedControllableProperties
+	 */
+	private void updateValueForTheControllableProperty(String property, String value, Map<String, String> extendedStatistics, List<AdvancedControllableProperty> advancedControllableProperties) {
+		for (AdvancedControllableProperty advancedControllableProperty : advancedControllableProperties) {
+			if (advancedControllableProperty.getName().equals(property)) {
+				extendedStatistics.put(property, value);
+				advancedControllableProperty.setValue(value);
+				break;
+			}
+		}
 	}
 
 	/**

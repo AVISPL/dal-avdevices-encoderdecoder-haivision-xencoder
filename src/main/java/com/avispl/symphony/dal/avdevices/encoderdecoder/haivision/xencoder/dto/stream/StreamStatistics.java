@@ -64,7 +64,7 @@ public class StreamStatistics {
 	@JsonAlias("AES Encryption")
 	private String aesEncryption;
 
-	@JsonAlias("Resent Packet")
+	@JsonAlias("Resent Packets")
 	private String resentPacket;
 
 	@JsonAlias("Resent Bytes")
@@ -81,9 +81,6 @@ public class StreamStatistics {
 
 	@JsonAlias("Received NAKs")
 	private String receivedNAKs;
-
-	@JsonAlias("MTU")
-	private String mtu;
 
 	@JsonAlias("Max Bandwidth")
 	private String maxBandwidth;
@@ -479,24 +476,6 @@ public class StreamStatistics {
 	}
 
 	/**
-	 * Retrieves {@code {@link #mtu}}
-	 *
-	 * @return value of {@link #mtu}
-	 */
-	public String getMtu() {
-		return mtu;
-	}
-
-	/**
-	 * Sets {@code mtu}
-	 *
-	 * @param mtu the {@code java.lang.String} field
-	 */
-	public void setMtu(String mtu) {
-		this.mtu = mtu;
-	}
-
-	/**
 	 * Retrieves {@code {@link #maxBandwidth}}
 	 *
 	 * @return value of {@link #maxBandwidth}
@@ -598,8 +577,6 @@ public class StreamStatistics {
 				return getState();
 			case UPTIME:
 				return getUpTime();
-			case NAME:
-				return getName();
 			case SOURCE_PORT:
 				return getSourcePort();
 			case SSRC:
@@ -634,8 +611,6 @@ public class StreamStatistics {
 				return getReceivedACKs();
 			case RECEIVED_NAKS:
 				return getReceivedNAKs();
-			case MTU:
-				return getMtu();
 			case MAX_BANDWIDTH:
 				return getMaxBandwidth();
 			case PATH_MAX_BANDWIDTH:

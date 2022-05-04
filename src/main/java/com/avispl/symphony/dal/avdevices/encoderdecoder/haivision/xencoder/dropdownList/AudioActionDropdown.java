@@ -15,10 +15,10 @@ import java.util.List;
  */
 public enum AudioActionDropdown {
 
-	MUTED("Muted",true,true),
-	START("Start",false,true),
-	STOP("Stop",true,false),
-	NONE("None",true,true);
+	MUTED("Muted", false, true),
+	START("Start", false, true),
+	STOP("Stop", true, false),
+	NONE("None", true, true);
 
 	private final String name;
 	private final boolean isStartAction;

@@ -3,8 +3,11 @@
  */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * BitRateDropdown class defined the enum for monitoring and controlling process
@@ -15,16 +18,18 @@ import java.util.List;
  */
 public enum BitRateDropdown {
 
-	NUMBER_56("56 kbps", false, true),
-	NUMBER_64("64 kbps", false, true),
-	NUMBER_80("80 kbps", true, false),
-	NUMBER_96("96 kbps", true, true),
-	NUMBER_128("128 kbps", true, true),
-	NUMBER_160("160 kbps", false, true),
-	NUMBER_192("192 kbps", true, false),
-	NUMBER_256("256 kbps", true, false),
-	NUMBER_320("320 kbps", true, false);
+	NUMBER_56("56 kbps", "56", false, true),
+	NUMBER_64("64 kbps", "64", false, true),
+	NUMBER_80("80 kbps", "80", true, false),
+	NUMBER_96("96 kbps", "96", true, true),
+	NUMBER_128("128 kbps", "128", true, true),
+	NUMBER_160("160 kbps", "160", false, true),
+	NUMBER_192("192 kbps", "192", true, false),
+	NUMBER_256("256 kbps", "256", true, false),
+	NUMBER_320("320 kbps", "320", true, false);
+
 	private final String name;
+	private final String value;
 	private final boolean isStereo;
 	private final boolean isMono;
 
@@ -32,11 +37,13 @@ public enum BitRateDropdown {
 	 * BitRateDropdown instantiation
 	 *
 	 * @param name {@code {@link #name}}
+	 * @param value {@code {@link #value}}
 	 * @param isStereo {@code {@link #isStereo}}
 	 * @param isMono {@code {@link #isMono}}
 	 */
-	BitRateDropdown(String name, boolean isStereo, boolean isMono) {
+	BitRateDropdown(String name, String value, boolean isStereo, boolean isMono) {
 		this.name = name;
+		this.value = value;
 		this.isStereo = isStereo;
 		this.isMono = isMono;
 	}
@@ -48,6 +55,15 @@ public enum BitRateDropdown {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Retrieves {@code {@link #value}}
+	 *
+	 * @return value of {@link #value}
+	 */
+	public String getValue() {
+		return value;
 	}
 
 	/**
@@ -96,5 +112,33 @@ public enum BitRateDropdown {
 			}
 		}
 		return list.toArray(new String[list.size()]);
+	}
+
+	/**
+	 * Get default bitRate value for the BitRateDropdown list
+	 *
+	 * @param bitRate the bitRate is String value
+	 * @param channelMode the channelMode is mode of ChannelModeDropdown
+	 * @return bitrate/defaultBitRate
+	 */
+	public static String getDefaultBitRate(String bitRate, String channelMode) {
+		String defaultBitRate = NUMBER_56.getName();
+		if (ChannelModeDropdown.STEREO.getName().equals(channelMode)) {
+			defaultBitRate = NUMBER_80.getName();
+		}
+		return Arrays.stream(DropdownList.Names(BitRateDropdown.class)).anyMatch(bitRate::equals) ? bitRate : defaultBitRate;
+	}
+
+	/**
+	 * Retrieves name to value map of BitRateDropdown
+	 *
+	 * @return Map<String, String> are map name and value
+	 */
+	public static Map<String, String> getValueToNameMap() {
+		Map<String, String> valueToName = new HashMap<>();
+		for (BitRateDropdown bitRateDropdown : BitRateDropdown.values()) {
+			valueToName.put(bitRateDropdown.getName(), bitRateDropdown.getValue());
+		}
+		return valueToName;
 	}
 }
