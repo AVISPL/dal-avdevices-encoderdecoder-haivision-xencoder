@@ -3,9 +3,6 @@
  */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * SampleRateDropdown class defined the enum for monitoring and controlling process
  *
