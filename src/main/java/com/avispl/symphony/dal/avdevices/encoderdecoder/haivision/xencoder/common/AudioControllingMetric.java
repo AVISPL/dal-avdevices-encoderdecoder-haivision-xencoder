@@ -45,6 +45,7 @@ public enum AudioControllingMetric {
 	}
 
 	/**
+	 * Get name of enum by metric
 	 *
 	 * @param name {@code {@link #name}}
 	 * @return name of metric

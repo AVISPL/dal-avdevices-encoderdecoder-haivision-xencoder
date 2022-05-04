@@ -35,16 +35,16 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AlgorithmDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AudioActionDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AudioLevel;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AudioStateDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.BitRateDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.ChannelModeDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.DropdownList;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.InputDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.LanguageDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.SampleRateDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AlgorithmDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioActionDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioLevel;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioStateDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.DropdownList;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.SampleRateDropdown;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.AuthenticationRole;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.SystemInfoResponse;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.TemperatureStatus;
@@ -966,18 +966,18 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void addControlAudioConfig(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, AudioConfig audioConfig) {
 
-		String[] dropdownInput = DropdownList.Names(InputDropdown.class);
-		String[] dropdownMode = DropdownList.Names(ChannelModeDropdown.class);
-		String[] dropdownAlgorithm = DropdownList.Names(AlgorithmDropdown.class);
-		String[] dropdownSampleRate = DropdownList.Names(SampleRateDropdown.class);
-		String[] dropdownLanguage = DropdownList.Names(LanguageDropdown.class);
-		String[] dropdownLevel = DropdownList.Names(AudioLevel.class);
-		String[] dropdownAction = AudioActionDropdown.namesIsStartAction();
-		String[] dropdownBitRate = BitRateDropdown.namesIsMono();
-		Map<String, String> languageDropdown = LanguageDropdown.getNameToValueMap();
+		String[] dropdownInput = DropdownList.getArrayOfEnumNames(InputDropdown.class);
+		String[] dropdownMode = DropdownList.getArrayOfEnumNames(ChannelModeDropdown.class);
+		String[] dropdownAlgorithm = DropdownList.getArrayOfEnumNames(AlgorithmDropdown.class);
+		String[] dropdownSampleRate = DropdownList.getArrayOfEnumNames(SampleRateDropdown.class);
+		String[] dropdownLanguage = DropdownList.getArrayOfEnumNames(LanguageDropdown.class);
+		String[] dropdownLevel = DropdownList.getArrayOfEnumNames(AudioLevel.class);
+		String[] dropdownAction = AudioActionDropdown.getArrayOfNameByStartOrStopAction(true);
+		String[] dropdownBitRate = BitRateDropdown.getArrayOfNameByStereoOrMonoMode(false);
+		Map<String, String> nameToValueLanguageMap = LanguageDropdown.getNameToValueOrValueToNameMap(true);
 		Map<String, String> stateDropdown = AudioStateDropdown.getNameToValueMap();
-		Map<String, String> inputMap = InputDropdown.getNameToValueMap();
-		Map<String, String> algorithmName = AlgorithmDropdown.getNameToValueMap();
+		Map<String, String> nameToValueInputMap = InputDropdown.getNameToValueOrValueToNameMap(true);
+		Map<String, String> algorithmName = AlgorithmDropdown.getNameToValueOrParamValueToValueMap(true);
 		String audioName = audioConfig.getName();
 		String value;
 		for (AudioControllingMetric audioMetric : AudioControllingMetric.values()) {
@@ -988,7 +988,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					stats.put(audioKeyName, stateAudio);
 					break;
 				case INPUT:
-					value = inputMap.get(audioConfig.getInterfaceName());
+					value = nameToValueInputMap.get(audioConfig.getInterfaceName());
 					AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(stats, dropdownInput, audioKeyName, value);
 					addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
 					break;
@@ -1001,7 +1001,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					value = audioConfig.getBitRate();
 					String mode = audioConfig.getMode();
 					if (mode.equals(ChannelModeDropdown.STEREO.getName())) {
-						dropdownBitRate = BitRateDropdown.namesIsStereo();
+						dropdownBitRate = BitRateDropdown.getArrayOfNameByStereoOrMonoMode(true);
 					}
 					AdvancedControllableProperty bitRateControlProperty = controlDropdown(stats, dropdownBitRate, audioKeyName, value);
 					addAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
@@ -1018,7 +1018,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					break;
 				case LANGUAGE:
 					String language = audioConfig.getLang();
-					value = languageDropdown.get(language);
+					value = nameToValueLanguageMap.get(language);
 					if (StringUtils.isNullOrEmpty(value)) {
 						value = EncoderConstant.NONE;
 					}
@@ -1029,7 +1029,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					stateAudio = nameToAudioStatistics.get(audioConfig.getName()).getState();
 					//define action = Start
 					if (AudioStateDropdown.STOPPED.getValue().equalsIgnoreCase(stateAudio)) {
-						dropdownAction = AudioActionDropdown.namesIsStopAction();
+						dropdownAction = AudioActionDropdown.getArrayOfNameByStartOrStopAction(false);
 					}
 					value = stateDropdown.get(stateAudio);
 					AdvancedControllableProperty actionDropdownControlProperty = controlDropdownAcceptNoneValue(stats, dropdownAction, audioKeyName, value);
@@ -1088,8 +1088,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				updateValueForTheControllableProperty(property, value, extendedStatistics, advancedControllableProperties);
 				break;
 			case INPUT:
-				String[] inputDropdown = DropdownList.Names(InputDropdown.class);
-				String[] levelDropdown = DropdownList.Names(AudioLevel.class);
+				String[] inputDropdown = DropdownList.getArrayOfEnumNames(InputDropdown.class);
+				String[] levelDropdown = DropdownList.getArrayOfEnumNames(AudioLevel.class);
 				AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(extendedStatistics, inputDropdown, property, value);
 				addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
 				String level = nameToAudioConfig.get(audioName).getLevel();
@@ -1105,7 +1105,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				}
 				break;
 			case CHANGE_MODE:
-				String[] dropdownMode = DropdownList.Names(ChannelModeDropdown.class);
+				String[] dropdownMode = DropdownList.getArrayOfEnumNames(ChannelModeDropdown.class);
 				AdvancedControllableProperty channelModeControlProperty = controlDropdown(extendedStatistics, dropdownMode, property, value);
 				addAdvanceControlProperties(advancedControllableProperties, channelModeControlProperty);
 
@@ -1114,9 +1114,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				String defaultBitrate = BitRateDropdown.getDefaultBitRate(bitRate, value);
 
 				//default channel mode is IsStereo
-				String[] dropdownBitRate = BitRateDropdown.namesIsStereo();
+				String[] dropdownBitRate = BitRateDropdown.getArrayOfNameByStereoOrMonoMode(true);
 				if (!ChannelModeDropdown.STEREO.getName().equals(value)) {
-					dropdownBitRate = BitRateDropdown.namesIsMono();
+					dropdownBitRate = BitRateDropdown.getArrayOfNameByStereoOrMonoMode(false);
 				}
 				AdvancedControllableProperty bitRateControlProperty = controlDropdown(extendedStatistics, dropdownBitRate, bitRateName, defaultBitrate);
 				addAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
@@ -1199,14 +1199,14 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private AudioConfig convertAudioByValue(Map<String, String> extendedStatistics, String audioName) {
 		AudioConfig audioConfig = new AudioConfig();
-		Map<String, String> languageMap = LanguageDropdown.getValueToNameMap();
+		Map<String, String> valueToNameLanguageMap = LanguageDropdown.getNameToValueOrValueToNameMap(false);
 		Map<String, String> channelModeMap = ChannelModeDropdown.getValueToNameMap();
 		Map<String, String> bitRateMap = BitRateDropdown.getValueToNameMap();
-		Map<String, String> algorithmParamMap = AlgorithmDropdown.getParamValueToValueNameMap();
-		Map<String, String> inputMap = InputDropdown.getValueToNameMap();
+		Map<String, String> algorithmParamMap = AlgorithmDropdown.getNameToValueOrParamValueToValueMap(false);
+		Map<String, String> valueToNameInputMap = InputDropdown.getNameToValueOrValueToNameMap(false);
 		String id = EncoderConstant.EMPTY_STRING;
 		AudioConfig audio = nameToAudioConfig.get(audioName);
-		String language = languageMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LANGUAGE.getName()));
+		String language = valueToNameLanguageMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LANGUAGE.getName()));
 		if (!EncoderConstant.NONE.equals(language) || EncoderConstant.EMPTY_STRING.equals(language)) {
 			audioConfig.setLang(language);
 		}
@@ -1214,7 +1214,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			id = audio.getId();
 		}
 		audioConfig.setId(id);
-		audioConfig.setInterfaceName(inputMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.INPUT.getName())));
+		audioConfig.setInterfaceName(valueToNameInputMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.INPUT.getName())));
 		audioConfig.setBitRate(bitRateMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.BITRATE.getName())));
 		audioConfig.setMode(channelModeMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.CHANGE_MODE.getName())));
 		audioConfig.setAlgorithm(algorithmParamMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.ALGORITHM.getName())));

@@ -257,22 +257,31 @@ public class AudioConfig {
 		switch (metric) {
 			case STATE:
 				setState(value);
+				break;
 			case INPUT:
 				setInterfaceName(value);
+				break;
 			case CHANGE_MODE:
 				setMode(value);
+				break;
 			case BITRATE:
 				setBitRate(value);
+				break;
 			case SAMPLE_RATE:
 				setSampleRate(value);
+				break;
 			case ALGORITHM:
 				setAlgorithm(value);
+				break;
 			case ACTION:
 				setAction(value);
+				break;
 			case LANGUAGE:
 				setLang(value);
+				break;
 			case LEVEL:
 				setLevel(value);
+				break;
 			default:
 				throw new IllegalArgumentException("The metric is not exits");
 		}
@@ -286,17 +295,12 @@ public class AudioConfig {
 	public String retrieveAudioPayloadData() {
 		String levelValue = "";
 		if (!StringUtils.isNullOrEmpty(level)) {
-			levelValue = " level=" + level;
+			levelValue = String.format(" level=%s", level);
 		}
 		String languageValue = "";
 		if (!StringUtils.isNullOrEmpty(lang)) {
-			languageValue = " lang=" + lang;
+			languageValue = String.format(" lang=%s", lang);
 		}
-		return " input=" + interfaceName +
-				" bitRate=" + bitRate +
-				" mode=" + mode +
-				" algorithm=" + algorithm +
-				languageValue +
-				levelValue;
+		return String.format(" input=%s bitRate=%s mode=%s  algorithm=%s%s%s", interfaceName, bitRate, mode, algorithm, languageValue, levelValue);
 	}
 }

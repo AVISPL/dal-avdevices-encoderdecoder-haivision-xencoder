@@ -23,12 +23,12 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AlgorithmDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.AudioActionDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.BitRateDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.ChannelModeDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.InputDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList.LanguageDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AlgorithmDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioActionDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageDropdown;
 
 /**
  * Unit test for HaivisionXEncoderCommunicator

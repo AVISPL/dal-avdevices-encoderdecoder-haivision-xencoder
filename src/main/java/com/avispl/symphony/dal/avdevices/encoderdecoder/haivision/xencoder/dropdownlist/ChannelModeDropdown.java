@@ -1,7 +1,7 @@
 /*
  *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
  */
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList;
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,9 +51,9 @@ public enum ChannelModeDropdown {
 	}
 
 	/**
-	 * Retrieves name to value map of ChannelModeDropdown
+	 * Retrieves name to value or value to name map of ChannelModeDropdown
 	 *
-	 * @return Map<String, String> are map name and value
+	 * @return Map<String, String> are map name and value or value and name
 	 */
 	public static Map<String, String> getValueToNameMap() {
 		Map<String, String> valueToName = new HashMap<>();

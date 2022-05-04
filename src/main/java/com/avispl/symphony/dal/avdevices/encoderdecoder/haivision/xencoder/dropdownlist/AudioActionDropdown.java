@@ -1,7 +1,7 @@
 /*
  *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
  */
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList;
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -65,32 +65,21 @@ public enum AudioActionDropdown {
 	}
 
 	/**
-	 * Retrieves all name of audioActionDropdown with stop action
+	 * Retrieves all names of audioActionDropdown enum with stop action
 	 *
+	 * @param isStart the isStart is boolean value with action start or stop
 	 * @return list name of audioActionDropdown
 	 */
-	public static String[] namesIsStopAction() {
-		List<String> list = new LinkedList<>();
+	public static String[] getArrayOfNameByStartOrStopAction(boolean isStart) {
+		List<String> actionList = new LinkedList<>();
 		for (AudioActionDropdown audioActionDropdown : AudioActionDropdown.values()) {
-			if (audioActionDropdown.isStopAction()) {
-				list.add(audioActionDropdown.getName());
+			if (audioActionDropdown.isStopAction() && !isStart) {
+				actionList.add(audioActionDropdown.getName());
+			}
+			else if(audioActionDropdown.isStartAction() && isStart){
+				actionList.add(audioActionDropdown.getName());
 			}
 		}
-		return list.toArray(new String[list.size()]);
-	}
-
-	/**
-	 * Retrieves all name of audioActionDropdown with start action
-	 *
-	 * @return list name of audioActionDropdown
-	 */
-	public static String[] namesIsStartAction() {
-		List<String> list = new LinkedList<>();
-		for (AudioActionDropdown audioActionDropdown : AudioActionDropdown.values()) {
-			if (audioActionDropdown.isStartAction()) {
-				list.add(audioActionDropdown.getName());
-			}
-		}
-		return list.toArray(new String[list.size()]);
+		return actionList.toArray(new String[actionList.size()]);
 	}
 }

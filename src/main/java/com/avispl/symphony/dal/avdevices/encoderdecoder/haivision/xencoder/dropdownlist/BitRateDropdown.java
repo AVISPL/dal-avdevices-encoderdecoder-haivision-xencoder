@@ -1,7 +1,7 @@
 /*
  *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
  */
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList;
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -85,33 +85,21 @@ public enum BitRateDropdown {
 	}
 
 	/**
-	 * Retrieves all name of BitRateDropdown is stereo mode
+	 * Retrieves all name of BitRateDropdown by stereo mode
 	 *
+	 * @param isStereoMode the isStereoMode is boolean value stereoMode or monoMode
 	 * @return list name of BitRate
 	 */
-	public static String[] namesIsStereo() {
-		List<String> list = new LinkedList<>();
+	public static String[] getArrayOfNameByStereoOrMonoMode(boolean isStereoMode) {
+		List<String> channelModeList = new LinkedList<>();
 		for (BitRateDropdown bitRateDropdown : BitRateDropdown.values()) {
-			if (bitRateDropdown.isStereo()) {
-				list.add(bitRateDropdown.getName());
+			if (bitRateDropdown.isStereo() && isStereoMode) {
+				channelModeList.add(bitRateDropdown.getName());
+			} else if (bitRateDropdown.isMono() && !isStereoMode) {
+				channelModeList.add(bitRateDropdown.getName());
 			}
 		}
-		return list.toArray(new String[list.size()]);
-	}
-
-	/**
-	 * Retrieves all name of BitRateDropdown is mono mode
-	 *
-	 * @return list name of BitRate
-	 */
-	public static String[] namesIsMono() {
-		List<String> list = new LinkedList<>();
-		for (BitRateDropdown bitRateDropdown : BitRateDropdown.values()) {
-			if (bitRateDropdown.isMono()) {
-				list.add(bitRateDropdown.getName());
-			}
-		}
-		return list.toArray(new String[list.size()]);
+		return channelModeList.toArray(new String[channelModeList.size()]);
 	}
 
 	/**
@@ -126,7 +114,7 @@ public enum BitRateDropdown {
 		if (ChannelModeDropdown.STEREO.getName().equals(channelMode)) {
 			defaultBitRate = NUMBER_80.getName();
 		}
-		return Arrays.stream(DropdownList.Names(BitRateDropdown.class)).anyMatch(bitRate::equals) ? bitRate : defaultBitRate;
+		return Arrays.asList(DropdownList.getArrayOfEnumNames(BitRateDropdown.class)).contains(bitRate) ? bitRate : defaultBitRate;
 	}
 
 	/**

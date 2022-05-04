@@ -1,7 +1,7 @@
 /*
  *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
  */
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList;
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -107,28 +107,20 @@ public enum LanguageDropdown {
 	}
 
 	/**
-	 * Retrieves name to value map of languageDropdown
+	 * Retrieves name to value or value to Name map of languageDropdown
 	 *
-	 * @return Map<String, Integer> are map value and name
+	 * @param isNameToValue the isNameToValue is boolean value nameToValue or ValueToName
+	 * @return Map<String, String> are map value and name or name and value
 	 */
-	public static Map<String, String> getNameToValueMap() {
-		Map<String, String> nameToValue = new HashMap<>();
+	public static Map<String, String> getNameToValueOrValueToNameMap(boolean isNameToValue) {
+		Map<String, String> nameMap = new HashMap<>();
 		for (LanguageDropdown languageDropdown : LanguageDropdown.values()) {
-			nameToValue.put(languageDropdown.getValue(), languageDropdown.getName());
+			if (isNameToValue) {
+				nameMap.put(languageDropdown.getValue(), languageDropdown.getName());
+			} else {
+				nameMap.put(languageDropdown.getName(), languageDropdown.getValue());
+			}
 		}
-		return nameToValue;
-	}
-
-	/**
-	 * Retrieves name to value map of languageDropdown
-	 *
-	 * @return Map<Integer, String> are name and value
-	 */
-	public static Map<String, String> getValueToNameMap() {
-		Map<String, String> valueToName = new HashMap<>();
-		for (LanguageDropdown languageDropdown : LanguageDropdown.values()) {
-			valueToName.put(languageDropdown.getName(), languageDropdown.getValue());
-		}
-		return valueToName;
+		return nameMap;
 	}
 }

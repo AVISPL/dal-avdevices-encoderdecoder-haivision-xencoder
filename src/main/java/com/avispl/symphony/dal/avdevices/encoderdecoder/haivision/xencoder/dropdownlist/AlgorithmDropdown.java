@@ -1,7 +1,7 @@
 /*
  *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
  */
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList;
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,28 +63,20 @@ public enum AlgorithmDropdown {
 	}
 
 	/**
-	 * Retrieves param value to name map of AlgorithmDropdown
-	 *
-	 * @return Map<String, String> are map param value and value
-	 */
-	public static Map<String, String> getParamValueToValueNameMap() {
-		Map<String, String> valueToName = new HashMap<>();
-		for (AlgorithmDropdown algorithmDropdown : AlgorithmDropdown.values()) {
-			valueToName.put(algorithmDropdown.getName(), algorithmDropdown.getParamValue());
-		}
-		return valueToName;
-	}
-
-	/**
 	 * Retrieves name to value map of AlgorithmDropdown
 	 *
+	 * @param isNameToValue the isNameToValue is boolean value nameToValue or valueToName
 	 * @return Map<String, String> are map name and value
 	 */
-	public static Map<String, String> getNameToValueMap() {
-		Map<String, String> nameToValue = new HashMap<>();
+	public static Map<String, String> getNameToValueOrParamValueToValueMap(boolean isNameToValue) {
+		Map<String, String> nameMap = new HashMap<>();
 		for (AlgorithmDropdown algorithmDropdown : AlgorithmDropdown.values()) {
-			nameToValue.put(algorithmDropdown.getValue(), algorithmDropdown.getName());
+			if (isNameToValue) {
+				nameMap.put(algorithmDropdown.getValue(), algorithmDropdown.getName());
+			} else {
+				nameMap.put(algorithmDropdown.getName(), algorithmDropdown.getParamValue());
+			}
 		}
-		return nameToValue;
+		return nameMap;
 	}
 }

@@ -1,7 +1,7 @@
 /*
  *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
  */
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList;
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +14,7 @@ import java.util.Map;
  * @since 1.0.0
  */
 public enum AudioStateDropdown {
+
 	STOPPED("Stopped", "STOPPED"),
 	WORKING("Working", "WORKING"),
 	MUTED("Muted", "MUTED"),
@@ -62,18 +63,5 @@ public enum AudioStateDropdown {
 			nameToValue.put(stateDropdown.getValue(), stateDropdown.getName());
 		}
 		return nameToValue;
-	}
-
-	/**
-	 * Retrieves name to value map of stateDropdown
-	 *
-	 * @return Map<String, String> are map name and value
-	 */
-	public static Map<String, String> getValueToNameMap() {
-		Map<String, String> valueToName = new HashMap<>();
-		for (AudioStateDropdown stateDropdown : AudioStateDropdown.values()) {
-			valueToName.put(stateDropdown.getName(), stateDropdown.getValue());
-		}
-		return valueToName;
 	}
 }

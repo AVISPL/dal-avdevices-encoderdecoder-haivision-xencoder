@@ -1,7 +1,7 @@
 /*
  *  * Copyright (c) 2022 AVI-SPL, Inc. All Rights Reserved.
  */
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownList;
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,28 +58,20 @@ public enum InputDropdown {
 	}
 
 	/**
-	 * Retrieves name to value map of InputDropdown
+	 * Retrieves name to value or value to name map of InputDropdown
 	 *
-	 * @return Map<String, String> are map value and name
+	 * @param isNameToValue the isNameToValue is boolean value nameToValue or ValueToName
+	 * @return Map<String, String> are map value and name or name and value
 	 */
-	public static Map<String, String> getNameToValueMap() {
-		Map<String, String> nameToValue = new HashMap<>();
+	public static Map<String, String> getNameToValueOrValueToNameMap(boolean isNameToValue) {
+		Map<String, String> nameMap = new HashMap<>();
 		for (InputDropdown inputDropdown : InputDropdown.values()) {
-			nameToValue.put(inputDropdown.getValue(), inputDropdown.getName());
+			if (isNameToValue) {
+				nameMap.put(inputDropdown.getValue(), inputDropdown.getName());
+			} else {
+				nameMap.put(inputDropdown.getName(), inputDropdown.getValue());
+			}
 		}
-		return nameToValue;
-	}
-
-	/**
-	 * Retrieves name to value map of InputDropdown
-	 *
-	 * @return Map<String, String> are map name and value
-	 */
-	public static Map<String, String> getValueToNameMap() {
-		Map<String, String> valueToName = new HashMap<>();
-		for (InputDropdown inputDropdown : InputDropdown.values()) {
-			valueToName.put(inputDropdown.getName(), inputDropdown.getValue());
-		}
-		return valueToName;
+		return nameMap;
 	}
 }
