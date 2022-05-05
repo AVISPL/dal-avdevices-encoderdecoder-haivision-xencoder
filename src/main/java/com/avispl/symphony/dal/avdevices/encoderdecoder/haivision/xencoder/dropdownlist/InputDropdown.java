@@ -3,9 +3,6 @@
  */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * InputDropdown class defined the enum for monitoring and controlling process
  *
@@ -55,23 +52,5 @@ public enum InputDropdown {
 	 */
 	public String getValue() {
 		return value;
-	}
-
-	/**
-	 * Retrieves name to value or value to name map of InputDropdown
-	 *
-	 * @param isNameToValue the isNameToValue is boolean value nameToValue or ValueToName
-	 * @return Map<String, String> are map value and name or name and value
-	 */
-	public static Map<String, String> getNameToValueOrValueToNameMap(boolean isNameToValue) {
-		Map<String, String> nameMap = new HashMap<>();
-		for (InputDropdown inputDropdown : InputDropdown.values()) {
-			if (isNameToValue) {
-				nameMap.put(inputDropdown.getValue(), inputDropdown.getName());
-			} else {
-				nameMap.put(inputDropdown.getName(), inputDropdown.getValue());
-			}
-		}
-		return nameMap;
 	}
 }

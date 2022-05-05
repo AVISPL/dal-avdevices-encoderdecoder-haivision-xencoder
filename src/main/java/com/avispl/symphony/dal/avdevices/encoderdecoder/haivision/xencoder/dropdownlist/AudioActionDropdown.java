@@ -15,14 +15,16 @@ import java.util.List;
  */
 public enum AudioActionDropdown {
 
-	MUTED("Muted", false, true),
-	START("Start", false, true),
-	STOP("Stop", true, false),
-	NONE("None", true, true);
+	MUTED("Mute", true, false, false),
+	UN_MUTED("Unmute", false, false, true),
+	START("Start", false, true, false),
+	STOP("Stop", true, false, true),
+	NONE("None", true, true, true);
 
 	private final String name;
 	private final boolean isStartAction;
 	private final boolean isStopAction;
+	private final boolean isMuteAction;
 
 	/**
 	 * AudioStateDropdown instantiation
@@ -30,11 +32,13 @@ public enum AudioActionDropdown {
 	 * @param name {@code {@link #name}}
 	 * @param isStartAction {@code {@link #isStartAction}}
 	 * @param isStopAction {@code {@link #isStopAction}}
+	 * @param isMuteAction {@code {@link #isMuteAction}}
 	 */
-	AudioActionDropdown(String name,boolean isStartAction,boolean isStopAction) {
+	AudioActionDropdown(String name, boolean isStartAction, boolean isStopAction, boolean isMuteAction) {
 		this.name = name;
 		this.isStartAction = isStartAction;
 		this.isStopAction = isStopAction;
+		this.isMuteAction = isMuteAction;
 	}
 
 	/**
@@ -65,19 +69,41 @@ public enum AudioActionDropdown {
 	}
 
 	/**
-	 * Retrieves all names of audioActionDropdown enum with stop action
+	 * Retrieves {@code {@link #isMuteAction}}
 	 *
-	 * @param isStart the isStart is boolean value with action start or stop
+	 * @return value of {@link #isMuteAction}
+	 */
+	public boolean isMuteAction() {
+		return isMuteAction;
+	}
+
+	/**
+	 * Retrieves all names of audioActionDropdown by action
+	 *
+	 * @param action the action is String instance in AudioActionDropdown
 	 * @return list name of audioActionDropdown
 	 */
-	public static String[] getArrayOfNameByStartOrStopAction(boolean isStart) {
+	public static String[] getArrayOfEnumByAction(String action) {
 		List<String> actionList = new LinkedList<>();
 		for (AudioActionDropdown audioActionDropdown : AudioActionDropdown.values()) {
-			if (audioActionDropdown.isStopAction() && !isStart) {
-				actionList.add(audioActionDropdown.getName());
-			}
-			else if(audioActionDropdown.isStartAction() && isStart){
-				actionList.add(audioActionDropdown.getName());
+			switch (action) {
+				case "WORKING":
+					if (audioActionDropdown.isStartAction()) {
+						actionList.add(audioActionDropdown.getName());
+					}
+					break;
+				case "STOPPED":
+					if (audioActionDropdown.isStopAction()) {
+						actionList.add(audioActionDropdown.getName());
+					}
+					break;
+				case "MUTED":
+					if (audioActionDropdown.isMuteAction()) {
+						actionList.add(audioActionDropdown.getName());
+					}
+					break;
+				default:
+					throw new IllegalArgumentException("Do not support state action is: " + action);
 			}
 		}
 		return actionList.toArray(new String[actionList.size()]);

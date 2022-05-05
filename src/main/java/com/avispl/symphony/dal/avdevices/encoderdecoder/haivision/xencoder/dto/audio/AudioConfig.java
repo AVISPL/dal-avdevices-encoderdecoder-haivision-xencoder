@@ -6,7 +6,6 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioControllingMetric;
 import com.avispl.symphony.dal.util.StringUtils;
 
 /**
@@ -248,46 +247,6 @@ public class AudioConfig {
 	}
 
 	/**
-	 * Get the value by the metric monitoring
-	 *
-	 * @param metric the metric is metric monitoring
-	 * @return String value of encoder monitoring properties by metric
-	 */
-	public void getValueByMetric(AudioControllingMetric metric, String value) {
-		switch (metric) {
-			case STATE:
-				setState(value);
-				break;
-			case INPUT:
-				setInterfaceName(value);
-				break;
-			case CHANGE_MODE:
-				setMode(value);
-				break;
-			case BITRATE:
-				setBitRate(value);
-				break;
-			case SAMPLE_RATE:
-				setSampleRate(value);
-				break;
-			case ALGORITHM:
-				setAlgorithm(value);
-				break;
-			case ACTION:
-				setAction(value);
-				break;
-			case LANGUAGE:
-				setLang(value);
-				break;
-			case LEVEL:
-				setLevel(value);
-				break;
-			default:
-				throw new IllegalArgumentException("The metric is not exits");
-		}
-	}
-
-	/**
 	 * Convert Audio config
 	 *
 	 * @return payLoad the payload is String by Audio config
@@ -297,10 +256,6 @@ public class AudioConfig {
 		if (!StringUtils.isNullOrEmpty(level)) {
 			levelValue = String.format(" level=%s", level);
 		}
-		String languageValue = "";
-		if (!StringUtils.isNullOrEmpty(lang)) {
-			languageValue = String.format(" lang=%s", lang);
-		}
-		return String.format(" input=%s bitRate=%s mode=%s  algorithm=%s%s%s", interfaceName, bitRate, mode, algorithm, languageValue, levelValue);
+		return String.format(" input=%s bitRate=%s mode=%s  algorithm=%s  lang=%s%s", interfaceName, bitRate, mode, algorithm, lang, levelValue);
 	}
 }

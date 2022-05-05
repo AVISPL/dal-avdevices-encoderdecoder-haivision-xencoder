@@ -15,21 +15,25 @@ import java.util.Map;
  */
 public enum ChannelModeDropdown {
 
-	STEREO("Stereo", "stereo"),
-	MONO_LEFT("Mono Left", "mono"),
-	MONO_RIGHT("Mono Right", "monoright");
+	STEREO("Stereo", "Stereo","stereo"),
+	MONO_LEFT("Mono Left", "Mono","mono"),
+	MONO_RIGHT("Mono Right", "Mono (Right Channel)","monoright");
 
 	private final String name;
 	private final String value;
+	private final String paramValue;
 
 	/**
 	 * ChannelModeDropdown instantiation
 	 *
 	 * @param name {@code {@link #name}}
+	 * @param value {@code {@link #value}}
+	 * @param paramValue {@code {@link #paramValue}}
 	 */
-	ChannelModeDropdown(String name, String value) {
+	ChannelModeDropdown(String name, String value,String paramValue) {
 		this.name = name;
 		this.value = value;
+		this.paramValue = paramValue;
 	}
 
 	/**
@@ -51,15 +55,24 @@ public enum ChannelModeDropdown {
 	}
 
 	/**
-	 * Retrieves name to value or value to name map of ChannelModeDropdown
+	 * Retrieves {@code {@link #paramValue}}
 	 *
-	 * @return Map<String, String> are map name and value or value and name
+	 * @return value of {@link #paramValue}
 	 */
-	public static Map<String, String> getValueToNameMap() {
-		Map<String, String> valueToName = new HashMap<>();
+	public String getParamValue() {
+		return paramValue;
+	}
+
+	/**
+	 * Retrieves param value to value name of ChannelModeDropdown
+	 *
+	 * @return Map<String, String> are map param value and value name
+	 */
+	public static Map<String, String> getParamValueToNameMap() {
+		Map<String, String> nameMap = new HashMap<>();
 		for (ChannelModeDropdown channelModeDropdown : ChannelModeDropdown.values()) {
-			valueToName.put(channelModeDropdown.getName(), channelModeDropdown.getValue());
+			nameMap.put(channelModeDropdown.getName(), channelModeDropdown.getParamValue());
 		}
-		return valueToName;
+		return nameMap;
 	}
 }

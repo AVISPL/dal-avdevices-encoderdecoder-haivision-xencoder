@@ -7,7 +7,6 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -160,7 +159,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
-		Assert.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValue,stats.get(propName));
 	}
 
 	/**
@@ -180,7 +179,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
-		Assert.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValue,stats.get(propName));
 	}
 
 	/**
@@ -200,7 +199,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
-		Assert.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValue,stats.get(propName));
 	}
 
 	/**
@@ -220,7 +219,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
-		Assert.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValue,stats.get(propName));
 	}
 
 	/**
@@ -240,7 +239,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
-		Assert.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValue,stats.get(propName));
 	}
 
 	/**
@@ -260,6 +259,40 @@ public class HaivisionXEncoderCommunicatorTest {
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
-		Assert.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+
+	/**
+	 * Test get Audio control: with Apply Change properties
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlApplyChange() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.INPUT.getName();
+		String propValue = InputDropdown.SDI_1_1_2.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameAction = "Audio Encoder 0#" + AudioControllingMetric.ACTION.getName();
+		String propValueAction = AudioActionDropdown.START.getName();
+		controllableProperty.setProperty(propNameAction);
+		controllableProperty.setValue(propValueAction);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameApplyChange = "Audio Encoder 0#" + AudioControllingMetric.APPLY_CHANGE.getName();
+		String propValueApplyChange = "1";
+		controllableProperty.setProperty(propNameApplyChange);
+		controllableProperty.setValue(propValueApplyChange);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValueAction,stats.get(propNameAction));
 	}
 }

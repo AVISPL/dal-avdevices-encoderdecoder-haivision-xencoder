@@ -4,10 +4,8 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * BitRateDropdown class defined the enum for monitoring and controlling process
@@ -111,22 +109,10 @@ public enum BitRateDropdown {
 	 */
 	public static String getDefaultBitRate(String bitRate, String channelMode) {
 		String defaultBitRate = NUMBER_56.getName();
-		if (ChannelModeDropdown.STEREO.getName().equals(channelMode)) {
+		boolean isStereo = ChannelModeDropdown.STEREO.getName().equals(channelMode);
+		if (isStereo) {
 			defaultBitRate = NUMBER_80.getName();
 		}
-		return Arrays.asList(DropdownList.getArrayOfEnumNames(BitRateDropdown.class)).contains(bitRate) ? bitRate : defaultBitRate;
-	}
-
-	/**
-	 * Retrieves name to value map of BitRateDropdown
-	 *
-	 * @return Map<String, String> are map name and value
-	 */
-	public static Map<String, String> getValueToNameMap() {
-		Map<String, String> valueToName = new HashMap<>();
-		for (BitRateDropdown bitRateDropdown : BitRateDropdown.values()) {
-			valueToName.put(bitRateDropdown.getName(), bitRateDropdown.getValue());
-		}
-		return valueToName;
+		return Arrays.asList(BitRateDropdown.getArrayOfNameByStereoOrMonoMode(isStereo)).contains(bitRate) ? bitRate : defaultBitRate;
 	}
 }
