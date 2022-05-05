@@ -14,32 +14,31 @@ public enum StreamMonitoringMetric {
 
 	STATE("State"),
 	UPTIME("UpTime"),
-	NAME("Name"),
 	SOURCE_PORT("SourcePort"),
 	SSRC("SSRC"),
 	SENT_PACKETS("SentPackets"),
-	SENTBYTES("SentBytes"),
-	BITRATE("Bitrate"),
+	SENT_BYTES("SentBytes"),
+	BITRATE("Bitrate (kbps)"),
 	UNSENT_PACKETS("UnsentPackets"),
 	UNSENT_BYTES("UnsentBytes"),
 	LAST_ERROR("LastError"),
 	OCCURRED("Occurred"),
 	RECONNECTIONS("Reconnections"),
 	AES_ENCRYPTION("AesEncryption"),
-	RESENT_PACKET("ResentPacket"),
+	RESENT_PACKET("ResentPackets"),
 	RESENT_BYTES("ResentBytes"),
 	DROPPED_PACKETS("DroppedPackets"),
 	DROPPED_BYTES("DroppedBytes"),
 	RECEIVED_ACKS("ReceivedACKs"),
 	RECEIVED_NAKS("ReceivedNAKs"),
-	MTU("MTU"),
-	MAX_BANDWIDTH("MaxBandwidth"),
+	MAX_BANDWIDTH("MaxBandwidth (kbps)"),
 	PATH_MAX_BANDWIDTH("PathMaxBandwidth"),
-	RTT("RTT"),
-	LOCAL_BUFFER_LEVEL("LocalBufferLevel"),
-	LATENCY("Latency");
+	RTT("RTT (ms)"),
+	LOCAL_BUFFER_LEVEL("Buffer (ms)"),
+	LATENCY("Latency (ms)");
 
 	private String name;
+
 	/**
 	 * StreamMonitoringMetric instantiation
 	 *

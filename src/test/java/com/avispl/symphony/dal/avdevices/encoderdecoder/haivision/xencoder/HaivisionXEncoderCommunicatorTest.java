@@ -13,13 +13,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.avispl.symphony.api.dal.dto.control.ControllableProperty;
 import com.avispl.symphony.api.dal.dto.monitor.ExtendedStatistics;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioControllingMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AlgorithmDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioActionDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageDropdown;
 
 /**
  * Unit test for HaivisionXEncoderCommunicator
@@ -34,6 +42,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@BeforeEach()
 	public void setUp() throws Exception {
 		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
+		haivisionXEncoderCommunicator.setConfigManagement("true");
 		haivisionXEncoderCommunicator.setHost("***REMOVED***");
 		haivisionXEncoderCommunicator.setPort(22);
 		haivisionXEncoderCommunicator.setLogin("admin");
@@ -131,5 +140,159 @@ public class HaivisionXEncoderCommunicatorTest {
 		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		Assertions.assertNotNull(stats.get(EncoderMonitoringMetric.TEMPERATURE.getName()));
+	}
+
+	/**
+	 * Test get Audio control: with Input properties is SDI 1 (1-2)
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlInput() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.INPUT.getName();
+		String propValue = InputDropdown.SDI_1_1_2.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Channel Mode properties is stereo
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlChannelModeIsStereo() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.CHANGE_MODE.getName();
+		String propValue = ChannelModeDropdown.STEREO.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Bitrate properties is 128 kbps
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlBitrate() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.BITRATE.getName();
+		String propValue = BitRateDropdown.NUMBER_128.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Algorithm properties is MPEG-4 LOAS/LATM
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlAlgorithmModeIsLOAS() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.ALGORITHM.getName();
+		String propValue = AlgorithmDropdown.MPEG_4.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Language properties is English
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlLanguageIsEnglish() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.LANGUAGE.getName();
+		String propValue = LanguageDropdown.ENGLISH.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Action properties is Start
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlActionIsStart() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.ACTION.getName();
+		String propValue = AudioActionDropdown.START.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+
+	/**
+	 * Test get Audio control: with Apply Change properties
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlApplyChange() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.INPUT.getName();
+		String propValue = InputDropdown.SDI_1_1_2.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameAction = "Audio Encoder 0#" + AudioControllingMetric.ACTION.getName();
+		String propValueAction = AudioActionDropdown.START.getName();
+		controllableProperty.setProperty(propNameAction);
+		controllableProperty.setValue(propValueAction);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameApplyChange = "Audio Encoder 0#" + AudioControllingMetric.APPLY_CHANGE.getName();
+		String propValueApplyChange = "1";
+		controllableProperty.setProperty(propNameApplyChange);
+		controllableProperty.setValue(propValueApplyChange);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValueAction,stats.get(propNameAction));
 	}
 }

@@ -26,7 +26,7 @@ public class SystemInfoResponse {
 	private String hardwareCompatibility;
 
 	@JsonAlias("CPLD Version")
-	private String cpldVevision;
+	private String cpldVersion;
 
 	@JsonAlias("Boot Version")
 	private String bootVersion;
@@ -49,9 +49,8 @@ public class SystemInfoResponse {
 	@JsonAlias("Firmware Time")
 	private String firmwareTime;
 
-	@JsonAlias("Temperature")
-	private String temperature;
-
+	@JsonAlias("Hardware Version")
+	private String hardwareVersion;
 
 	/**
 	 * Retrieves {@code {@link #serialNumber}}
@@ -90,21 +89,21 @@ public class SystemInfoResponse {
 	}
 
 	/**
-	 * Retrieves {@code {@link #cpldVevision }}
+	 * Retrieves {@code {@link #cpldVersion }}
 	 *
-	 * @return value of {@link #cpldVevision}
+	 * @return value of {@link #cpldVersion}
 	 */
-	public String getCpldVevision() {
-		return cpldVevision;
+	public String getCpldVersion() {
+		return cpldVersion;
 	}
 
 	/**
 	 * Sets {@code cpldRevision}
 	 *
-	 * @param cpldVevision the {@code java.lang.String} field
+	 * @param cpldVersion the {@code java.lang.String} field
 	 */
-	public void setCpldVevision(String cpldVevision) {
-		this.cpldVevision = cpldVevision;
+	public void setCpldVersion(String cpldVersion) {
+		this.cpldVersion = cpldVersion;
 	}
 
 	/**
@@ -234,21 +233,21 @@ public class SystemInfoResponse {
 	}
 
 	/**
-	 * Retrieves {@code {@link #temperature}}
+	 * Retrieves {@code {@link #hardwareVersion}}
 	 *
-	 * @return value of {@link #temperature}
+	 * @return value of {@link #hardwareVersion}
 	 */
-	public String getTemperature() {
-		return temperature;
+	public String getHardwareVersion() {
+		return hardwareVersion;
 	}
 
 	/**
-	 * Sets {@code temperature}
+	 * Sets {@code hardwareVersion}
 	 *
-	 * @param temperature the {@code java.lang.String} field
+	 * @param hardwareVersion the {@code java.lang.String} field
 	 */
-	public void setTemperature(String temperature) {
-		this.temperature = temperature;
+	public void setHardwareVersion(String hardwareVersion) {
+		this.hardwareVersion = hardwareVersion;
 	}
 
 	/**
@@ -259,14 +258,14 @@ public class SystemInfoResponse {
 	 */
 	public String getValueByMetric(SystemMonitoringMetric metric) {
 		switch (metric) {
-			case UPTIME:
+			case FIRMWARE_TIME:
 				return getFirmwareTime();
 			case SERIAL_NUMBER:
 				return getSerialNumber();
 			case HARDWARE_COMPATIBILITY:
 				return getHardwareCompatibility();
-			case CPLD_VEVISION:
-				return getCpldVevision();
+			case CPLD_VERSION:
+				return getCpldVersion();
 			case BOOT_VERSION:
 				return getBootVersion();
 			case CARD_TYPE:
@@ -279,8 +278,8 @@ public class SystemInfoResponse {
 				return getFirmwareVersion();
 			case FIRMWARE_OPTIONS:
 				return getFirmwareOptions();
-			case TEMPERATURE:
-				return getTemperature();
+			case HARDWARE_VERSION:
+				return getHardwareVersion();
 			default:
 				return EncoderConstant.NONE;
 		}

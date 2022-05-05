@@ -6,6 +6,8 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.avispl.symphony.dal.util.StringUtils;
+
 /**
  * AudioConfig DTO class
  *
@@ -44,6 +46,7 @@ public class AudioConfig {
 	private String level;
 
 	private String state;
+	private String action;
 
 	/**
 	 * Retrieves {@code {@link #id}}
@@ -223,5 +226,36 @@ public class AudioConfig {
 	 */
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	/**
+	 * Retrieves {@code {@link #action}}
+	 *
+	 * @return value of {@link #action}
+	 */
+	public String getAction() {
+		return action;
+	}
+
+	/**
+	 * Sets {@code action}
+	 *
+	 * @param action the {@code java.lang.String} field
+	 */
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	/**
+	 * Convert Audio config
+	 *
+	 * @return payLoad the payload is String by Audio config
+	 */
+	public String retrieveAudioPayloadData() {
+		String levelValue = "";
+		if (!StringUtils.isNullOrEmpty(level)) {
+			levelValue = String.format(" level=%s", level);
+		}
+		return String.format(" input=%s bitRate=%s mode=%s  algorithm=%s  lang=%s%s", interfaceName, bitRate, mode, algorithm, lang, levelValue);
 	}
 }

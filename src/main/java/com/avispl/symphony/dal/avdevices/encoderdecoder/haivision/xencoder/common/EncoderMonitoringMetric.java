@@ -14,7 +14,7 @@ public enum EncoderMonitoringMetric {
 
 	ROLE_BASED("RoleBased", false),
 	ACCOUNT("Account", false),
-	TEMPERATURE("TemperatureStatus", true),
+	TEMPERATURE("Temperature", true),
 	SYSTEM_INFORMATION("SystemInformation", true),
 	AUDIO_STATISTICS("AudioStatistics", true),
 	AUDIO_CONFIG("AudioConfig", true),

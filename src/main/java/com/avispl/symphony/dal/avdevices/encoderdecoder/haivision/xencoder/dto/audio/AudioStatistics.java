@@ -46,6 +46,9 @@ public class AudioStatistics {
 	@JsonAlias("Maximum Sample Value")
 	private String maxSampleValue;
 
+	@JsonAlias("Encoder ID")
+	private String encoderId;
+
 	/**
 	 * Retrieves {@code {@link #name}}
 	 *
@@ -206,6 +209,24 @@ public class AudioStatistics {
 	 */
 	public void setMaxSampleValue(String maxSampleValue) {
 		this.maxSampleValue = maxSampleValue;
+	}
+
+	/**
+	 * Retrieves {@code {@link #encoderId}}
+	 *
+	 * @return value of {@link #encoderId}
+	 */
+	public String getEncoderId() {
+		return encoderId;
+	}
+
+	/**
+	 * Sets {@code encoderId}
+	 *
+	 * @param encoderId the {@code java.lang.String} field
+	 */
+	public void setEncoderId(String encoderId) {
+		this.encoderId = encoderId;
 	}
 
 	/**
