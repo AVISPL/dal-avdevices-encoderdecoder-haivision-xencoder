@@ -49,5 +49,8 @@ public class EncoderConstant {
 	public static final String LESS_THAN = "<";
 	public static final String DEFAULT_AUDIO_LEVEL = "6";
 	public static final String SUCCESS_RESPONSE = "successfully";
+	public static final String WORKING = "WORKING";
+	public static final String STOPPED = "STOPPED";
+	public static final String MUTED = "MUTED";
 
 }

@@ -6,6 +6,8 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.drop
 import java.util.LinkedList;
 import java.util.List;
 
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
+
 /**
  * StateDropdown class defined the enum for monitoring and controlling process
  *
@@ -87,17 +89,17 @@ public enum AudioActionDropdown {
 		List<String> actionList = new LinkedList<>();
 		for (AudioActionDropdown audioActionDropdown : AudioActionDropdown.values()) {
 			switch (action) {
-				case "WORKING":
+				case EncoderConstant.WORKING:
 					if (audioActionDropdown.isStartAction()) {
 						actionList.add(audioActionDropdown.getName());
 					}
 					break;
-				case "STOPPED":
+				case EncoderConstant.STOPPED:
 					if (audioActionDropdown.isStopAction()) {
 						actionList.add(audioActionDropdown.getName());
 					}
 					break;
-				case "MUTED":
+				case EncoderConstant.MUTED:
 					if (audioActionDropdown.isMuteAction()) {
 						actionList.add(audioActionDropdown.getName());
 					}
