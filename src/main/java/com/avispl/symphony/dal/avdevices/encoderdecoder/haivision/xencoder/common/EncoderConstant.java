@@ -36,6 +36,7 @@ public class EncoderConstant {
 	public static final String NAME = "Name";
 	public static final int NUMBER_ONE = 1;
 	public static final int NUMBER_TWO = 2;
+	public static final int ZERO = 0;
 	public static final String EDITED = "Edited";
 	public static final String FALSE = "False";
 	public static final String AUDIO = "Audio";
@@ -52,5 +53,12 @@ public class EncoderConstant {
 	public static final String WORKING = "WORKING";
 	public static final String STOPPED = "STOPPED";
 	public static final String MUTED = "MUTED";
+	public static final String ERROR_INPUT = "Unable to set property \"input\"";
+	public static final String DISABLE = "Disable";
+	public static final String ENABLE = "Enable";
+	public static final String CROP = "Crop";
+	public static final String INPUT_AUDIO = "Input/Auto";
+	public static final String ON = "On";
+	public static final String OFF = "Off";
 
 }

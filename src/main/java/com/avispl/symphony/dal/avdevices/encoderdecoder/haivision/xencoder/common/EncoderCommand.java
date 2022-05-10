@@ -34,6 +34,9 @@ public enum EncoderCommand {
 	//audio command
 	OPERATION_AUDENC("audenc "),
 
+	//input command
+	OPERATION_VIDIN("vidin "),
+
 	//temperatures command
 	OPERATION_TEMPERATURE("temperature "),
 

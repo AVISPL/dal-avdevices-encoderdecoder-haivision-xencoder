@@ -70,6 +70,9 @@ public class VideoConfig  {
 	@JsonAlias("Picture Partitioning")
 	private String picturePartitioning;
 
+	@JsonAlias("Partial Frame Skip")
+	private String partialFrameSkip;
+
 	/**
 	 * Retrieves {@code {@link #id}}
 	 *
@@ -392,5 +395,23 @@ public class VideoConfig  {
 	 */
 	public void setPicturePartitioning(String picturePartitioning) {
 		this.picturePartitioning = picturePartitioning;
+	}
+
+	/**
+	 * Retrieves {@code {@link #partialFrameSkip}}
+	 *
+	 * @return value of {@link #partialFrameSkip}
+	 */
+	public String getPartialFrameSkip() {
+		return partialFrameSkip;
+	}
+
+	/**
+	 * Sets {@code partialFrameSkip}
+	 *
+	 * @param partialFrameSkip the {@code java.lang.String} field
+	 */
+	public void setPartialFrameSkip(String partialFrameSkip) {
+		this.partialFrameSkip = partialFrameSkip;
 	}
 }

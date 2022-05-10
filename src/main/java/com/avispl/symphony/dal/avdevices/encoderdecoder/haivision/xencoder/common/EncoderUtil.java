@@ -40,6 +40,8 @@ public class EncoderUtil {
 				return EncoderCommand.OPERATION_STREAM.getName() + EncoderCommand.GET.getName() + EncoderCommand.ALL.getName() + EncoderCommand.CONFIG.getName();
 			case TEMPERATURE:
 				return EncoderCommand.OPERATION_TEMPERATURE.getName() + EncoderCommand.GET.getName();
+			case INPUT:
+				return EncoderCommand.OPERATION_VIDIN.getName() + EncoderCommand.GET.getName() + EncoderCommand.ALL.getName();
 			case ACCOUNT:
 			case ROLE_BASED:
 				return EncoderConstant.NONE;
