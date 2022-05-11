@@ -1,4 +1,4 @@
-package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
+package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
  * VideoControllingMetric  class defined the enum for the controlling process

@@ -73,6 +73,8 @@ public class VideoConfig  {
 	@JsonAlias("Partial Frame Skip")
 	private String partialFrameSkip;
 
+	private String action;
+
 	/**
 	 * Retrieves {@code {@link #id}}
 	 *
@@ -413,5 +415,36 @@ public class VideoConfig  {
 	 */
 	public void setPartialFrameSkip(String partialFrameSkip) {
 		this.partialFrameSkip = partialFrameSkip;
+	}
+
+	/**
+	 * Retrieves {@code {@link #action}}
+	 *
+	 * @return value of {@link #action}
+	 */
+	public String getAction() {
+		return action;
+	}
+
+	/**
+	 * Sets {@code action}
+	 *
+	 * @param action the {@code java.lang.String} field
+	 */
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	/**
+	 * Convert Video config
+	 *
+	 * @return payLoad the payload is String by Video config
+	 */
+	public String retrieveVideoPayloadData() {
+		return String.format(
+				" bitrate=%s gopSize=%s closedCaption=%s inputInterface=%s timeCode=%s aspectRatio=%s resolution=%s inputFormat=%s framing=%s frameRate=%s cropping=%s intraRefresh=%s intraRefreshRate=%s"
+						+ " entropyCoding=%s picturePartitioning=%s partialFrameSkip=%s",
+				bitrate, gopSize, closedCaption, inputInterface, timeCode, aspectRatio, resolution, inputFormat, framing, frameRate, cropping, intraRefresh, intraRefreshRate,
+				entropyCoding, picturePartitioning, partialFrameSkip);
 	}
 }

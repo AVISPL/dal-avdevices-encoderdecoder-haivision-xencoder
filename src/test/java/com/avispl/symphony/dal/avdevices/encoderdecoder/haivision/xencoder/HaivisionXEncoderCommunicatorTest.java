@@ -274,8 +274,8 @@ public class HaivisionXEncoderCommunicatorTest {
 		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
-		String propName = "Audio Encoder 0#" + AudioControllingMetric.INPUT.getName();
-		String propValue = InputDropdown.SDI_1_1_2.getName();
+		String propName = "HD Video Encoder 0#BitRate";
+		String propValue = "-2";
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);

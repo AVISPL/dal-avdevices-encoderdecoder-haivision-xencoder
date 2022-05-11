@@ -41,6 +41,7 @@ public class EncoderConstant {
 	public static final String FALSE = "False";
 	public static final String AUDIO = "Audio";
 	public static final String CANCEL = "Cancel";
+	public static final String CANCELING = "Canceling";
 	public static final String APPLY = "Apply";
 	public static final String APPLYING = "Applying";
 	public static final String UNKNOWN = "Unknown";
@@ -57,8 +58,16 @@ public class EncoderConstant {
 	public static final String DISABLE = "Disable";
 	public static final String ENABLE = "Enable";
 	public static final String CROP = "Crop";
+	public static final String SCALE = "Scale";
 	public static final String INPUT_AUDIO = "Input/Auto";
 	public static final String ON = "On";
 	public static final String OFF = "Off";
+	public static final int MIN_BITRATE = 32;
+	public static final int MAX_BITRATE = 25000;
+	public static final int MIN_GOP_SIZE = 1;
+	public static final int MAX_GOP_SIZE = 1000;
+	public static final int MIN_REFRESH_RATE = 1;
+	public static final int MAX_REFRESH_RATE = 5000;
+	public static final String VIDEO = "Video";
 
 }
