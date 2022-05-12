@@ -72,6 +72,5 @@ public class EncoderConstant {
 	public static final String VIDEO = "Video";
 	public static final String AUTO = "Auto";
 	public static final String COMMAND_FAILED_FORMAT = "%s %s %s";
-	public static final String Resolution_1280x720p = "1280x720p";
 
 }

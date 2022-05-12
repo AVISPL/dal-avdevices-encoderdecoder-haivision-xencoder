@@ -450,8 +450,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 						addControlVideoConfig(stats, advancedControllableProperties, videoConfig);
 					}
 					break;
-				default:
+				case ACCOUNT:
+				case ROLE_BASED:
+				case TEMPERATURE:
+				case AUDIO_STATISTICS:
+				case VIDEO_STATISTICS:
+				case STREAM_STATISTICS:
+				case SYSTEM_INFORMATION:
 					break;
+				default:
+					throw new IllegalStateException(String.format("The metric %s is not supported: ", metric.getName()));
 			}
 		}
 	}
@@ -467,7 +475,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			if (EncoderConstant.NONE_STREAM_NAME.equals(streamName)) {
 				streamName = handleStreamNameIsEmpty(streamStatistics.getId());
 			}
-			String metricName = String.format("%s %s %s#", EncoderConstant.STREAM, streamName, EncoderConstant.STATISTICS);
+			String metricName = EncoderConstant.STREAM + EncoderConstant.SPACE + streamName + EncoderConstant.SPACE + EncoderConstant.STATISTICS;
 			for (StreamMonitoringMetric streamMonitoringMetric : StreamMonitoringMetric.values()) {
 				String streamValue = getDefaultValueForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
 				String streamKeyName = metricName + streamMonitoringMetric.getName();

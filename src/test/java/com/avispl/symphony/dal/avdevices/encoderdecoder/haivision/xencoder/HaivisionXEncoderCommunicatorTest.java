@@ -767,7 +767,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	void testVideoControlIntraRefreshDisable() throws Exception {
 		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
-		String propName = "HD Video Encoder 0#" + VideoControllingMetric.PARTITIONING.getName();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.INTRA_REFRESH.getName();
 		String propValue = "0";
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
