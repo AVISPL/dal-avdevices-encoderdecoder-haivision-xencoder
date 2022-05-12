@@ -6,6 +6,7 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
 import com.avispl.symphony.dal.util.StringUtils;
 
 /**
@@ -440,12 +441,12 @@ public class VideoConfig  {
 	/**
 	 * Convert Video config
 	 *
-	 * @return payLoad the payload is String by Video config
+	 * @return string of video config payload.
 	 */
 	public String retrieveVideoPayloadData() {
 
-		String intraRefreshRateValue = "";
-		String croppingValue = "";
+		String intraRefreshRateValue = EncoderConstant.EMPTY_STRING;
+		String croppingValue = EncoderConstant.EMPTY_STRING;
 		if (!StringUtils.isNullOrEmpty(intraRefreshRate)) {
 			intraRefreshRateValue = String.format(" refreshRate=%s", intraRefreshRate);
 		}

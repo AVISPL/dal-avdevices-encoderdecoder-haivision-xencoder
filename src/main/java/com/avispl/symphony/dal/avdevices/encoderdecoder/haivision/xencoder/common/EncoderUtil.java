@@ -19,7 +19,7 @@ public class EncoderUtil {
 	 *
 	 * @param encoderMonitoringMetric is instance of EncoderMonitoringMetric
 	 * @return URL is instance of AxisURL
-	 * @throws Exception if the name is not supported
+	 * @throws IllegalArgumentException if the name is not supported
 	 */
 	public static String getMonitorCommand(EncoderMonitoringMetric encoderMonitoringMetric) {
 		Objects.requireNonNull(encoderMonitoringMetric);

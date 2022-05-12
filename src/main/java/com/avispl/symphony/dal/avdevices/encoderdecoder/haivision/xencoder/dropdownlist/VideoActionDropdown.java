@@ -48,7 +48,7 @@ public enum VideoActionDropdown {
 	/**
 	 * Retrieves all names of VideoActionDropdown by action
 	 *
-	 * @param action the action is String instance in VideoActionDropdown
+	 * @param action check whether the action start or stop.
 	 * @return list name of VideoActionDropdown
 	 */
 	public static String[] getVideoAction(boolean action) {

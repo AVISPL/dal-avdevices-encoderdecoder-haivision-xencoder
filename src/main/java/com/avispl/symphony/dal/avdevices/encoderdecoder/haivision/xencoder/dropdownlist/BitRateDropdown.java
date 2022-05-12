@@ -91,10 +91,14 @@ public enum BitRateDropdown {
 	public static String[] getArrayOfNameByStereoOrMonoMode(boolean isStereoMode) {
 		List<String> channelModeList = new LinkedList<>();
 		for (BitRateDropdown bitRateDropdown : BitRateDropdown.values()) {
-			if (bitRateDropdown.isStereo() && isStereoMode) {
-				channelModeList.add(bitRateDropdown.getName());
-			} else if (bitRateDropdown.isMono() && !isStereoMode) {
-				channelModeList.add(bitRateDropdown.getName());
+			if (isStereoMode) {
+				if (bitRateDropdown.isStereo()) {
+					channelModeList.add(bitRateDropdown.getName());
+				}
+			} else {
+				if (bitRateDropdown.isMono()) {
+					channelModeList.add(bitRateDropdown.getName());
+				}
 			}
 		}
 		return channelModeList.toArray(new String[channelModeList.size()]);

@@ -305,7 +305,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	// UT for video Control--------------------------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Test get Video control: with Input properties is BNC-1
+	 * Test Video control: with Input properties is BNC-1
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -326,7 +326,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with BitRate properties in range 32-25000
+	 * Test Video control: with BitRate properties in range 32-25000
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -347,7 +347,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with BitRate properties out off min range <32
+	 * Test Video control: with BitRate properties out off min range <32
 	 *
 	 * Expect bitRate to take the minimum value of 32
 	 * @throws Exception When fail to controlProperty
@@ -369,7 +369,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with BitRate properties out off max range >25000
+	 * Test Video control: with BitRate properties out off max range >25000
 	 *
 	 * Expect bitRate to take the Maximum value of 25000
 	 * @throws Exception When fail to controlProperty
@@ -391,7 +391,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Resolution properties is Automatic
+	 * Test Video control: with Resolution properties is Automatic
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -415,7 +415,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Resolution properties different Automatic
+	 * Test Video control: with Resolution properties different Automatic
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -439,7 +439,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Frame Rate properties is 60
+	 * Test Video control: with Frame Rate properties is 60
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -460,7 +460,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Framing properties is IBP
+	 * Test Video control: with Framing properties is IBP
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -481,7 +481,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with GOP Size properties in range 1-1000
+	 * Test Video control: with GOP Size properties in range 1-1000
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -502,7 +502,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with GOP Size properties out off min range <1
+	 * Test Video control: with GOP Size properties out off min range <1
 	 *
 	 * Expect GOPSize to take the minimum value of 1
 	 * @throws Exception When fail to controlProperty
@@ -524,7 +524,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with GOP Size properties out off max range >1000
+	 * Test Video control: with GOP Size properties out off max range >1000
 	 *
 	 * Expect GOPSize to take the Maximum value of 1000
 	 * @throws Exception When fail to controlProperty
@@ -546,7 +546,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Aspect Ratio properties is mode 3:2
+	 * Test Video control: with Aspect Ratio properties is mode 3:2
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -567,7 +567,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Closed Caption properties is mode enable
+	 * Test Video control: with Closed Caption properties is mode enable
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -588,7 +588,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Closed Caption properties is mode disable
+	 * Test Video control: with Closed Caption properties is mode disable
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -609,7 +609,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with time code source properties is system
+	 * Test Video control: with time code source properties is system
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -630,7 +630,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with time code source properties is None
+	 * Test Video control: with time code source properties is None
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -651,7 +651,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Entropy Coding properties is CAVLC
+	 * Test Video control: with Entropy Coding properties is CAVLC
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -672,7 +672,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Entropy Coding properties is CABAC
+	 * Test Video control: with Entropy Coding properties is CABAC
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -693,7 +693,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Partitioning properties is mode enable
+	 * Test Video control: with Partitioning properties is mode enable
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -714,7 +714,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Partitioning properties is mode disable
+	 * Test Video control: with Partitioning properties is mode disable
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -735,7 +735,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Intra Refresh properties is mode enable
+	 * Test Video control: with Intra Refresh properties is mode enable
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -758,7 +758,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Intra Refresh properties is mode disable
+	 * Test Video control: with Intra Refresh properties is mode disable
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -781,7 +781,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Partial Image Skip properties is mode enable
+	 * Test Video control: with Partial Image Skip properties is mode enable
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
@@ -802,7 +802,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	}
 
 	/**
-	 * Test get Video control: with Partial Image Skip properties is mode disable
+	 * Test Video control: with Partial Image Skip properties is mode disable
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */

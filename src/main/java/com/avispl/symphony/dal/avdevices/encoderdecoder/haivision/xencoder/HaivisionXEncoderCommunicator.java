@@ -475,7 +475,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			if (EncoderConstant.NONE_STREAM_NAME.equals(streamName)) {
 				streamName = handleStreamNameIsEmpty(streamStatistics.getId());
 			}
-			String metricName = EncoderConstant.STREAM + EncoderConstant.SPACE + streamName + EncoderConstant.SPACE + EncoderConstant.STATISTICS;
+			String metricName = EncoderConstant.STREAM + EncoderConstant.SPACE + streamName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (StreamMonitoringMetric streamMonitoringMetric : StreamMonitoringMetric.values()) {
 				String streamValue = getDefaultValueForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
 				String streamKeyName = metricName + streamMonitoringMetric.getName();
@@ -744,6 +744,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 *
 	 * @param metric list metric of device
 	 * @param stats stats list statistics property
+	 * @throws IllegalArgumentException if the name is not supported
 	 */
 	private void retrieveDataByMetric(Map<String, String> stats, EncoderMonitoringMetric metric) {
 		Objects.requireNonNull(metric);
@@ -833,6 +834,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 *
 	 * @param mappingData is Map<String,String> instance
 	 * @param metric the metric is instance encoderMonitoringMetric
+	 * @throws IllegalArgumentException if the name is not supported
 	 */
 	private void retrieveDataDetails(Map<String, String> mappingData, EncoderMonitoringMetric metric) {
 		switch (metric) {
@@ -1231,6 +1233,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * Sent request to action audio
 	 *
 	 * @param audioConfig is instance AudioConfig DTO
+	 * @throws ResourceNotReachableException if set action audio config failed
 	 */
 	private void setActionAudioControl(AudioConfig audioConfig) {
 		String audioId = audioConfig.getId();
@@ -1254,6 +1257,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 *
 	 * @param audioConfig the audioConfig is instance in AuidoConfig
 	 * @param audioId the audioId is id of audio encoder
+	 * @throws ResourceNotReachableException if set audio config failed
 	 */
 	private void setAudioApplyChange(AudioConfig audioConfig, String audioId) {
 		String data = audioConfig.retrieveAudioPayloadData();
@@ -1585,6 +1589,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * Sent request to action video
 	 *
 	 * @param videoConfigData is instance VideoConfig DTO
+	 * @throws CommandFailureException if set action video config failed
 	 */
 	private void setActionVideoControl(VideoConfig videoConfigData) {
 		String videoId = videoConfigData.getId();
@@ -1607,6 +1612,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 *
 	 * @param videoConfigData the videoConfigData is instance in VideoConfig
 	 * @param videoId the id is id of video encoder
+	 * @throws CommandFailureException if set video config failed
 	 */
 	private void setVideoApplyChange(VideoConfig videoConfigData, String videoId) {
 		String data = videoConfigData.retrieveVideoPayloadData();
