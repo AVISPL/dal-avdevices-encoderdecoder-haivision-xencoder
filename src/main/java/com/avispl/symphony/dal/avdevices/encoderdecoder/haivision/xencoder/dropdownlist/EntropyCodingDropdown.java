@@ -13,7 +13,7 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.drop
 public enum EntropyCodingDropdown {
 
 	CAVLC("CAVLC"),
-	CABAC("WSS/CABAC");
+	CABAC("CABAC");
 
 	private final String name;
 

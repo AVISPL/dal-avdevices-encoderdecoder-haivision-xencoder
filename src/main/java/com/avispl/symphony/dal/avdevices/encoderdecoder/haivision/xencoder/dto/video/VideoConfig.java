@@ -6,6 +6,8 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.avispl.symphony.dal.util.StringUtils;
+
 /**
  * VideoConfig DTO class
  *
@@ -441,10 +443,18 @@ public class VideoConfig  {
 	 * @return payLoad the payload is String by Video config
 	 */
 	public String retrieveVideoPayloadData() {
+
+		String intraRefreshRateValue = "";
+		String croppingValue = "";
+		if (!StringUtils.isNullOrEmpty(intraRefreshRate)) {
+			intraRefreshRateValue = String.format(" refreshRate=%s", intraRefreshRate);
+		}
+		if (!StringUtils.isNullOrEmpty(cropping)) {
+			croppingValue = String.format(" reSizeMode=%s", cropping);
+		}
 		return String.format(
-				" bitrate=%s gopSize=%s closedCaption=%s inputInterface=%s timeCode=%s aspectRatio=%s resolution=%s inputFormat=%s framing=%s frameRate=%s cropping=%s intraRefresh=%s intraRefreshRate=%s"
-						+ " entropyCoding=%s picturePartitioning=%s partialFrameSkip=%s",
-				bitrate, gopSize, closedCaption, inputInterface, timeCode, aspectRatio, resolution, inputFormat, framing, frameRate, cropping, intraRefresh, intraRefreshRate,
-				entropyCoding, picturePartitioning, partialFrameSkip);
+				" bitrate=%s gopSize=%s closedCaption=%s input=%s timeCode=%s aspectRatio=%s resolution=%s gopStructure=%s picRate=%s intraRefresh=%s entropyCoding=%s partitioning=%s skipFrames=%s%s%s",
+				bitrate, gopSize, closedCaption, inputInterface, timeCode, aspectRatio, resolution, framing, frameRate, intraRefresh, entropyCoding, picturePartitioning, partialFrameSkip,
+				intraRefreshRateValue, croppingValue);
 	}
 }

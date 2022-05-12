@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
@@ -252,6 +253,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private List<StreamConfig> streamConfigList = new ArrayList<>();
 
 	/**
+	 * ReentrantLock to prevent null pointer exception to localExtendedStatistics when controlProperty method is called before GetMultipleStatistics method.
+	 */
+	private final ReentrantLock reentrantLock = new ReentrantLock();
+
+	/**
 	 * HaivisionXEncoderCommunicator constructor
 	 */
 	public HaivisionXEncoderCommunicator() {
@@ -272,21 +278,25 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Getting statistics from Makito X Encoder at host %s with port %s", this.host, this.getPort()));
 		}
-		ExtendedStatistics extendedStatistics = new ExtendedStatistics();
-		Map<String, String> stats = new HashMap<>();
-		List<AdvancedControllableProperty> advancedControllableProperties = new ArrayList<>();
+		reentrantLock.lock();
+		try {
+			ExtendedStatistics extendedStatistics = new ExtendedStatistics();
+			Map<String, String> stats = new HashMap<>();
+			List<AdvancedControllableProperty> advancedControllableProperties = new ArrayList<>();
 
-		if (!isEmergencyDelivery) {
-			roleBased = retrieveUserRole();
-			isConfigManagement = isConfigManagementProperties();
-			populateInformationFromDevice(stats, advancedControllableProperties);
-			if ((EncoderConstant.OPERATOR.equals(roleBased) || EncoderConstant.ADMIN.equals(roleBased)) && isConfigManagement) {
-				extendedStatistics.setControllableProperties(advancedControllableProperties);
+			if (!isEmergencyDelivery) {
+				roleBased = retrieveUserRole();
+				isConfigManagement = isConfigManagementProperties();
+				populateInformationFromDevice(stats, advancedControllableProperties);
+				if ((EncoderConstant.OPERATOR.equals(roleBased) || EncoderConstant.ADMIN.equals(roleBased)) && isConfigManagement) {
+					extendedStatistics.setControllableProperties(advancedControllableProperties);
+				}
+				extendedStatistics.setStatistics(stats);
+				localExtendedStatistics = extendedStatistics;
 			}
-			extendedStatistics.setStatistics(stats);
-			localExtendedStatistics = extendedStatistics;
+		} finally {
+			reentrantLock.unlock();
 		}
-
 		return Collections.singletonList(localExtendedStatistics);
 	}
 
@@ -301,16 +311,18 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			logger.debug("controlProperty property" + property);
 			logger.debug("controlProperty value" + value);
 		}
-		if (localExtendedStatistics == null) {
-			return;
-		}
-		Map<String, String> extendedStatistics = localExtendedStatistics.getStatistics();
-		List<AdvancedControllableProperty> advancedControllableProperties = localExtendedStatistics.getControllableProperties();
-		String propertiesAudioAndVideo = property.substring(0, EncoderConstant.AUDIO.length());
-		if (EncoderConstant.AUDIO.equals(propertiesAudioAndVideo)) {
-			controlAudioProperty(property, value, extendedStatistics, advancedControllableProperties);
-		} else {
-			controlVideoProperty(property, value, extendedStatistics, advancedControllableProperties);
+		reentrantLock.lock();
+		try {
+			Map<String, String> extendedStatistics = localExtendedStatistics.getStatistics();
+			List<AdvancedControllableProperty> advancedControllableProperties = localExtendedStatistics.getControllableProperties();
+			String propertiesAudioAndVideo = property.substring(0, EncoderConstant.AUDIO.length());
+			if (EncoderConstant.AUDIO.equals(propertiesAudioAndVideo)) {
+				controlAudioProperty(property, value, extendedStatistics, advancedControllableProperties);
+			} else {
+				controlVideoProperty(property, value, extendedStatistics, advancedControllableProperties);
+			}
+		} finally {
+			reentrantLock.unlock();
 		}
 	}
 
@@ -1223,7 +1235,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					throw new ResourceNotReachableException(String.format("Change action %s failed", audioConfig.getAction()));
 				}
 			} catch (Exception e) {
-				logger.error(String.format("%s %s %s", this.host, request, e));
+				logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 				throw new CommandFailureException(this.getHost(), request, "Error while setting action audio config: " + e.getMessage(), e);
 			}
 		}
@@ -1247,7 +1259,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 
 		} catch (Exception e) {
-			logger.error(String.format("%s %s %s", this.host, request, e));
+			logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 			throw new ResourceNotReachableException("Error while setting audio config: " + e.getMessage(), e);
 		}
 	}
@@ -1309,6 +1321,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 		Map<String, String> videoStateDropdown = DropdownList.getMapOfEnumNames(VideoStateDropdown.class, false);
 		Map<String, String> timeCodeSourceMap = DropdownList.getMapOfEnumNames(TimeCodeSource.class, false);
+		Map<String, String> resolutionValueToNameMap = DropdownList.getMapOfEnumNames(ResolutionDropdown.class, false);
 		String videoName = videoConfig.getName();
 		String value;
 
@@ -1338,10 +1351,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
 					break;
 				case RESOLUTION:
-					value = videoConfig.getResolution();
-					if (EncoderConstant.INPUT_AUDIO.equals(value)) {
-						value = ResolutionDropdown.RESOLUTION_AUTOMATIC.getName();
-					}
+					value = resolutionValueToNameMap.get(videoConfig.getResolution());
 					AdvancedControllableProperty resolutionControlProperty = controlDropdown(stats, dropdownResolution, videoKeyName, value);
 					addAdvanceControlProperties(advancedControllableProperties, resolutionControlProperty);
 					break;
@@ -1381,12 +1391,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addAdvanceControlProperties(advancedControllableProperties, aspectRatioControlProperty);
 					break;
 				case CLOSED_CAPTION:
-					value = videoConfig.getClosedCaption();
-					int closedCaption = EncoderConstant.ZERO;
-					if (EncoderConstant.ON.equals(value)) {
-						closedCaption = EncoderConstant.NUMBER_ONE;
-					}
-					AdvancedControllableProperty closedCaptionControlProperty = controlSwitch(stats, videoKeyName, String.valueOf(closedCaption), EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+					value = convertOffOnValueByNumberValue(videoConfig.getClosedCaption(), true);
+					AdvancedControllableProperty closedCaptionControlProperty = controlSwitch(stats, videoKeyName, value, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
 					addAdvanceControlProperties(advancedControllableProperties, closedCaptionControlProperty);
 					break;
 				case TIME_CODE_SOURCE:
@@ -1400,21 +1406,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addAdvanceControlProperties(advancedControllableProperties, entropyCodingControlProperty);
 					break;
 				case PARTITIONING:
-					value = videoConfig.getPicturePartitioning();
-					int picturePartitioning = EncoderConstant.ZERO;
-					if (EncoderConstant.ON.equals(value)) {
-						picturePartitioning = EncoderConstant.NUMBER_ONE;
-					}
-					AdvancedControllableProperty picturePartitioningControlProperty = controlSwitch(stats, videoKeyName, String.valueOf(picturePartitioning), EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+					value = convertOffOnValueByNumberValue(videoConfig.getPicturePartitioning(), true);
+					AdvancedControllableProperty picturePartitioningControlProperty = controlSwitch(stats, videoKeyName, value, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
 					addAdvanceControlProperties(advancedControllableProperties, picturePartitioningControlProperty);
 					break;
 				case INTRA_REFRESH:
-					value = videoConfig.getIntraRefresh();
-					int intraRefresh = EncoderConstant.ZERO;
-					if (EncoderConstant.ON.equals(value)) {
-						intraRefresh = EncoderConstant.NUMBER_ONE;
-					}
-					AdvancedControllableProperty intraRefreshControlProperty = controlSwitch(stats, videoKeyName, String.valueOf(intraRefresh), EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+					value = convertOffOnValueByNumberValue(videoConfig.getIntraRefresh(), true);
+					AdvancedControllableProperty intraRefreshControlProperty = controlSwitch(stats, videoKeyName, value, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
 					addAdvanceControlProperties(advancedControllableProperties, intraRefreshControlProperty);
 					break;
 				case INTRA_REFRESH_RATE:
@@ -1428,12 +1426,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					}
 					break;
 				case PARTIAL_IMAGE_SKIP:
-					value = videoConfig.getPartialFrameSkip();
-					int refreshRate = EncoderConstant.ZERO;
-					if (EncoderConstant.ON.equals(value)) {
-						refreshRate = EncoderConstant.NUMBER_ONE;
-					}
-					AdvancedControllableProperty imageSkipControlProperty = controlSwitch(stats, videoKeyName, String.valueOf(refreshRate), EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+					value = convertOffOnValueByNumberValue(videoConfig.getPartialFrameSkip(), true);
+					AdvancedControllableProperty imageSkipControlProperty = controlSwitch(stats, videoKeyName, value, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
 					addAdvanceControlProperties(advancedControllableProperties, imageSkipControlProperty);
 					break;
 				case ACTION:
@@ -1520,6 +1514,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				} else {
 					videoConfig = nameToVideoConfig.get(videoName);
 					String intraRefreshRateValue = videoConfig.getIntraRefreshRate();
+					if (StringUtils.isNullOrEmpty(intraRefreshRateValue)) {
+						intraRefreshRateValue = String.valueOf(EncoderConstant.DEFAULT_REFRESH_RATE);
+					}
 					AdvancedControllableProperty refreshRateControlProperty = controlTextOrNumeric(extendedStatistics, intraRefreshRateName, intraRefreshRateValue, true);
 					addAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
 				}
@@ -1592,7 +1589,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					throw new ResourceNotReachableException(String.format("Change video %s failed", videoConfigData.getAction()));
 				}
 			} catch (Exception e) {
-				logger.error(String.format("%s %s %s", this.host, request, e));
+				logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 				throw new CommandFailureException(this.getHost(), request, "Error while setting action video config: " + e.getMessage(), e);
 			}
 		}
@@ -1632,36 +1629,75 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String bitrate = extendedStatistics.get(propertyName + VideoControllingMetric.BITRATE.getName());
 		String action = extendedStatistics.get(propertyName + VideoControllingMetric.ACTION.getName());
 		String gopSize = extendedStatistics.get(propertyName + VideoControllingMetric.GOP_SIZE.getName());
-		String closedCaption = extendedStatistics.get(propertyName + VideoControllingMetric.CLOSED_CAPTION.getName());
-		String inputInterface = extendedStatistics.get(propertyName + VideoControllingMetric.INPUT.getName());
 		String timeCode = extendedStatistics.get(propertyName + VideoControllingMetric.TIME_CODE_SOURCE.getName());
 		String aspectRatio = extendedStatistics.get(propertyName + VideoControllingMetric.ASPECT_RATIO.getName());
 		String resolution = extendedStatistics.get(propertyName + VideoControllingMetric.RESOLUTION.getName());
 		String framing = extendedStatistics.get(propertyName + VideoControllingMetric.FRAMING.getName());
 		String frameRate = extendedStatistics.get(propertyName + VideoControllingMetric.FRAME_RATE.getName());
-		String cropping = extendedStatistics.get(propertyName + VideoControllingMetric.CROPPING.getName());
-		String intraRefresh = extendedStatistics.get(propertyName + VideoControllingMetric.INTRA_REFRESH.getName());
+		String intraRefreshRate = extendedStatistics.get(propertyName + VideoControllingMetric.INTRA_REFRESH_RATE.getName());
 		String entropyCoding = extendedStatistics.get(propertyName + VideoControllingMetric.ENTROPY_CODING.getName());
-		String picturePartitioning = extendedStatistics.get(propertyName + VideoControllingMetric.PARTITIONING.getName());
-		String partialFrameSkip = extendedStatistics.get(propertyName + VideoControllingMetric.PARTIAL_IMAGE_SKIP.getName());
+		String cropping = extendedStatistics.get(propertyName + VideoControllingMetric.CROPPING.getName());
+		String intraRefresh = convertOffOnValueByNumberValue(extendedStatistics.get(propertyName + VideoControllingMetric.INTRA_REFRESH.getName()), false);
+		String closedCaption = convertOffOnValueByNumberValue(extendedStatistics.get(propertyName + VideoControllingMetric.CLOSED_CAPTION.getName()), false);
+		String inputInterface = extendedStatistics.get(propertyName + VideoControllingMetric.INPUT.getName()).replace(EncoderConstant.DASH, "");
+		String picturePartitioning = convertOffOnValueByNumberValue(extendedStatistics.get(propertyName + VideoControllingMetric.PARTITIONING.getName()), false);
+		String partialFrameSkip = convertOffOnValueByNumberValue(extendedStatistics.get(propertyName + VideoControllingMetric.PARTIAL_IMAGE_SKIP.getName()), false);
 
+		if (ResolutionDropdown.RESOLUTION_AUTOMATIC.getName().equals(resolution)) {
+			resolution = EncoderConstant.AUTO;
+		}
+
+		if (cropping != null) {
+			String croppingValue = EncoderConstant.SCALE;
+			if (EncoderConstant.NUMBER_ONE == Integer.parseInt(cropping)) {
+				croppingValue = EncoderConstant.CROP;
+			}
+			cropping = croppingValue;
+		}
 		videoConfig.setId(id);
 		videoConfig.setAction(action);
 		videoConfig.setBitrate(bitrate);
 		videoConfig.setGopSize(gopSize);
-		videoConfig.setClosedCaption(closedCaption);
-		videoConfig.setInputInterface(inputInterface);
 		videoConfig.setTimeCode(timeCode);
 		videoConfig.setAspectRatio(aspectRatio);
 		videoConfig.setResolution(resolution);
 		videoConfig.setFraming(framing);
 		videoConfig.setFrameRate(frameRate);
+		videoConfig.setIntraRefreshRate(intraRefreshRate);
+		videoConfig.setEntropyCoding(entropyCoding);
 		videoConfig.setCropping(cropping);
 		videoConfig.setIntraRefresh(intraRefresh);
-		videoConfig.setEntropyCoding(entropyCoding);
+		videoConfig.setClosedCaption(closedCaption);
+		videoConfig.setInputInterface(inputInterface);
 		videoConfig.setPicturePartitioning(picturePartitioning);
 		videoConfig.setPartialFrameSkip(partialFrameSkip);
+
 		return videoConfig;
+	}
+
+	/**
+	 * Change Off/On value to 0/1 or 0/1 value to Off/On, If value is null, return the value is empty string.
+	 *
+	 * @param value the value is value to be converted
+	 * @param isOnOffValueToNumber the isOnOffValueToNumber is boolean value
+	 * @return String is On/Off value if isOnOffValueToNumber is true or if isOnOffValueToNumber is false will be 0/1
+	 */
+	private String convertOffOnValueByNumberValue(String value, boolean isOnOffValueToNumber) {
+		String defaultValue = EncoderConstant.EMPTY_STRING;
+		if (!StringUtils.isNullOrEmpty(value)) {
+			if (isOnOffValueToNumber) {
+				defaultValue = String.valueOf(EncoderConstant.ZERO);
+				if (EncoderConstant.ON.equals(value)) {
+					defaultValue = String.valueOf(EncoderConstant.NUMBER_ONE);
+				}
+			} else {
+				defaultValue = EncoderConstant.OFF;
+				if (EncoderConstant.NUMBER_ONE == Integer.parseInt(value)) {
+					defaultValue = EncoderConstant.ON;
+				}
+			}
+		}
+		return defaultValue;
 	}
 
 	/**
@@ -1673,7 +1709,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @return int is value or default value
 	 */
 	private int getMinOrMaxValue(int min, int max, int value) {
-		if ((min < value && value < max)) {
+		if (min < value && value < max) {
 			return value;
 		}
 		int defaultValue = 0;
