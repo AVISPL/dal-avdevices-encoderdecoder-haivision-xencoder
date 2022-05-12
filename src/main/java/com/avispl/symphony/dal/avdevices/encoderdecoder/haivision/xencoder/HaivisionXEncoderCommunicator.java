@@ -1594,10 +1594,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			try {
 				String responseData = send(request);
 				if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
-					throw new ResourceNotReachableException(String.format("Change video %s failed", videoConfigData.getAction()));
+					throw new CommandFailureException(this.getHost(), request, String.format("Change video %s failed", videoConfigData.getAction()));
 				}
 			} catch (Exception e) {
-				logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 				throw new CommandFailureException(this.getHost(), request, "Error while setting action video config: " + e.getMessage(), e);
 			}
 		}
