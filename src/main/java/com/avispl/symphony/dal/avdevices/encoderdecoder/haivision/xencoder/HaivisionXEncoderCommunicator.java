@@ -1673,7 +1673,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (ResolutionDropdown.RESOLUTION_AUTOMATIC.getName().equals(resolution)) {
 			resolution = EncoderConstant.AUTO;
 		}
-
+		if (FrameRateDropdown.FAME_RATE_0.getName().equals(frameRate)) {
+			frameRate = EncoderConstant.AUTO;
+		}
 		if (cropping != null) {
 			String croppingValue = EncoderConstant.SCALE;
 			if (EncoderConstant.NUMBER_ONE == Integer.parseInt(cropping)) {
