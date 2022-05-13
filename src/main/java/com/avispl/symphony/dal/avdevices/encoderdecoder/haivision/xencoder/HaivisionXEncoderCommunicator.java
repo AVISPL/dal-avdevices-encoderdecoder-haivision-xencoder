@@ -3,6 +3,7 @@
  */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -311,11 +312,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			logger.debug("controlProperty property" + property);
 			logger.debug("controlProperty value" + value);
 		}
-		if (localExtendedStatistics == null) {
-			return;
-		}
 		reentrantLock.lock();
 		try {
+			if (localExtendedStatistics == null) {
+				return;
+			}
 			Map<String, String> extendedStatistics = localExtendedStatistics.getStatistics();
 			List<AdvancedControllableProperty> advancedControllableProperties = localExtendedStatistics.getControllableProperties();
 			String propertiesAudioAndVideo = property.substring(0, EncoderConstant.AUDIO.length());
@@ -351,7 +352,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void populateInformationFromDevice(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 
 		//clear data before fetching data
-		destroyDataBeforeFetchData();
+		clearBeforeFetchingData();
 
 		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
 			if (EncoderMonitoringMetric.ACCOUNT.equals(encoderMonitoringMetric)) {
@@ -379,7 +380,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	/**
 	 * Clear data before fetching data
 	 */
-	private void destroyDataBeforeFetchData() {
+	private void clearBeforeFetchingData() {
 		//audio
 		audioStatisticsList.clear();
 		audioConfigList.clear();
@@ -1143,7 +1144,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Control Audio encoder
+	 * Control Audio Property
 	 *
 	 * @param property the property is the filed name of controlling metric
 	 * @param value the value is value of metric
@@ -1209,10 +1210,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				AudioConfig audioConfig = convertAudioByValue(extendedStatistics, audioName);
 
 				// sent request to apply all change for all metric
-				setAudioApplyChange(audioConfig, audioConfig.getId());
+				sendCommandToSaveAllAudioProperties(audioConfig, audioConfig.getId());
 
 				//sent request to action for the metric
-				setActionAudioControl(audioConfig);
+				sendCommandToActionAudioConfig(audioConfig);
 				isEmergencyDelivery = false;
 				break;
 			case CANCEL:
@@ -1236,12 +1237,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Sent request to action audio
+	 * Send command to set audio action
 	 *
 	 * @param audioConfig is instance AudioConfig DTO
 	 * @throws ResourceNotReachableException if set action audio config failed
 	 */
-	private void setActionAudioControl(AudioConfig audioConfig) {
+	private void sendCommandToActionAudioConfig(AudioConfig audioConfig) {
 		String audioId = audioConfig.getId();
 		String action = audioConfig.getAction();
 		String request = EncoderCommand.OPERATION_AUDENC.getName() + audioId + EncoderConstant.SPACE + action;
@@ -1259,13 +1260,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Save audio apply change
+	 * Send command to apply all audio properties
 	 *
 	 * @param audioConfig the audioConfig is instance in AudioConfig
 	 * @param audioId the audioId is id of audio encoder
 	 * @throws Exception if set audio config failed
 	 */
-	private void setAudioApplyChange(AudioConfig audioConfig, String audioId) {
+	private void sendCommandToSaveAllAudioProperties(AudioConfig audioConfig, String audioId) {
 		String data = audioConfig.retrieveAudioPayloadData();
 		String request = EncoderCommand.OPERATION_AUDENC.getName() + audioId + EncoderConstant.SPACE + EncoderCommand.SET + data;
 		try {
@@ -1283,7 +1284,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Change audioConfig by value
+	 * Convert audioConfig by value
 	 *
 	 * @param extendedStatistics list extendedStatistics
 	 * @param audioName the audio name is name of audio
@@ -1465,7 +1466,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Control Audio encoder
+	 * Control Audio property
 	 *
 	 * @param property the property is the filed name of controlling metric
 	 * @param value the value is value of metric
@@ -1482,11 +1483,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		isEmergencyDelivery = true;
 		switch (videoControllingMetric) {
 			case GOP_SIZE:
-				int gopSize = getMinOrMaxValue(EncoderConstant.MIN_GOP_SIZE, EncoderConstant.MAX_GOP_SIZE, Integer.parseInt(value));
+				BigInteger gopSize = getMinOrMaxValue(new BigInteger(EncoderConstant.MIN_GOP_SIZE), new BigInteger(EncoderConstant.MAX_GOP_SIZE), new BigInteger(value));
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(gopSize), extendedStatistics, advancedControllableProperties);
 				break;
 			case BITRATE:
-				int bitrate = getMinOrMaxValue(EncoderConstant.MIN_BITRATE, EncoderConstant.MAX_BITRATE, Integer.parseInt(value));
+				BigInteger bitrate = getMinOrMaxValue(new BigInteger(EncoderConstant.MIN_BITRATE), new BigInteger(EncoderConstant.MAX_BITRATE), new BigInteger(value) );
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(bitrate), extendedStatistics, advancedControllableProperties);
 				break;
 			case RESOLUTION:
@@ -1528,7 +1529,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				}
 				break;
 			case INTRA_REFRESH_RATE:
-				int intraRefreshRate = getMinOrMaxValue(EncoderConstant.MIN_REFRESH_RATE, EncoderConstant.MAX_REFRESH_RATE, Integer.parseInt(value));
+				BigInteger intraRefreshRate = getMinOrMaxValue(new BigInteger(EncoderConstant.MIN_REFRESH_RATE), new BigInteger(EncoderConstant.MAX_REFRESH_RATE), new BigInteger(value));
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(intraRefreshRate), extendedStatistics, advancedControllableProperties);
 
 				//update intra refresh rate
@@ -1553,10 +1554,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				VideoConfig videoConfigData = convertVideoByValue(extendedStatistics, videoName);
 
 				// sent request to apply all change for all metric
-				setVideoApplyChange(videoConfigData, videoConfigData.getId());
+				sendCommandToSaveAllVideoProperties(videoConfigData, videoConfigData.getId());
 
 				//sent request to action for the metric
-				setActionVideoControl(videoConfigData);
+				sendCommandToActionVideoControl(videoConfigData);
 				isEmergencyDelivery = false;
 				break;
 			case CANCEL:
@@ -1599,12 +1600,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Sent request to action video
+	 * Send command to set video action
 	 *
 	 * @param videoConfigData is instance VideoConfig DTO
 	 * @throws CommandFailureException if set action video config failed
 	 */
-	private void setActionVideoControl(VideoConfig videoConfigData) {
+	private void sendCommandToActionVideoControl(VideoConfig videoConfigData) {
 		String videoId = videoConfigData.getId();
 		String action = videoConfigData.getAction();
 		String request = EncoderCommand.OPERATION_VIDENC.getName() + videoId + EncoderConstant.SPACE + action;
@@ -1621,13 +1622,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Save video apply change
+	 * Send command to apply all video properties
 	 *
 	 * @param videoConfigData the videoConfigData is instance in VideoConfig
 	 * @param videoId the id is id of video encoder
 	 * @throws CommandFailureException if set video config failed
 	 */
-	private void setVideoApplyChange(VideoConfig videoConfigData, String videoId) {
+	private void sendCommandToSaveAllVideoProperties(VideoConfig videoConfigData, String videoId) {
 		String data = videoConfigData.retrieveVideoPayloadData();
 		String request = EncoderCommand.OPERATION_VIDENC.getName() + videoId + EncoderConstant.SPACE + EncoderCommand.SET + data;
 		try {
@@ -1641,7 +1642,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Change videoConfig by value
+	 * Convert videoConfig by value
 	 *
 	 * @param extendedStatistics list extendedStatistics
 	 * @param videoName the videoName is name of video
@@ -1702,7 +1703,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Change Off/On value to 0/1 or 0/1 value to Off/On, If value is null, return the value is empty string.
+	 * Convert Off/On value to 0/1 or 0/1 value to Off/On, If value is null, return the value is empty string.
 	 *
 	 * @param value the value is value to be converted
 	 * @param isOnOffValueToNumber the isOnOffValueToNumber is boolean value
@@ -1732,17 +1733,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param min is the minimum value
 	 * @param max is the maximum value
 	 * @param value is the value to compare between min and max value
-	 * @return int is value or default value
+	 * @return BigInteger is value or default value
 	 */
-	private int getMinOrMaxValue(int min, int max, int value) {
-		if (min < value && value < max) {
+	private BigInteger getMinOrMaxValue(BigInteger min, BigInteger max, BigInteger value) {
+		if (min.compareTo(value) <= 0 && value.compareTo(max) <= 0) {
 			return value;
 		}
-		int defaultValue = 0;
-		if (min > value) {
+		BigInteger defaultValue;
+		if (value.compareTo(min) < 0) {
 			defaultValue = min;
-		}
-		if (value > max) {
+		} else {
 			defaultValue = max;
 		}
 		return defaultValue;

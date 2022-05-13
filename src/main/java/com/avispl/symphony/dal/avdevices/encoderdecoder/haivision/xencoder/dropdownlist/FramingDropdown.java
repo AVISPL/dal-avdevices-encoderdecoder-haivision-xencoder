@@ -15,8 +15,7 @@ public enum FramingDropdown {
 	I("I"),
 	IP("IP"),
 	IBP("IBP"),
-	IBBP("IBBP"),
-	IBBBP("IBBBP");
+	IBBP("IBBP");
 
 	private final String name;
 

@@ -358,7 +358,14 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "HD Video Encoder 0#" + VideoControllingMetric.BITRATE.getName();
-		String propValue = "30";
+		String gOPSize = "HD Video Encoder 0#" + VideoControllingMetric.GOP_SIZE.getName();
+		String propValue = "32";
+		String gOPSizeValue = "105";
+
+		controllableProperty.setProperty(gOPSize);
+		controllableProperty.setValue(gOPSizeValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		 haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
