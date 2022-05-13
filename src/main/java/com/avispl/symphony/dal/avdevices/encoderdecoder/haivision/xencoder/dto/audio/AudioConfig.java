@@ -247,7 +247,7 @@ public class AudioConfig {
 	}
 
 	/**
-	 * Convert Audio config
+	 * Retrieve Video Payload data
 	 *
 	 * @return payLoad the payload is String by Audio config
 	 */

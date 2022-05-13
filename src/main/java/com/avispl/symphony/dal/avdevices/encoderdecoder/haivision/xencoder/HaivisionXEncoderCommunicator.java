@@ -283,7 +283,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			ExtendedStatistics extendedStatistics = new ExtendedStatistics();
 			Map<String, String> stats = new HashMap<>();
 			List<AdvancedControllableProperty> advancedControllableProperties = new ArrayList<>();
-
+			failedMonitor.clear();
 			if (!isEmergencyDelivery) {
 				roleBased = retrieveUserRole();
 				isConfigManagement = isConfigManagementProperties();
@@ -310,6 +310,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (logger.isDebugEnabled()) {
 			logger.debug("controlProperty property" + property);
 			logger.debug("controlProperty value" + value);
+		}
+		if (localExtendedStatistics == null) {
+			return;
 		}
 		reentrantLock.lock();
 		try {
@@ -347,7 +350,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void populateInformationFromDevice(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 
-		//clear data befor fetching data
+		//clear data before fetching data
 		destroyDataBeforeFetchData();
 
 		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
@@ -374,7 +377,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Clear date before fetching data
+	 * Clear data before fetching data
 	 */
 	private void destroyDataBeforeFetchData() {
 		//audio
@@ -388,6 +391,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		videoConfigList.clear();
 		nameToVideoConfig.clear();
 		nameToVideoStatistics.clear();
+
+		//input
+		nameToInputResponse.clear();
 
 		//stream
 		streamConfigList.clear();
@@ -414,7 +420,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			case AUDIO_CONFIG:
 			case VIDEO_CONFIG:
-				populateAudioConfigData(stats, advancedControllableProperties, encoderMonitoringMetric);
+				populateAudioVideoConfigData(stats, advancedControllableProperties, encoderMonitoringMetric);
 				break;
 			case TEMPERATURE:
 			case ACCOUNT:
@@ -429,13 +435,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Populate audio config
+	 * Populate audio and video config
 	 *
 	 * @param stats list statistics property
 	 * @param advancedControllableProperties the advancedControllableProperties is list AdvancedControllableProperties
 	 * @param metric the metric instance in EncoderMonitoringMetric
 	 */
-	private void populateAudioConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, EncoderMonitoringMetric metric) {
+	private void populateAudioVideoConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, EncoderMonitoringMetric metric) {
 		Objects.requireNonNull(stats);
 		Objects.requireNonNull(advancedControllableProperties);
 		if ((EncoderConstant.ADMIN.equals(roleBased) || EncoderConstant.OPERATOR.equals(roleBased)) && isConfigManagement) {
@@ -1255,9 +1261,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	/**
 	 * Save audio apply change
 	 *
-	 * @param audioConfig the audioConfig is instance in AuidoConfig
+	 * @param audioConfig the audioConfig is instance in AudioConfig
 	 * @param audioId the audioId is id of audio encoder
-	 * @throws ResourceNotReachableException if set audio config failed
+	 * @throws Exception if set audio config failed
 	 */
 	private void setAudioApplyChange(AudioConfig audioConfig, String audioId) {
 		String data = audioConfig.retrieveAudioPayloadData();
@@ -1370,13 +1376,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				case CROPPING:
 					String resolutionMode = videoConfig.getResolution();
 					if (!EncoderConstant.INPUT_AUDIO.equals(resolutionMode)) {
-						value = videoConfig.getCropping();
-						int cropping = EncoderConstant.ZERO;
-						if (EncoderConstant.CROP.equals(value)) {
-							cropping = EncoderConstant.NUMBER_ONE;
-						}
-						AdvancedControllableProperty croppingControlProperty = controlSwitch(stats, videoKeyName, String.valueOf(cropping), EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-						addAdvanceControlProperties(advancedControllableProperties, croppingControlProperty);
+						handleControlCroppingMetric(stats, advancedControllableProperties, videoKeyName, videoConfig);
 					}
 					break;
 				case FRAME_RATE:
@@ -1499,13 +1499,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					String croppingMode = extendedStatistics.get(cropping);
 					VideoConfig videoConfig = nameToVideoConfig.get(videoName);
 					if (croppingMode == null) {
-						croppingMode = videoConfig.getCropping();
-						int croppingValue = EncoderConstant.ZERO;
-						if (EncoderConstant.CROP.equals(croppingMode)) {
-							croppingValue = EncoderConstant.NUMBER_ONE;
-						}
-						AdvancedControllableProperty croppingControlProperty = controlSwitch(extendedStatistics, cropping, String.valueOf(croppingValue), EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-						addAdvanceControlProperties(advancedControllableProperties, croppingControlProperty);
+						handleControlCroppingMetric(extendedStatistics, advancedControllableProperties, cropping, videoConfig);
 					}
 				}
 				break;
@@ -1583,6 +1577,25 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.EMPTY_STRING);
 			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.CANCEL, EncoderConstant.CANCELING, 0));
 		}
+	}
+
+	/**
+	 * Handle add control for cropping metric
+	 *
+	 * @param extendedStatistics list statistics property
+	 * @param advancedControllableProperties the advancedControllableProperties is list AdvancedControllableProperties
+	 * @param cropping the cropping is property with format is GroupName#Cropping
+	 * @param videoConfig is instance in VideoConfig DTO
+	 */
+	private void handleControlCroppingMetric(Map<String, String> extendedStatistics, List<AdvancedControllableProperty> advancedControllableProperties, String cropping, VideoConfig videoConfig) {
+		String croppingMode;
+		croppingMode = videoConfig.getCropping();
+		int croppingValue = EncoderConstant.ZERO;
+		if (EncoderConstant.CROP.equals(croppingMode)) {
+			croppingValue = EncoderConstant.NUMBER_ONE;
+		}
+		AdvancedControllableProperty croppingControlProperty = controlSwitch(extendedStatistics, cropping, String.valueOf(croppingValue), EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+		addAdvanceControlProperties(advancedControllableProperties, croppingControlProperty);
 	}
 
 	/**
@@ -1799,6 +1812,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (!EncoderConstant.NONE.equals(value)) {
 			return createDropdown(name, options, value);
 		}
+		// if response data is null or none. Only display monitoring data not display controlling data
 		return null;
 	}
 

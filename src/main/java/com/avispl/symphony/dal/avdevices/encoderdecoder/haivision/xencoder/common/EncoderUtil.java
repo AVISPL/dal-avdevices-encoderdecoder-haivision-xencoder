@@ -15,10 +15,10 @@ import java.util.Objects;
 public class EncoderUtil {
 
 	/**
-	 * Retrieves the URL for monitoring process
+	 * Retrieves the command for monitoring and controlling process
 	 *
 	 * @param encoderMonitoringMetric is instance of EncoderMonitoringMetric
-	 * @return URL is instance of AxisURL
+	 * @return String is full command for monitoring and controlling request
 	 * @throws IllegalArgumentException if the name is not supported
 	 */
 	public static String getMonitorCommand(EncoderMonitoringMetric encoderMonitoringMetric) {
