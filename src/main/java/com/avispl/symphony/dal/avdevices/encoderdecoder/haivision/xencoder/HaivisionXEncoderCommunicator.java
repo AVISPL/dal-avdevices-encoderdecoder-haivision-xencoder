@@ -1267,7 +1267,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @throws Exception if set audio config failed
 	 */
 	private void sendCommandToSaveAllAudioProperties(AudioConfig audioConfig, String audioId) {
-		String data = audioConfig.retrieveAudioPayloadData();
+		String data = audioConfig.retrieveFullParameterOfAudioConfig();
 		String request = EncoderCommand.OPERATION_AUDENC.getName() + audioId + EncoderConstant.SPACE + EncoderCommand.SET + data;
 		try {
 			String responseData = send(request);
@@ -1629,7 +1629,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @throws CommandFailureException if set video config failed
 	 */
 	private void sendCommandToSaveAllVideoProperties(VideoConfig videoConfigData, String videoId) {
-		String data = videoConfigData.retrieveVideoPayloadData();
+		String data = videoConfigData.retrieveFullParameterOfVideoConfig();
 		String request = EncoderCommand.OPERATION_VIDENC.getName() + videoId + EncoderConstant.SPACE + EncoderCommand.SET + data;
 		try {
 			String responseData = send(request);

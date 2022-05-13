@@ -247,11 +247,11 @@ public class AudioConfig {
 	}
 
 	/**
-	 * Retrieve Video Payload data
+	 * Retrieve all parameter of Audio config
 	 *
-	 * @return payLoad the payload is String by Audio config
+	 * @return String is full param of Audio config
 	 */
-	public String retrieveAudioPayloadData() {
+	public String retrieveFullParameterOfAudioConfig() {
 		String levelValue = "";
 		if (!StringUtils.isNullOrEmpty(level)) {
 			levelValue = String.format(" level=%s", level);

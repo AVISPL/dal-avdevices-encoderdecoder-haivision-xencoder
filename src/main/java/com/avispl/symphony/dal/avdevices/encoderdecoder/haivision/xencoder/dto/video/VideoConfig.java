@@ -439,12 +439,11 @@ public class VideoConfig  {
 	}
 
 	/**
-	 * Convert Video config
+	 * Retrieve all parameter of Audio config
 	 *
-	 * @return string of video config payload.
+	 * @return String is full param of Audio config
 	 */
-	public String retrieveVideoPayloadData() {
-
+	public String retrieveFullParameterOfVideoConfig() {
 		String intraRefreshRateValue = EncoderConstant.EMPTY_STRING;
 		String croppingValue = EncoderConstant.EMPTY_STRING;
 		if (!StringUtils.isNullOrEmpty(intraRefreshRate)) {

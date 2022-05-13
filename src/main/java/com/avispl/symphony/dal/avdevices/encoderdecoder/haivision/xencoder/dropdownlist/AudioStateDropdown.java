@@ -4,7 +4,7 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 /**
- * StateDropdown class defined the enum for monitoring and controlling process
+ * AudioStateDropdown class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/25/2022
@@ -20,7 +20,7 @@ public enum AudioStateDropdown {
 	private final String value;
 
 	/**
-	 * VideoDropdown instantiation
+	 * AudioStateDropdown instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param value {@code {@link #value}}

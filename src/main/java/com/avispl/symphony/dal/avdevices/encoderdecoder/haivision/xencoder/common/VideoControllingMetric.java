@@ -29,8 +29,7 @@ public enum VideoControllingMetric {
 	APPLY_CHANGE("ApplyChange"),
 	ACTION("Action"),
 	CANCEL("Cancel");
-
-
+	
 	private final String name;
 
 	/**

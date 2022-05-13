@@ -29,7 +29,7 @@ public enum AudioActionDropdown {
 	private final boolean isMuteAction;
 
 	/**
-	 * AudioStateDropdown instantiation
+	 * AudioActionDropdown instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param isStartAction {@code {@link #isStartAction}}
