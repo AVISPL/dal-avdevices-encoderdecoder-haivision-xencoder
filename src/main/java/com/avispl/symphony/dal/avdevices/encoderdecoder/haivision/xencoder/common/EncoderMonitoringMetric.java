@@ -21,6 +21,7 @@ public enum EncoderMonitoringMetric {
 	VIDEO_STATISTICS("AudioStatistics", true),
 	VIDEO_CONFIG("AudioConfig", true),
 	STREAM_STATISTICS("StreamStatistics", true),
+	INPUT("Vidin", true),
 	STREAM_CONFIG("StreamConfig", true);
 
 	private final String name;

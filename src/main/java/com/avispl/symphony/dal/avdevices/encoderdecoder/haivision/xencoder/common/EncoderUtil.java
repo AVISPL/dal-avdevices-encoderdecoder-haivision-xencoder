@@ -15,11 +15,11 @@ import java.util.Objects;
 public class EncoderUtil {
 
 	/**
-	 * Retrieves the URL for monitoring process
+	 * Retrieves the command for monitoring and controlling process
 	 *
 	 * @param encoderMonitoringMetric is instance of EncoderMonitoringMetric
-	 * @return URL is instance of AxisURL
-	 * @throws Exception if the name is not supported
+	 * @return String is full command for monitoring and controlling request
+	 * @throws IllegalArgumentException if the name is not supported
 	 */
 	public static String getMonitorCommand(EncoderMonitoringMetric encoderMonitoringMetric) {
 		Objects.requireNonNull(encoderMonitoringMetric);
@@ -40,6 +40,8 @@ public class EncoderUtil {
 				return EncoderCommand.OPERATION_STREAM.getName() + EncoderCommand.GET.getName() + EncoderCommand.ALL.getName() + EncoderCommand.CONFIG.getName();
 			case TEMPERATURE:
 				return EncoderCommand.OPERATION_TEMPERATURE.getName() + EncoderCommand.GET.getName();
+			case INPUT:
+				return EncoderCommand.OPERATION_VIDIN.getName() + EncoderCommand.GET.getName() + EncoderCommand.ALL.getName();
 			case ACCOUNT:
 			case ROLE_BASED:
 				return EncoderConstant.NONE;

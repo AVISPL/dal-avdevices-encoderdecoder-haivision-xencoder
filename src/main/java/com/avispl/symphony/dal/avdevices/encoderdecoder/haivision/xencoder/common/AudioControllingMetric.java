@@ -49,7 +49,7 @@ public enum AudioControllingMetric {
 	 *
 	 * @param name {@code {@link #name}}
 	 * @return name of metric
-	 * @throws Exception if can not find the enum with name
+	 * @throws IllegalArgumentException if can not find the enum with name
 	 */
 	public static AudioControllingMetric getByName(String name) {
 		for (AudioControllingMetric metric : AudioControllingMetric.values()) {
