@@ -432,7 +432,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "HD Video Encoder 0#" + VideoControllingMetric.RESOLUTION.getName();
-		String propValue = ResolutionEnum.RESOLUTION_720_576I.getName();
+		String propValue = ResolutionEnum.RESOLUTION_800_600.getName();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);

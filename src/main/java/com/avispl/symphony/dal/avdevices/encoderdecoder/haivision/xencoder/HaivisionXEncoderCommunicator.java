@@ -1695,6 +1695,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (ResolutionEnum.RESOLUTION_AUTOMATIC.getName().equals(resolution)) {
 			resolution = EncoderConstant.AUTO;
 		}
+		if (ResolutionEnum.RESOLUTION_352_288.getName().equals(resolution) || ResolutionEnum.RESOLUTION_720_576.getName().equals(resolution) || ResolutionEnum.RESOLUTION_720_480.getName()
+				.equals(resolution)) {
+			resolution = String.format("%sp", resolution);
+		}
 		if (FrameRateEnum.FAME_RATE_0.getName().equals(frameRate)) {
 			frameRate = EncoderConstant.AUTO;
 		}
