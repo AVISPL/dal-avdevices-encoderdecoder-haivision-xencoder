@@ -22,14 +22,14 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AlgorithmDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioActionDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EntropyCodingDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ResolutionDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AlgorithmEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioActionEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EntropyCodingEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ResolutionEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.TimeCodeSource;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoControllingMetric;
 
@@ -158,7 +158,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "Audio Encoder 0#" + AudioControllingMetric.INPUT.getName();
-		String propValue = InputDropdown.SDI_1_1_2.getValue();
+		String propValue = InputEnum.SDI_1_1_2.getValue();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -178,7 +178,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "Audio Encoder 0#" + AudioControllingMetric.CHANGE_MODE.getName();
-		String propValue = ChannelModeDropdown.STEREO.getValue();
+		String propValue = ChannelModeEnum.STEREO.getValue();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -198,7 +198,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "Audio Encoder 0#" + AudioControllingMetric.BITRATE.getName();
-		String propValue = BitRateDropdown.NUMBER_128.getValue();
+		String propValue = BitRateEnum.NUMBER_128.getValue();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -218,7 +218,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "Audio Encoder 0#" + AudioControllingMetric.ALGORITHM.getName();
-		String propValue = AlgorithmDropdown.MPEG_4.getName();
+		String propValue = AlgorithmEnum.MPEG_4.getName();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -238,7 +238,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "Audio Encoder 0#" + AudioControllingMetric.LANGUAGE.getName();
-		String propValue = LanguageDropdown.ENGLISH.getValue();
+		String propValue = LanguageEnum.ENGLISH.getValue();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -258,7 +258,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "Audio Encoder 0#" + AudioControllingMetric.ACTION.getName();
-		String propValue = AudioActionDropdown.START.getName();
+		String propValue = AudioActionEnum.START.getName();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -284,7 +284,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
 		String propNameAction = "Audio Encoder 0#" + AudioControllingMetric.ACTION.getName();
-		String propValueAction = AudioActionDropdown.START.getName();
+		String propValueAction = AudioActionEnum.START.getName();
 		controllableProperty.setProperty(propNameAction);
 		controllableProperty.setValue(propValueAction);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -408,7 +408,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "HD Video Encoder 0#" + VideoControllingMetric.RESOLUTION.getName();
-		String propValue = ResolutionDropdown.RESOLUTION_AUTOMATIC.getName();
+		String propValue = ResolutionEnum.RESOLUTION_AUTOMATIC.getName();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -432,7 +432,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "HD Video Encoder 0#" + VideoControllingMetric.RESOLUTION.getName();
-		String propValue = ResolutionDropdown.RESOLUTION_720_576I.getName();
+		String propValue = ResolutionEnum.RESOLUTION_720_576I.getName();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -668,7 +668,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "HD Video Encoder 0#" + VideoControllingMetric.ENTROPY_CODING.getName();
-		String propValue = EntropyCodingDropdown.CAVLC.getName();
+		String propValue = EntropyCodingEnum.CAVLC.getName();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -689,7 +689,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "HD Video Encoder 0#" + VideoControllingMetric.ENTROPY_CODING.getName();
-		String propValue = EntropyCodingDropdown.CABAC.getName();
+		String propValue = EntropyCodingEnum.CABAC.getName();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -784,7 +784,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		Assertions.assertEquals(propValue,stats.get(propName));
-		Assertions.assertNull(stats.get(intraRefreshRate));
+		Assertions.assertEquals("",stats.get(intraRefreshRate));
 	}
 
 	/**

@@ -4,13 +4,13 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 /**
- * InputDropdown class defined the enum for monitoring and controlling process
+ * InputEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/25/2022
  * @since 1.0.0
  */
-public enum InputDropdown {
+public enum InputEnum {
 
 	ANALOG("Analog", "Analog"),
 	SDI_1_1_2("SDI 1 (1-2)", "SDI1Ch1+2"),
@@ -34,12 +34,12 @@ public enum InputDropdown {
 	private final String value;
 
 	/**
-	 * InputDropdown instantiation
+	 * InputEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param value {@code {@link #value}}
 	 */
-	InputDropdown(String name, String value) {
+	InputEnum(String name, String value) {
 		this.name = name;
 		this.value = value;
 	}

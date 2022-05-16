@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ChannelModeDropdown class defined the enum for monitoring and controlling process
+ * ChannelModeEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/25/2022
  * @since 1.0.0
  */
-public enum ChannelModeDropdown {
+public enum ChannelModeEnum {
 
 	STEREO("Stereo", "Stereo","stereo"),
 	MONO_LEFT("Mono Left", "Mono","mono"),
@@ -24,13 +24,13 @@ public enum ChannelModeDropdown {
 	private final String paramValue;
 
 	/**
-	 * ChannelModeDropdown instantiation
+	 * ChannelModeEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param value {@code {@link #value}}
 	 * @param paramValue {@code {@link #paramValue}}
 	 */
-	ChannelModeDropdown(String name, String value,String paramValue) {
+	ChannelModeEnum(String name, String value,String paramValue) {
 		this.name = name;
 		this.value = value;
 		this.paramValue = paramValue;
@@ -68,9 +68,9 @@ public enum ChannelModeDropdown {
 	 *
 	 * @return Map<String, String> are map param value and value name
 	 */
-	public static Map<String, String> getParamValueToNameMap() {
+	public static Map<String, String> ChannelModeEnum() {
 		Map<String, String> nameMap = new HashMap<>();
-		for (ChannelModeDropdown channelModeDropdown : ChannelModeDropdown.values()) {
+		for (ChannelModeEnum channelModeDropdown : ChannelModeEnum.values()) {
 			nameMap.put(channelModeDropdown.getName(), channelModeDropdown.getParamValue());
 		}
 		return nameMap;

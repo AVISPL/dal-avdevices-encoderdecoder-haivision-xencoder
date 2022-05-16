@@ -4,13 +4,13 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 /**
- * ResolutionDropdown class defined the enum for monitoring and controlling process
+ * ResolutionEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 5/10/2022
  * @since 1.0.0
  */
-public enum ResolutionDropdown {
+public enum ResolutionEnum {
 
 	RESOLUTION_AUTOMATIC("Automatic", "Input/Auto"),
 	RESOLUTION_1920_1080P("1920x1080p", "1920x1080p"),
@@ -45,12 +45,12 @@ public enum ResolutionDropdown {
 	private final String value;
 
 	/**
-	 * ResolutionDropdown instantiation
+	 * ResolutionEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param value {@code {@link #value}}
 	 */
-	ResolutionDropdown(String name, String value) {
+	ResolutionEnum(String name, String value) {
 		this.name = name;
 		this.value = value;
 	}

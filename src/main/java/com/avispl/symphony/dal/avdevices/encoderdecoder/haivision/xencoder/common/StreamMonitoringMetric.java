@@ -4,7 +4,7 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
- * StreamMonitoringMetric class defined the enum for the monitoring process
+ * StreamMonitoringMetric class defined the enum of the monitoring metrics
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/22/2022

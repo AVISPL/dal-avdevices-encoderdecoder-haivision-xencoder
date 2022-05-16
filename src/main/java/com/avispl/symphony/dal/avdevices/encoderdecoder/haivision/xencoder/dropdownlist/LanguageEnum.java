@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * LanguageDropdown class defined the enum for monitoring and controlling process
+ * LanguageEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/25/2022
  * @since 1.0.0
  */
-public enum LanguageDropdown {
+public enum LanguageEnum {
 
 	ALBANIAN("Albanian (sqi)", "sqi (Albanian)","sqi"),
 	ARABIC("Arabic (ara)", "ara (Arabic)","ara"),
@@ -79,13 +79,13 @@ public enum LanguageDropdown {
 	private final String paramValue;
 
 	/**
-	 * LanguageDropdown instantiation
+	 * LanguageEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param value {@code {@link #value}}
 	 * @param paramValue {@code {@link #paramValue}}
 	 */
-	LanguageDropdown(String name, String value,String paramValue) {
+	LanguageEnum(String name, String value,String paramValue) {
 		this.name = name;
 		this.value = value;
 		this.paramValue = paramValue;
@@ -125,7 +125,7 @@ public enum LanguageDropdown {
 	 */
 	public static Map<String, String> getParamValueToNameMap() {
 		Map<String, String> nameMap = new HashMap<>();
-		for (LanguageDropdown languageDropdown : LanguageDropdown.values()) {
+		for (LanguageEnum languageDropdown : LanguageEnum.values()) {
 			nameMap.put(languageDropdown.getName(), languageDropdown.getParamValue());
 		}
 		return nameMap;

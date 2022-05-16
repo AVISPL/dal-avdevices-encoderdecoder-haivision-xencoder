@@ -4,13 +4,13 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 /**
- * FrameRateDropdown class defined the enum for monitoring and controlling process
+ * FrameRateEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 5/10/2022
  * @since 1.0.0
  */
-public enum FrameRateDropdown {
+public enum FrameRateEnum {
 
 	FAME_RATE_0("Automatic"),
 	FAME_RATE_1("1"),
@@ -77,11 +77,11 @@ public enum FrameRateDropdown {
 	private final String name;
 
 	/**
-	 * FrameRateDropdown instantiation
+	 * FrameRateEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 */
-	FrameRateDropdown(String name) {
+	FrameRateEnum(String name) {
 		this.name = name;
 	}
 

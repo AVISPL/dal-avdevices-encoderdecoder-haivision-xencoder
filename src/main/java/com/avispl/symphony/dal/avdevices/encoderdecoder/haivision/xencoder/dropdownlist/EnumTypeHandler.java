@@ -11,20 +11,20 @@ import java.util.Map;
 
 import com.avispl.symphony.api.dal.error.ResourceNotReachableException;
 /**
- * DropdownList class defined the enum for monitoring and controlling process
+ * EnumTypeHandler class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/25/2022
  * @since 1.0.0
  */
-public class DropdownList {
+public class EnumTypeHandler {
 
 	/**
 	 * Get an array of all enum names
 	 *
 	 * @param enumType the enumtype is enum class
 	 */
-	public static <T extends Enum<T>> String[] getArrayOfEnumNames(Class<T> enumType) {
+	public static <T extends Enum<T>> String[] getEnumNames(Class<T> enumType) {
 		List<String> names = new ArrayList<>();
 		for (T c : enumType.getEnumConstants()) {
 			try {

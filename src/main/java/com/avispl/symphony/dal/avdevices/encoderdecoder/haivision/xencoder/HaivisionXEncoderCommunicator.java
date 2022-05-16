@@ -38,24 +38,24 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoControllingMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AlgorithmDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AspectRatioDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioActionDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AlgorithmEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AspectRatioEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioActionEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioLevel;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioStateDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.DropdownList;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EntropyCodingDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.FrameRateDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.FramingDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ResolutionDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.SampleRateDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioStateEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EntropyCodingEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.FrameRateEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.FramingEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ResolutionEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.SampleRateEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.TimeCodeSource;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.VideoActionDropdown;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.VideoStateDropdown;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.VideoActionEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.VideoStateEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.AuthenticationRole;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.InputResponse;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.SystemInfoResponse;
@@ -101,11 +101,30 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 	private final String uuidDay = UUID.randomUUID().toString().replace(EncoderConstant.DASH, EncoderConstant.EMPTY_STRING);
 
-	Map<String, AudioStatistics> nameToAudioStatistics = new HashMap<>();
-	Map<String, VideoStatistics> nameToVideoStatistics = new HashMap<>();
-	Map<String, AudioConfig> nameToAudioConfig = new HashMap<>();
-	Map<String, VideoConfig> nameToVideoConfig = new HashMap<>();
-	Map<String, InputResponse> nameToInputResponse = new HashMap<>();
+	/**
+	 * Map of Audio statistics with key name of AudioStatistics, value is AudioStatistics
+	 */
+	Map<String, AudioStatistics> mapOfNameAndAudioStatistics = new HashMap<>();
+
+	/**
+	 * Map of Video statistics with key name of VideoStatistics, value is VideoStatistics
+	 */
+	Map<String, VideoStatistics> mapOfNameAndVideoStatistics = new HashMap<>();
+
+	/**
+	 * Map of Audio Config with key is the name of AudioConfig, value is AudioConfig
+	 */
+	Map<String, AudioConfig> mapOfNameAndAudioConfig = new HashMap<>();
+
+	/**
+	 * Map of Video Config with key is the name of VideoConfig, value is VideoConfig
+	 */
+	Map<String, VideoConfig> mapOfNameAndVideoConfig = new HashMap<>();
+
+	/**
+	 * Map of Input Response with key is the name of InputResponse, value is InputResponse
+	 */
+	Map<String, InputResponse> mapOfNameAndInputResponse = new HashMap<>();
 
 	//The properties adapter
 	private String streamNameFilter;
@@ -384,17 +403,17 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		//audio
 		audioStatisticsList.clear();
 		audioConfigList.clear();
-		nameToAudioConfig.clear();
-		nameToAudioStatistics.clear();
+		mapOfNameAndAudioConfig.clear();
+		mapOfNameAndAudioStatistics.clear();
 
 		//video
 		videoStatisticsList.clear();
 		videoConfigList.clear();
-		nameToVideoConfig.clear();
-		nameToVideoStatistics.clear();
+		mapOfNameAndVideoConfig.clear();
+		mapOfNameAndVideoStatistics.clear();
 
 		//input
-		nameToInputResponse.clear();
+		mapOfNameAndInputResponse.clear();
 
 		//stream
 		streamConfigList.clear();
@@ -421,7 +440,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			case AUDIO_CONFIG:
 			case VIDEO_CONFIG:
-				populateAudioVideoConfigData(stats, advancedControllableProperties, encoderMonitoringMetric);
+				populateConfigData(stats, advancedControllableProperties, encoderMonitoringMetric);
 				break;
 			case TEMPERATURE:
 			case ACCOUNT:
@@ -436,13 +455,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Populate audio and video config
+	 * Populate controlling properties for audio, video, stream, etc configs
 	 *
 	 * @param stats list statistics property
 	 * @param advancedControllableProperties the advancedControllableProperties is list AdvancedControllableProperties
 	 * @param metric the metric instance in EncoderMonitoringMetric
 	 */
-	private void populateAudioVideoConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, EncoderMonitoringMetric metric) {
+	private void populateConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, EncoderMonitoringMetric metric) {
 		Objects.requireNonNull(stats);
 		Objects.requireNonNull(advancedControllableProperties);
 		if ((EncoderConstant.ADMIN.equals(roleBased) || EncoderConstant.OPERATOR.equals(roleBased)) && isConfigManagement) {
@@ -493,6 +512,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 						stats.put(streamKeyName, formatTimeData(streamValue));
 						break;
 					case OCCURRED:
+						// Example streamValue format 2h2d2s ago => we only take 2h2d2s
 						int len = streamValue.lastIndexOf(EncoderConstant.SPACE);
 						if (len > 1) {
 							streamValue = streamValue.substring(0, len);
@@ -602,7 +622,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 						break;
 					case RESOLUTION:
 						if (EncoderConstant.NONE.equals(videoValue)) {
-							videoValue = nameToVideoConfig.get(videoName).getResolution();
+							videoValue = mapOfNameAndVideoConfig.get(videoName).getResolution();
 						}
 						stats.put(videoKeyName, videoValue);
 						break;
@@ -847,22 +867,22 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		switch (metric) {
 			case AUDIO_STATISTICS:
 				AudioStatistics audioStatistics = objectMapper.convertValue(mappingData, AudioStatistics.class);
-				nameToAudioStatistics.put(audioStatistics.getName(), audioStatistics);
+				mapOfNameAndAudioStatistics.put(audioStatistics.getName(), audioStatistics);
 				audioStatisticsList.add(audioStatistics);
 				break;
 			case AUDIO_CONFIG:
 				AudioConfig audioConfig = objectMapper.convertValue(mappingData, AudioConfig.class);
-				nameToAudioConfig.put(audioConfig.getName(), audioConfig);
+				mapOfNameAndAudioConfig.put(audioConfig.getName(), audioConfig);
 				audioConfigList.add(audioConfig);
 				break;
 			case VIDEO_STATISTICS:
 				VideoStatistics videoStatistics = objectMapper.convertValue(mappingData, VideoStatistics.class);
-				nameToVideoStatistics.put(videoStatistics.getName(), videoStatistics);
+				mapOfNameAndVideoStatistics.put(videoStatistics.getName(), videoStatistics);
 				videoStatisticsList.add(videoStatistics);
 				break;
 			case VIDEO_CONFIG:
 				VideoConfig videoConfigResponse = objectMapper.convertValue(mappingData, VideoConfig.class);
-				nameToVideoConfig.put(videoConfigResponse.getName(), videoConfigResponse);
+				mapOfNameAndVideoConfig.put(videoConfigResponse.getName(), videoConfigResponse);
 				videoConfigList.add(videoConfigResponse);
 				break;
 			case STREAM_STATISTICS:
@@ -875,7 +895,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			case INPUT:
 				InputResponse inputResponse = objectMapper.convertValue(mappingData, InputResponse.class);
-				nameToInputResponse.put(inputResponse.getName(), inputResponse);
+				mapOfNameAndInputResponse.put(inputResponse.getName(), inputResponse);
 				break;
 			default:
 				throw new IllegalArgumentException("Do not support encoderStatisticsMetric: " + metric.name());
@@ -1025,8 +1045,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private String convertValueByIndexOfSpace(String value) {
 		try {
+			//Example format of value 10 ms => we only take 10
 			return value.substring(0, value.indexOf(EncoderConstant.SPACE));
 		} catch (Exception e) {
+			//if exception occur (no space in value) we return the initial value
 			return value;
 		}
 	}
@@ -1052,56 +1074,56 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void addControlAudioConfig(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, AudioConfig audioConfig) {
 
-		String[] dropdownInput = DropdownList.getArrayOfEnumNames(InputDropdown.class);
-		String[] dropdownMode = DropdownList.getArrayOfEnumNames(ChannelModeDropdown.class);
-		String[] dropdownAlgorithm = DropdownList.getArrayOfEnumNames(AlgorithmDropdown.class);
-		String[] dropdownSampleRate = DropdownList.getArrayOfEnumNames(SampleRateDropdown.class);
-		String[] dropdownLanguage = DropdownList.getArrayOfEnumNames(LanguageDropdown.class);
-		String[] dropdownLevel = DropdownList.getArrayOfEnumNames(AudioLevel.class);
-		String[] dropdownBitRate = BitRateDropdown.getArrayOfNameByStereoOrMonoMode(false);
-		Map<String, String> languageMap = DropdownList.getMapOfEnumNames(LanguageDropdown.class, false);
-		Map<String, String> stateDropdown = DropdownList.getMapOfEnumNames(AudioStateDropdown.class, false);
-		Map<String, String> inputMap = DropdownList.getMapOfEnumNames(InputDropdown.class, false);
-		Map<String, String> algorithmName = AlgorithmDropdown.getNameToValueOrParamValueToValueMap(true);
+		String[] dropdownInput = EnumTypeHandler.getEnumNames(InputEnum.class);
+		String[] dropdownMode = EnumTypeHandler.getEnumNames(ChannelModeEnum.class);
+		String[] dropdownAlgorithm = EnumTypeHandler.getEnumNames(AlgorithmEnum.class);
+		String[] dropdownSampleRate = EnumTypeHandler.getEnumNames(SampleRateEnum.class);
+		String[] dropdownLanguage = EnumTypeHandler.getEnumNames(LanguageEnum.class);
+		String[] dropdownLevel = EnumTypeHandler.getEnumNames(AudioLevel.class);
+		String[] dropdownBitRate = BitRateEnum.getArrayOfNameByStereoOrMonoMode(false);
+		Map<String, String> languageMap = EnumTypeHandler.getMapOfEnumNames(LanguageEnum.class, false);
+		Map<String, String> stateDropdown = EnumTypeHandler.getMapOfEnumNames(AudioStateEnum.class, false);
+		Map<String, String> inputMap = EnumTypeHandler.getMapOfEnumNames(InputEnum.class, false);
+		Map<String, String> algorithmName = AlgorithmEnum.getMapOfAlgorithmDropdown(true);
 
-		Map<String, String> channelModeMap = DropdownList.getMapOfEnumNames(ChannelModeDropdown.class, false);
+		Map<String, String> channelModeMap = EnumTypeHandler.getMapOfEnumNames(ChannelModeEnum.class, false);
 		String audioName = audioConfig.getName();
 		String value;
 		for (AudioControllingMetric audioMetric : AudioControllingMetric.values()) {
 			String audioKeyName = audioName + EncoderConstant.HASH + audioMetric.getName();
 			switch (audioMetric) {
 				case STATE:
-					String stateAudio = nameToAudioStatistics.get(audioConfig.getName()).getState();
+					String stateAudio = mapOfNameAndAudioStatistics.get(audioConfig.getName()).getState();
 					stats.put(audioKeyName, stateAudio);
 					break;
 				case INPUT:
 					value = inputMap.get(audioConfig.getInterfaceName());
 					AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(stats, dropdownInput, audioKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
 					break;
 				case CHANGE_MODE:
 					value = channelModeMap.get(audioConfig.getMode());
 					AdvancedControllableProperty channelModeControlProperty = controlDropdown(stats, dropdownMode, audioKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, channelModeControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, channelModeControlProperty);
 					break;
 				case BITRATE:
 					value = audioConfig.getBitRate();
 					String mode = audioConfig.getMode();
-					if (mode.equals(ChannelModeDropdown.STEREO.getName())) {
-						dropdownBitRate = BitRateDropdown.getArrayOfNameByStereoOrMonoMode(true);
+					if (mode.equals(ChannelModeEnum.STEREO.getName())) {
+						dropdownBitRate = BitRateEnum.getArrayOfNameByStereoOrMonoMode(true);
 					}
 					AdvancedControllableProperty bitRateControlProperty = controlDropdown(stats, dropdownBitRate, audioKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
 					break;
 				case SAMPLE_RATE:
 					value = audioConfig.getSampleRate();
 					AdvancedControllableProperty samPleRateControlProperty = controlDropdown(stats, dropdownSampleRate, audioKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, samPleRateControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, samPleRateControlProperty);
 					break;
 				case ALGORITHM:
 					value = algorithmName.get(audioConfig.getAlgorithm());
 					AdvancedControllableProperty algorithmControlProperty = controlDropdown(stats, dropdownAlgorithm, audioKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, algorithmControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, algorithmControlProperty);
 					break;
 				case LANGUAGE:
 					String language = audioConfig.getLang();
@@ -1110,17 +1132,17 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 						value = EncoderConstant.NONE;
 					}
 					AdvancedControllableProperty languageControlProperty = controlDropdownAcceptNoneValue(stats, dropdownLanguage, audioKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, languageControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, languageControlProperty);
 					break;
 				case ACTION:
-					stateAudio = nameToAudioStatistics.get(audioConfig.getName()).getState();
-					String[] dropdownAction = AudioActionDropdown.getArrayOfEnumByAction(stateAudio);
+					stateAudio = mapOfNameAndAudioStatistics.get(audioConfig.getName()).getState();
+					String[] dropdownAction = AudioActionEnum.getArrayOfEnumByAction(stateAudio);
 					value = stateDropdown.get(stateAudio);
 					AdvancedControllableProperty actionDropdownControlProperty = controlDropdownAcceptNoneValue(stats, dropdownAction, audioKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, actionDropdownControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, actionDropdownControlProperty);
 					break;
 				case LEVEL:
-					if (InputDropdown.ANALOG.getName().equalsIgnoreCase(audioConfig.getInterfaceName())) {
+					if (InputEnum.ANALOG.getName().equalsIgnoreCase(audioConfig.getInterfaceName())) {
 						value = audioConfig.getLevel();
 						int len = value.indexOf(EncoderConstant.SPACE);
 						//subString the value by space IfAbsent
@@ -1128,7 +1150,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 							value = value.substring(0, len);
 						}
 						AdvancedControllableProperty levelDropdownControlProperty = controlDropdownAcceptNoneValue(stats, dropdownLevel, audioKeyName, value);
-						addAdvanceControlProperties(advancedControllableProperties, levelDropdownControlProperty);
+						addOrUpdateAdvanceControlProperties(advancedControllableProperties, levelDropdownControlProperty);
 					}
 					break;
 				case CANCEL:
@@ -1148,10 +1170,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 *
 	 * @param property the property is the filed name of controlling metric
 	 * @param value the value is value of metric
-	 * @param extendedStatistics list extendedStatistics
+	 * @param stats list of stats
 	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
 	 */
-	private void controlAudioProperty(String property, String value, Map<String, String> extendedStatistics, List<AdvancedControllableProperty> advancedControllableProperties) {
+	private void controlAudioProperty(String property, String value, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 		// property format: GroupName#PropertyName
 		String[] audioProperty = property.split(EncoderConstant.HASH);
 		String audioName = audioProperty[0];
@@ -1162,58 +1184,58 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		isEmergencyDelivery = true;
 		switch (audioControllingMetric) {
 			case LEVEL:
-				nameToAudioConfig.get(audioName).setLevel(value);
-				updateValueForTheControllableProperty(property, value, extendedStatistics, advancedControllableProperties);
+				mapOfNameAndAudioConfig.get(audioName).setLevel(value);
+				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
 				break;
 			case ACTION:
 			case BITRATE:
 			case LANGUAGE:
 			case ALGORITHM:
 			case SAMPLE_RATE:
-				updateValueForTheControllableProperty(property, value, extendedStatistics, advancedControllableProperties);
+				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
 				break;
 			case INPUT:
-				String[] inputDropdown = DropdownList.getArrayOfEnumNames(InputDropdown.class);
-				String[] levelDropdown = DropdownList.getArrayOfEnumNames(AudioLevel.class);
-				AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(extendedStatistics, inputDropdown, property, value);
-				addAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
-				String level = nameToAudioConfig.get(audioName).getLevel();
+				String[] inputDropdown = EnumTypeHandler.getEnumNames(InputEnum.class);
+				String[] levelDropdown = EnumTypeHandler.getEnumNames(AudioLevel.class);
+				AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(stats, inputDropdown, property, value);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
+				String level = mapOfNameAndAudioConfig.get(audioName).getLevel();
 				if (StringUtils.isNullOrEmpty(level)) {
 					level = EncoderConstant.DEFAULT_AUDIO_LEVEL;
 				}
-				if (InputDropdown.ANALOG.getName().equalsIgnoreCase(value)) {
-					AdvancedControllableProperty levelProperty = controlDropdown(extendedStatistics, levelDropdown, levelName, level);
-					addAdvanceControlProperties(advancedControllableProperties, levelProperty);
+				if (InputEnum.ANALOG.getName().equalsIgnoreCase(value)) {
+					AdvancedControllableProperty levelProperty = controlDropdown(stats, levelDropdown, levelName, level);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, levelProperty);
 				} else {
-					extendedStatistics.remove(levelName);
+					stats.remove(levelName);
 					advancedControllableProperties.removeIf(item -> item.getName().equals(levelName));
 				}
 				break;
 			case CHANGE_MODE:
-				String[] dropdownMode = DropdownList.getArrayOfEnumNames(ChannelModeDropdown.class);
-				AdvancedControllableProperty channelModeControlProperty = controlDropdown(extendedStatistics, dropdownMode, property, value);
-				addAdvanceControlProperties(advancedControllableProperties, channelModeControlProperty);
+				String[] dropdownMode = EnumTypeHandler.getEnumNames(ChannelModeEnum.class);
+				AdvancedControllableProperty channelModeControlProperty = controlDropdown(stats, dropdownMode, property, value);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, channelModeControlProperty);
 
 				//Update bitRate with channel mode
-				String bitRate = extendedStatistics.get(bitRateName);
-				String defaultBitrate = BitRateDropdown.getDefaultBitRate(bitRate, value);
+				String bitRate = stats.get(bitRateName);
+				String defaultBitrate = BitRateEnum.getDefaultBitRate(bitRate, value);
 
 				//default channel mode is IsStereo
-				String[] dropdownBitRate = BitRateDropdown.getArrayOfNameByStereoOrMonoMode(true);
-				if (!ChannelModeDropdown.STEREO.getName().equals(value)) {
-					dropdownBitRate = BitRateDropdown.getArrayOfNameByStereoOrMonoMode(false);
+				String[] dropdownBitRate = BitRateEnum.getArrayOfNameByStereoOrMonoMode(true);
+				if (!ChannelModeEnum.STEREO.getName().equals(value)) {
+					dropdownBitRate = BitRateEnum.getArrayOfNameByStereoOrMonoMode(false);
 				}
-				AdvancedControllableProperty bitRateControlProperty = controlDropdown(extendedStatistics, dropdownBitRate, bitRateName, defaultBitrate);
-				addAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
+				AdvancedControllableProperty bitRateControlProperty = controlDropdown(stats, dropdownBitRate, bitRateName, defaultBitrate);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
 				break;
 			case APPLY_CHANGE:
-				AudioConfig audioConfig = convertAudioByValue(extendedStatistics, audioName);
+				AudioConfig audioConfig = convertAudioByValue(stats, audioName);
 
 				// sent request to apply all change for all metric
 				sendCommandToSaveAllAudioProperties(audioConfig, audioConfig.getId());
 
 				//sent request to action for the metric
-				sendCommandToActionAudioConfig(audioConfig);
+				sendCommandToSetAudioAction(audioConfig);
 				isEmergencyDelivery = false;
 				break;
 			case CANCEL:
@@ -1227,11 +1249,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		//Editing
 		if (isEmergencyDelivery) {
 			propertyName = audioName;
-			extendedStatistics.put(propertyName + EncoderConstant.HASH + AudioControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.EMPTY_STRING);
+			stats.put(propertyName + EncoderConstant.HASH + AudioControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.EMPTY_STRING);
 			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + AudioControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.APPLY, EncoderConstant.APPLYING, 0));
 
-			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.TRUE);
-			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.EMPTY_STRING);
+			stats.put(propertyName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.TRUE);
+			stats.put(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.EMPTY_STRING);
 			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.CANCEL, EncoderConstant.CANCELING, 0));
 		}
 	}
@@ -1242,7 +1264,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param audioConfig is instance AudioConfig DTO
 	 * @throws ResourceNotReachableException if set action audio config failed
 	 */
-	private void sendCommandToActionAudioConfig(AudioConfig audioConfig) {
+	private void sendCommandToSetAudioAction(AudioConfig audioConfig) {
 		String audioId = audioConfig.getId();
 		String action = audioConfig.getAction();
 		String request = EncoderCommand.OPERATION_AUDENC.getName() + audioId + EncoderConstant.SPACE + action;
@@ -1267,7 +1289,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @throws Exception if set audio config failed
 	 */
 	private void sendCommandToSaveAllAudioProperties(AudioConfig audioConfig, String audioId) {
-		String data = audioConfig.retrieveFullParameterOfAudioConfig();
+		String data = audioConfig.toString();
 		String request = EncoderCommand.OPERATION_AUDENC.getName() + audioId + EncoderConstant.SPACE + EncoderCommand.SET + data;
 		try {
 			String responseData = send(request);
@@ -1276,7 +1298,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			} else if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new ResourceNotReachableException(responseData);
 			}
-
 		} catch (Exception e) {
 			logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 			throw new ResourceNotReachableException("Error while setting audio config: " + e.getMessage(), e);
@@ -1286,30 +1307,30 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	/**
 	 * Convert audioConfig by value
 	 *
-	 * @param extendedStatistics list extendedStatistics
+	 * @param stats list of stats
 	 * @param audioName the audio name is name of audio
 	 * @return AudioConfig is instance in AudioConfig
 	 */
-	private AudioConfig convertAudioByValue(Map<String, String> extendedStatistics, String audioName) {
+	private AudioConfig convertAudioByValue(Map<String, String> stats, String audioName) {
 		AudioConfig audioConfig = new AudioConfig();
-		Map<String, String> languageMap = LanguageDropdown.getParamValueToNameMap();
-		Map<String, String> channelModeMap = ChannelModeDropdown.getParamValueToNameMap();
-		Map<String, String> inputMap = DropdownList.getMapOfEnumNames(InputDropdown.class, true);
-		Map<String, String> bitRateMap = DropdownList.getMapOfEnumNames(BitRateDropdown.class, true);
-		Map<String, String> algorithmParamMap = AlgorithmDropdown.getNameToValueOrParamValueToValueMap(false);
+		Map<String, String> languageMap = LanguageEnum.getParamValueToNameMap();
+		Map<String, String> channelModeMap = ChannelModeEnum.ChannelModeEnum();
+		Map<String, String> inputMap = EnumTypeHandler.getMapOfEnumNames(InputEnum.class, true);
+		Map<String, String> bitRateMap = EnumTypeHandler.getMapOfEnumNames(BitRateEnum.class, true);
+		Map<String, String> algorithmParamMap = AlgorithmEnum.getMapOfAlgorithmDropdown(false);
 		String id = EncoderConstant.EMPTY_STRING;
-		AudioConfig audio = nameToAudioConfig.get(audioName);
+		AudioConfig audio = mapOfNameAndAudioConfig.get(audioName);
 		if (audio != null) {
 			id = audio.getId();
 		}
 		audioConfig.setId(id);
-		audioConfig.setLang(languageMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LANGUAGE.getName())));
-		audioConfig.setInterfaceName(inputMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.INPUT.getName())));
-		audioConfig.setBitRate(bitRateMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.BITRATE.getName())));
-		audioConfig.setMode(channelModeMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.CHANGE_MODE.getName())));
-		audioConfig.setAlgorithm(algorithmParamMap.get(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.ALGORITHM.getName())));
-		audioConfig.setLevel(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LEVEL.getName()));
-		audioConfig.setAction(extendedStatistics.get(audioName + EncoderConstant.HASH + AudioControllingMetric.ACTION.getName()));
+		audioConfig.setLang(languageMap.get(stats.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LANGUAGE.getName())));
+		audioConfig.setInterfaceName(inputMap.get(stats.get(audioName + EncoderConstant.HASH + AudioControllingMetric.INPUT.getName())));
+		audioConfig.setBitRate(bitRateMap.get(stats.get(audioName + EncoderConstant.HASH + AudioControllingMetric.BITRATE.getName())));
+		audioConfig.setMode(channelModeMap.get(stats.get(audioName + EncoderConstant.HASH + AudioControllingMetric.CHANGE_MODE.getName())));
+		audioConfig.setAlgorithm(algorithmParamMap.get(stats.get(audioName + EncoderConstant.HASH + AudioControllingMetric.ALGORITHM.getName())));
+		audioConfig.setLevel(stats.get(audioName + EncoderConstant.HASH + AudioControllingMetric.LEVEL.getName()));
+		audioConfig.setAction(stats.get(audioName + EncoderConstant.HASH + AudioControllingMetric.ACTION.getName()));
 
 		return audioConfig;
 	}
@@ -1329,18 +1350,18 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		Objects.requireNonNull(advancedControllableProperties);
 		Objects.requireNonNull(videoConfig);
 
-		String[] dropdownInput = nameToInputResponse.keySet().toArray(new String[nameToInputResponse.size()]);
-		String[] dropdownResolution = DropdownList.getArrayOfEnumNames(ResolutionDropdown.class);
-		String[] dropdownFrameRate = DropdownList.getArrayOfEnumNames(FrameRateDropdown.class);
-		String[] dropdownFraming = DropdownList.getArrayOfEnumNames(FramingDropdown.class);
-		String[] dropdownAspectRatio = DropdownList.getArrayOfEnumNames(AspectRatioDropdown.class);
-		String[] dropdownTimeCodeSource = DropdownList.getArrayOfEnumNames(TimeCodeSource.class);
-		String[] dropdownEntropyCoding = DropdownList.getArrayOfEnumNames(EntropyCodingDropdown.class);
-		String[] dropdownAction = VideoActionDropdown.getVideoAction(true);
+		String[] dropdownInput = mapOfNameAndInputResponse.keySet().toArray(new String[mapOfNameAndInputResponse.size()]);
+		String[] dropdownResolution = EnumTypeHandler.getEnumNames(ResolutionEnum.class);
+		String[] dropdownFrameRate = EnumTypeHandler.getEnumNames(FrameRateEnum.class);
+		String[] dropdownFraming = EnumTypeHandler.getEnumNames(FramingEnum.class);
+		String[] dropdownAspectRatio = EnumTypeHandler.getEnumNames(AspectRatioEnum.class);
+		String[] dropdownTimeCodeSource = EnumTypeHandler.getEnumNames(TimeCodeSource.class);
+		String[] dropdownEntropyCoding = EnumTypeHandler.getEnumNames(EntropyCodingEnum.class);
+		String[] dropdownAction = VideoActionEnum.getVideoAction(true);
 
-		Map<String, String> videoStateDropdown = DropdownList.getMapOfEnumNames(VideoStateDropdown.class, false);
-		Map<String, String> timeCodeSourceMap = DropdownList.getMapOfEnumNames(TimeCodeSource.class, false);
-		Map<String, String> resolutionValueToNameMap = DropdownList.getMapOfEnumNames(ResolutionDropdown.class, false);
+		Map<String, String> videoStateDropdown = EnumTypeHandler.getMapOfEnumNames(VideoStateEnum.class, false);
+		Map<String, String> timeCodeSourceMap = EnumTypeHandler.getMapOfEnumNames(TimeCodeSource.class, false);
+		Map<String, String> resolutionValueToNameMap = EnumTypeHandler.getMapOfEnumNames(ResolutionEnum.class, false);
 		String videoName = videoConfig.getName();
 		String value;
 
@@ -1348,11 +1369,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String videoKeyName = videoName + EncoderConstant.HASH + videoMetric.getName();
 			switch (videoMetric) {
 				case STATE:
-					String stateVideo =nameToVideoStatistics.get(videoConfig.getName()).getState();
+					String stateVideo = mapOfNameAndVideoStatistics.get(videoConfig.getName()).getState();
 					stats.put(videoKeyName, stateVideo);
 					break;
 				case INPUT_FORMAT:
-					String videoValue = getDefaultValueForNullData(nameToVideoStatistics.get(videoName).getInputFormat());
+					String videoValue = getDefaultValueForNullData(mapOfNameAndVideoStatistics.get(videoName).getInputFormat());
 					boolean isValidValue = videoValue.equals(EncoderConstant.NONE) || videoValue.equals(EncoderConstant.UNKNOWN);
 					if (isValidValue) {
 						videoValue = EncoderConstant.NO_INPUT;
@@ -1362,17 +1383,17 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				case INPUT:
 					value = videoConfig.getInputInterface();
 					AdvancedControllableProperty inputControlProperty = controlDropdown(stats, dropdownInput, videoKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, inputControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, inputControlProperty);
 					break;
 				case BITRATE:
 					value = convertValueByIndexOfSpace(videoConfig.getBitrate());
 					AdvancedControllableProperty bitRateControlProperty = controlTextOrNumeric(stats, videoKeyName, value, true);
-					addAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, bitRateControlProperty);
 					break;
 				case RESOLUTION:
 					value = resolutionValueToNameMap.get(videoConfig.getResolution());
 					AdvancedControllableProperty resolutionControlProperty = controlDropdown(stats, dropdownResolution, videoKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, resolutionControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, resolutionControlProperty);
 					break;
 				case CROPPING:
 					String resolutionMode = videoConfig.getResolution();
@@ -1383,74 +1404,74 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				case FRAME_RATE:
 					value = videoConfig.getFrameRate();
 					if (EncoderConstant.INPUT_AUDIO.equals(value)) {
-						value = FrameRateDropdown.FAME_RATE_0.getName();
+						value = FrameRateEnum.FAME_RATE_0.getName();
 					}
 					AdvancedControllableProperty frameRateControlProperty = controlDropdown(stats, dropdownFrameRate, videoKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, frameRateControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, frameRateControlProperty);
 					break;
 				case FRAMING:
 					value = videoConfig.getFraming();
 					AdvancedControllableProperty framingControlProperty = controlDropdown(stats, dropdownFraming, videoKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, framingControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, framingControlProperty);
 					break;
 				case GOP_SIZE:
 					value = videoConfig.getGopSize();
 					AdvancedControllableProperty gopSizeControlProperty = controlTextOrNumeric(stats, videoKeyName, value, true);
-					addAdvanceControlProperties(advancedControllableProperties, gopSizeControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, gopSizeControlProperty);
 					break;
 				case ASPECT_RATIO:
 					value = videoConfig.getAspectRatio();
 					AdvancedControllableProperty aspectRatioControlProperty = controlDropdown(stats, dropdownAspectRatio, videoKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, aspectRatioControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, aspectRatioControlProperty);
 					break;
 				case CLOSED_CAPTION:
-					value = convertOffOnValueByNumberValue(videoConfig.getClosedCaption(), true);
+					value = convertByState(videoConfig.getClosedCaption(), true);
 					AdvancedControllableProperty closedCaptionControlProperty = controlSwitch(stats, videoKeyName, value, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-					addAdvanceControlProperties(advancedControllableProperties, closedCaptionControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, closedCaptionControlProperty);
 					break;
 				case TIME_CODE_SOURCE:
 					value = timeCodeSourceMap.get(videoConfig.getTimeCode());
 					AdvancedControllableProperty timeCodeControlProperty = controlDropdownAcceptNoneValue(stats, dropdownTimeCodeSource, videoKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, timeCodeControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, timeCodeControlProperty);
 					break;
 				case ENTROPY_CODING:
 					value = videoConfig.getEntropyCoding();
 					AdvancedControllableProperty entropyCodingControlProperty = controlDropdown(stats, dropdownEntropyCoding, videoKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, entropyCodingControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, entropyCodingControlProperty);
 					break;
 				case PARTITIONING:
-					value = convertOffOnValueByNumberValue(videoConfig.getPicturePartitioning(), true);
+					value = convertByState(videoConfig.getPicturePartitioning(), true);
 					AdvancedControllableProperty picturePartitioningControlProperty = controlSwitch(stats, videoKeyName, value, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-					addAdvanceControlProperties(advancedControllableProperties, picturePartitioningControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, picturePartitioningControlProperty);
 					break;
 				case INTRA_REFRESH:
-					value = convertOffOnValueByNumberValue(videoConfig.getIntraRefresh(), true);
+					value = convertByState(videoConfig.getIntraRefresh(), true);
 					AdvancedControllableProperty intraRefreshControlProperty = controlSwitch(stats, videoKeyName, value, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-					addAdvanceControlProperties(advancedControllableProperties, intraRefreshControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, intraRefreshControlProperty);
 					break;
 				case INTRA_REFRESH_RATE:
 					value = videoConfig.getIntraRefresh();
 					if (EncoderConstant.ON.equals(value)) {
 						String refreshRate = videoConfig.getIntraRefreshRate();
 						AdvancedControllableProperty refreshRateControlProperty = controlTextOrNumeric(stats, videoKeyName, refreshRate, true);
-						addAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
+						addOrUpdateAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
 					} else {
 						stats.put(videoKeyName, EncoderConstant.EMPTY_STRING);
 					}
 					break;
 				case PARTIAL_IMAGE_SKIP:
-					value = convertOffOnValueByNumberValue(videoConfig.getPartialFrameSkip(), true);
+					value = convertByState(videoConfig.getPartialFrameSkip(), true);
 					AdvancedControllableProperty imageSkipControlProperty = controlSwitch(stats, videoKeyName, value, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-					addAdvanceControlProperties(advancedControllableProperties, imageSkipControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, imageSkipControlProperty);
 					break;
 				case ACTION:
-					stateVideo = nameToVideoStatistics.get(videoConfig.getName()).getState();
+					stateVideo = mapOfNameAndVideoStatistics.get(videoConfig.getName()).getState();
 					value = videoStateDropdown.get(stateVideo);
-					if (VideoStateDropdown.STOPPED.getName().equals(value)) {
-						dropdownAction = VideoActionDropdown.getVideoAction(false);
+					if (VideoStateEnum.STOPPED.getName().equals(value)) {
+						dropdownAction = VideoActionEnum.getVideoAction(false);
 					}
 					AdvancedControllableProperty actionDropdownControlProperty = controlDropdownAcceptNoneValue(stats, dropdownAction, videoKeyName, value);
-					addAdvanceControlProperties(advancedControllableProperties, actionDropdownControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, actionDropdownControlProperty);
 					break;
 				case APPLY_CHANGE:
 				case CANCEL:
@@ -1483,22 +1504,22 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		isEmergencyDelivery = true;
 		switch (videoControllingMetric) {
 			case GOP_SIZE:
-				BigInteger gopSize = getMinOrMaxValue(new BigInteger(EncoderConstant.MIN_GOP_SIZE), new BigInteger(EncoderConstant.MAX_GOP_SIZE), new BigInteger(value));
+				BigInteger gopSize = getValueByRange(new BigInteger(EncoderConstant.MIN_GOP_SIZE), new BigInteger(EncoderConstant.MAX_GOP_SIZE), new BigInteger(value));
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(gopSize), extendedStatistics, advancedControllableProperties);
 				break;
 			case BITRATE:
-				BigInteger bitrate = getMinOrMaxValue(new BigInteger(EncoderConstant.MIN_BITRATE), new BigInteger(EncoderConstant.MAX_BITRATE), new BigInteger(value) );
+				BigInteger bitrate = getValueByRange(new BigInteger(EncoderConstant.MIN_BITRATE), new BigInteger(EncoderConstant.MAX_BITRATE), new BigInteger(value) );
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(bitrate), extendedStatistics, advancedControllableProperties);
 				break;
 			case RESOLUTION:
 				updateValueForTheControllableProperty(videoKeyName, value, extendedStatistics, advancedControllableProperties);
 				String cropping = videoName + EncoderConstant.HASH + VideoControllingMetric.CROPPING.getName();
-				if (ResolutionDropdown.RESOLUTION_AUTOMATIC.getName().equals(value)) {
+				if (ResolutionEnum.RESOLUTION_AUTOMATIC.getName().equals(value)) {
 					extendedStatistics.remove(cropping);
 					advancedControllableProperties.removeIf(item -> item.getName().equals(cropping));
 				} else {
 					String croppingMode = extendedStatistics.get(cropping);
-					VideoConfig videoConfig = nameToVideoConfig.get(videoName);
+					VideoConfig videoConfig = mapOfNameAndVideoConfig.get(videoName);
 					if (croppingMode == null) {
 						handleControlCroppingMetric(extendedStatistics, advancedControllableProperties, cropping, videoConfig);
 					}
@@ -1509,7 +1530,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 				//update cropping
 				String crop = EncoderConstant.ZERO == Integer.parseInt(value) ? EncoderConstant.SCALE : EncoderConstant.CROP;
-				VideoConfig videoConfig = nameToVideoConfig.get(videoName);
+				VideoConfig videoConfig = mapOfNameAndVideoConfig.get(videoName);
 				videoConfig.setCropping(crop);
 				break;
 			case INTRA_REFRESH:
@@ -1519,21 +1540,21 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					extendedStatistics.put(intraRefreshRateName, EncoderConstant.EMPTY_STRING);
 					advancedControllableProperties.removeIf(item -> item.getName().equals(intraRefreshRateName));
 				} else {
-					videoConfig = nameToVideoConfig.get(videoName);
+					videoConfig = mapOfNameAndVideoConfig.get(videoName);
 					String intraRefreshRateValue = videoConfig.getIntraRefreshRate();
 					if (StringUtils.isNullOrEmpty(intraRefreshRateValue)) {
 						intraRefreshRateValue = String.valueOf(EncoderConstant.DEFAULT_REFRESH_RATE);
 					}
 					AdvancedControllableProperty refreshRateControlProperty = controlTextOrNumeric(extendedStatistics, intraRefreshRateName, intraRefreshRateValue, true);
-					addAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
 				}
 				break;
 			case INTRA_REFRESH_RATE:
-				BigInteger intraRefreshRate = getMinOrMaxValue(new BigInteger(EncoderConstant.MIN_REFRESH_RATE), new BigInteger(EncoderConstant.MAX_REFRESH_RATE), new BigInteger(value));
+				BigInteger intraRefreshRate = getValueByRange(new BigInteger(EncoderConstant.MIN_REFRESH_RATE), new BigInteger(EncoderConstant.MAX_REFRESH_RATE), new BigInteger(value));
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(intraRefreshRate), extendedStatistics, advancedControllableProperties);
 
 				//update intra refresh rate
-				videoConfig = nameToVideoConfig.get(videoName);
+				videoConfig = mapOfNameAndVideoConfig.get(videoName);
 				videoConfig.setIntraRefreshRate(String.valueOf(intraRefreshRate));
 				break;
 			//dropdown control
@@ -1554,10 +1575,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				VideoConfig videoConfigData = convertVideoByValue(extendedStatistics, videoName);
 
 				// sent request to apply all change for all metric
-				sendCommandToSaveAllVideoProperties(videoConfigData, videoConfigData.getId());
+				sendCommandToSaveAllVideoProperties(videoConfigData);
 
 				//sent request to action for the metric
-				sendCommandToActionVideoControl(videoConfigData);
+				sendCommandToSetVideoAction(videoConfigData);
 				isEmergencyDelivery = false;
 				break;
 			case CANCEL:
@@ -1596,7 +1617,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			croppingValue = EncoderConstant.NUMBER_ONE;
 		}
 		AdvancedControllableProperty croppingControlProperty = controlSwitch(extendedStatistics, cropping, String.valueOf(croppingValue), EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-		addAdvanceControlProperties(advancedControllableProperties, croppingControlProperty);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, croppingControlProperty);
 	}
 
 	/**
@@ -1605,7 +1626,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param videoConfigData is instance VideoConfig DTO
 	 * @throws CommandFailureException if set action video config failed
 	 */
-	private void sendCommandToActionVideoControl(VideoConfig videoConfigData) {
+	private void sendCommandToSetVideoAction(VideoConfig videoConfigData) {
 		String videoId = videoConfigData.getId();
 		String action = videoConfigData.getAction();
 		String request = EncoderCommand.OPERATION_VIDENC.getName() + videoId + EncoderConstant.SPACE + action;
@@ -1613,23 +1634,24 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			try {
 				String responseData = send(request);
 				if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
-					throw new CommandFailureException(this.getHost(), request, String.format("Change video %s failed", videoConfigData.getAction()));
+					throw new ResourceNotReachableException(String.format("Change video %s failed", videoConfigData.getAction()));
 				}
 			} catch (Exception e) {
-				throw new CommandFailureException(this.getHost(), request, "Error while setting action video config: " + e.getMessage(), e);
+				logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
+				throw new ResourceNotReachableException("Error while setting action video config: " + e.getMessage(), e);
 			}
 		}
 	}
 
 	/**
-	 * Send command to apply all video properties
+	 * Send command to set video action
 	 *
-	 * @param videoConfigData the videoConfigData is instance in VideoConfig
-	 * @param videoId the id is id of video encoder
-	 * @throws CommandFailureException if set video config failed
+	 * @param videoConfigData is instance VideoConfig DTO
+	 * @throws ResourceNotReachableException if set action video config failed
 	 */
-	private void sendCommandToSaveAllVideoProperties(VideoConfig videoConfigData, String videoId) {
-		String data = videoConfigData.retrieveFullParameterOfVideoConfig();
+	private void sendCommandToSaveAllVideoProperties(VideoConfig videoConfigData) {
+		String data = videoConfigData.toString();
+		String videoId = videoConfigData.getId();
 		String request = EncoderCommand.OPERATION_VIDENC.getName() + videoId + EncoderConstant.SPACE + EncoderCommand.SET + data;
 		try {
 			String responseData = send(request);
@@ -1644,36 +1666,36 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	/**
 	 * Convert videoConfig by value
 	 *
-	 * @param extendedStatistics list extendedStatistics
+	 * @param stats list of stats
 	 * @param videoName the videoName is name of video
 	 * @return videoConfig is instance in VideoConfig
 	 */
-	private VideoConfig convertVideoByValue(Map<String, String> extendedStatistics, String videoName) {
+	private VideoConfig convertVideoByValue(Map<String, String> stats, String videoName) {
 		VideoConfig videoConfig = new VideoConfig();
 
 		String propertyName = videoName + EncoderConstant.HASH;
-		String id = nameToVideoConfig.get(videoName).getId();
-		String bitrate = extendedStatistics.get(propertyName + VideoControllingMetric.BITRATE.getName());
-		String action = extendedStatistics.get(propertyName + VideoControllingMetric.ACTION.getName());
-		String gopSize = extendedStatistics.get(propertyName + VideoControllingMetric.GOP_SIZE.getName());
-		String timeCode = extendedStatistics.get(propertyName + VideoControllingMetric.TIME_CODE_SOURCE.getName());
-		String aspectRatio = extendedStatistics.get(propertyName + VideoControllingMetric.ASPECT_RATIO.getName());
-		String resolution = extendedStatistics.get(propertyName + VideoControllingMetric.RESOLUTION.getName());
-		String framing = extendedStatistics.get(propertyName + VideoControllingMetric.FRAMING.getName());
-		String frameRate = extendedStatistics.get(propertyName + VideoControllingMetric.FRAME_RATE.getName());
-		String intraRefreshRate = extendedStatistics.get(propertyName + VideoControllingMetric.INTRA_REFRESH_RATE.getName());
-		String entropyCoding = extendedStatistics.get(propertyName + VideoControllingMetric.ENTROPY_CODING.getName());
-		String cropping = extendedStatistics.get(propertyName + VideoControllingMetric.CROPPING.getName());
-		String intraRefresh = convertOffOnValueByNumberValue(extendedStatistics.get(propertyName + VideoControllingMetric.INTRA_REFRESH.getName()), false);
-		String closedCaption = convertOffOnValueByNumberValue(extendedStatistics.get(propertyName + VideoControllingMetric.CLOSED_CAPTION.getName()), false);
-		String inputInterface = extendedStatistics.get(propertyName + VideoControllingMetric.INPUT.getName()).replace(EncoderConstant.DASH, "");
-		String picturePartitioning = convertOffOnValueByNumberValue(extendedStatistics.get(propertyName + VideoControllingMetric.PARTITIONING.getName()), false);
-		String partialFrameSkip = convertOffOnValueByNumberValue(extendedStatistics.get(propertyName + VideoControllingMetric.PARTIAL_IMAGE_SKIP.getName()), false);
+		String id = mapOfNameAndVideoConfig.get(videoName).getId();
+		String bitrate = stats.get(propertyName + VideoControllingMetric.BITRATE.getName());
+		String action = stats.get(propertyName + VideoControllingMetric.ACTION.getName());
+		String gopSize = stats.get(propertyName + VideoControllingMetric.GOP_SIZE.getName());
+		String timeCode = stats.get(propertyName + VideoControllingMetric.TIME_CODE_SOURCE.getName());
+		String aspectRatio = stats.get(propertyName + VideoControllingMetric.ASPECT_RATIO.getName());
+		String resolution = stats.get(propertyName + VideoControllingMetric.RESOLUTION.getName());
+		String framing = stats.get(propertyName + VideoControllingMetric.FRAMING.getName());
+		String frameRate = stats.get(propertyName + VideoControllingMetric.FRAME_RATE.getName());
+		String intraRefreshRate = stats.get(propertyName + VideoControllingMetric.INTRA_REFRESH_RATE.getName());
+		String entropyCoding = stats.get(propertyName + VideoControllingMetric.ENTROPY_CODING.getName());
+		String cropping = stats.get(propertyName + VideoControllingMetric.CROPPING.getName());
+		String intraRefresh = convertByState(stats.get(propertyName + VideoControllingMetric.INTRA_REFRESH.getName()), false);
+		String closedCaption = convertByState(stats.get(propertyName + VideoControllingMetric.CLOSED_CAPTION.getName()), false);
+		String inputInterface = stats.get(propertyName + VideoControllingMetric.INPUT.getName()).replace(EncoderConstant.DASH, "");
+		String picturePartitioning = convertByState(stats.get(propertyName + VideoControllingMetric.PARTITIONING.getName()), false);
+		String partialFrameSkip = convertByState(stats.get(propertyName + VideoControllingMetric.PARTIAL_IMAGE_SKIP.getName()), false);
 
-		if (ResolutionDropdown.RESOLUTION_AUTOMATIC.getName().equals(resolution)) {
+		if (ResolutionEnum.RESOLUTION_AUTOMATIC.getName().equals(resolution)) {
 			resolution = EncoderConstant.AUTO;
 		}
-		if (FrameRateDropdown.FAME_RATE_0.getName().equals(frameRate)) {
+		if (FrameRateEnum.FAME_RATE_0.getName().equals(frameRate)) {
 			frameRate = EncoderConstant.AUTO;
 		}
 		if (cropping != null) {
@@ -1705,16 +1727,19 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Convert Off/On value to 0/1 or 0/1 value to Off/On, If value is null, return the value is empty string.
+	 * Change Off/On to 0/1 of value and vice versa.
+	 * -if value is Off/On return 0/1
+	 * -if value is 0/1 return Off/On
+	 * -If value is null, return an empty string.
 	 *
 	 * @param value the value is value to be converted
-	 * @param isOnOffValueToNumber the isOnOffValueToNumber is boolean value
-	 * @return String is On/Off value if isOnOffValueToNumber is true or if isOnOffValueToNumber is false will be 0/1
+	 * @param state the state is boolean value if state is true => convert to 0/1. if state is false => convert to Off/On
+	 * @return String is On/Off value if state is true or if state is false will be 0/1
 	 */
-	private String convertOffOnValueByNumberValue(String value, boolean isOnOffValueToNumber) {
+	private String convertByState(String value, boolean state) {
 		String defaultValue = EncoderConstant.EMPTY_STRING;
 		if (!StringUtils.isNullOrEmpty(value)) {
-			if (isOnOffValueToNumber) {
+			if (state) {
 				defaultValue = String.valueOf(EncoderConstant.ZERO);
 				if (EncoderConstant.ON.equals(value)) {
 					defaultValue = String.valueOf(EncoderConstant.NUMBER_ONE);
@@ -1730,24 +1755,24 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Get min max value if the value out of range
+	 * Get value by range if the value out of range return the initial value
 	 *
 	 * @param min is the minimum value
 	 * @param max is the maximum value
 	 * @param value is the value to compare between min and max value
-	 * @return BigInteger is value or default value
+	 * @return BigInteger is value or initial value
 	 */
-	private BigInteger getMinOrMaxValue(BigInteger min, BigInteger max, BigInteger value) {
+	private BigInteger getValueByRange(BigInteger min, BigInteger max, BigInteger value) {
 		if (min.compareTo(value) <= 0 && value.compareTo(max) <= 0) {
 			return value;
 		}
-		BigInteger defaultValue;
+		BigInteger initial;
 		if (value.compareTo(min) < 0) {
-			defaultValue = min;
+			initial = min;
 		} else {
-			defaultValue = max;
+			initial = max;
 		}
-		return defaultValue;
+		return initial;
 	}
 
 	/**
@@ -1769,12 +1794,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Add advancedControllableProperties if  advancedControllableProperties different empty
+	 * Add/Update advancedControllableProperties if  advancedControllableProperties different empty
 	 *
 	 * @param advancedControllableProperties advancedControllableProperties is the list that store all controllable properties
 	 * @param property the property is item advancedControllableProperties
 	 */
-	private void addAdvanceControlProperties(List<AdvancedControllableProperty> advancedControllableProperties, AdvancedControllableProperty property) {
+	private void addOrUpdateAdvanceControlProperties(List<AdvancedControllableProperty> advancedControllableProperties, AdvancedControllableProperty property) {
 		if (property != null) {
 			advancedControllableProperties.removeIf(item -> item.getName().equals(property.getName()));
 			advancedControllableProperties.add(property);

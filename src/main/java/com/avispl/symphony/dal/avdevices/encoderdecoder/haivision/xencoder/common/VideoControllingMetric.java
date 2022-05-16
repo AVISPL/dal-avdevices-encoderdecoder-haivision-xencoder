@@ -1,7 +1,7 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
- * VideoControllingMetric  class defined the enum for the controlling process
+ * VideoControllingMetric class defined the enum of the controlling metrics
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 5/5/2022

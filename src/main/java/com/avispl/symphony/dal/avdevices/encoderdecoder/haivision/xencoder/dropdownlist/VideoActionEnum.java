@@ -7,13 +7,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * VideoActionDropdown class defined the enum for monitoring and controlling process
+ * VideoActionEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 5/10/2022
  * @since 1.0.0
  */
-public enum VideoActionDropdown {
+public enum VideoActionEnum {
 
 	START("Start", false, true),
 	STOP("Stop", true, false),
@@ -24,13 +24,13 @@ public enum VideoActionDropdown {
 	private final boolean isStopAction;
 
 	/**
-	 * VideoActionDropdown instantiation
+	 * VideoActionEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param isStartAction {@code {@link #isStartAction}}
 	 * @param isStopAction {@code {@link #isStopAction}}
 	 */
-	VideoActionDropdown(String name, boolean isStartAction, boolean isStopAction) {
+	VideoActionEnum(String name, boolean isStartAction, boolean isStopAction) {
 		this.name = name;
 		this.isStartAction = isStartAction;
 		this.isStopAction = isStopAction;
@@ -53,7 +53,7 @@ public enum VideoActionDropdown {
 	 */
 	public static String[] getVideoAction(boolean action) {
 		List<String> actionList = new LinkedList<>();
-		for (VideoActionDropdown videoActionDropdown : VideoActionDropdown.values()) {
+		for (VideoActionEnum videoActionDropdown : VideoActionEnum.values()) {
 			if (action) {
 				if (videoActionDropdown.isStartAction) {
 					actionList.add(videoActionDropdown.getName());

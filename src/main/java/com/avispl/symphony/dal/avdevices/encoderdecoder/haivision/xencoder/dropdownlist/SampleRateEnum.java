@@ -4,27 +4,24 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 /**
- * FramingDropdown class defined the enum for monitoring and controlling process
+ * SampleRateEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
- * Created on 5/10/2022
+ * Created on 4/25/2022
  * @since 1.0.0
  */
-public enum FramingDropdown {
+public enum SampleRateEnum {
 
-	I("I"),
-	IP("IP"),
-	IBP("IBP"),
-	IBBP("IBBP");
+	SAMPLE_RATE_48Hz("48kHz");
 
 	private final String name;
 
 	/**
-	 * FramingDropdown instantiation
+	 * SampleRateEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 */
-	FramingDropdown(String name) {
+	SampleRateEnum(String name) {
 		this.name = name;
 	}
 

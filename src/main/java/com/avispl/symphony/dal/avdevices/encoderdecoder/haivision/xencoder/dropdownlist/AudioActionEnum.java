@@ -9,13 +9,13 @@ import java.util.List;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
 
 /**
- * StateDropdown class defined the enum for monitoring and controlling process
+ * AudioActionEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/25/2022
  * @since 1.0.0
  */
-public enum AudioActionDropdown {
+public enum AudioActionEnum {
 
 	MUTED("Mute", true, false, false),
 	UN_MUTED("Unmute", false, false, true),
@@ -29,14 +29,14 @@ public enum AudioActionDropdown {
 	private final boolean isMuteAction;
 
 	/**
-	 * AudioActionDropdown instantiation
+	 * AudioActionEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param isStartAction {@code {@link #isStartAction}}
 	 * @param isStopAction {@code {@link #isStopAction}}
 	 * @param isMuteAction {@code {@link #isMuteAction}}
 	 */
-	AudioActionDropdown(String name, boolean isStartAction, boolean isStopAction, boolean isMuteAction) {
+	AudioActionEnum(String name, boolean isStartAction, boolean isStopAction, boolean isMuteAction) {
 		this.name = name;
 		this.isStartAction = isStartAction;
 		this.isStopAction = isStopAction;
@@ -87,7 +87,7 @@ public enum AudioActionDropdown {
 	 */
 	public static String[] getArrayOfEnumByAction(String action) {
 		List<String> actionList = new LinkedList<>();
-		for (AudioActionDropdown audioActionDropdown : AudioActionDropdown.values()) {
+		for (AudioActionEnum audioActionDropdown : AudioActionEnum.values()) {
 			switch (action) {
 				case EncoderConstant.WORKING:
 					if (audioActionDropdown.isStartAction()) {

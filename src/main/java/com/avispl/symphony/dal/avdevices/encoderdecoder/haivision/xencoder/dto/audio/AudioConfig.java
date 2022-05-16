@@ -247,11 +247,12 @@ public class AudioConfig {
 	}
 
 	/**
-	 * Retrieve all parameter of Audio config
+	 * Get to String of Audio configs
 	 *
 	 * @return String is full param of Audio config
 	 */
-	public String retrieveFullParameterOfAudioConfig() {
+	@Override
+	public String toString() {
 		String levelValue = "";
 		if (!StringUtils.isNullOrEmpty(level)) {
 			levelValue = String.format(" level=%s", level);

@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * AlgorithmDropdown class defined the enum for monitoring and controlling process
+ * AlgorithmEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/25/2022
  * @since 1.0.0
  */
-public enum AlgorithmDropdown {
+public enum AlgorithmEnum {
 
 	MPEG_2("MPEG-2 ADTS", "MPEG2-ADTS", "adts"),
 	MPEG_4("MPEG-4 LOAS/LATM", "LOAS", "loas");
@@ -23,13 +23,13 @@ public enum AlgorithmDropdown {
 	private final String paramValue;
 
 	/**
-	 * AlgorithmDropdown instantiation
+	 * AlgorithmEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param value {@code {@link #value}}
 	 * @param paramValue {@code {@link #paramValue}}
 	 */
-	AlgorithmDropdown(String name, String value, String paramValue) {
+	AlgorithmEnum(String name, String value, String paramValue) {
 		this.name = name;
 		this.value = value;
 		this.paramValue = paramValue;
@@ -64,13 +64,15 @@ public enum AlgorithmDropdown {
 
 	/**
 	 * Retrieves name to value map of AlgorithmDropdown
+	 * if isNameToValue is true => key of map is value of the enum, value is the name
+	 * if isNameToValue is false => key of map is name of the enum, value is the paramValue
 	 *
-	 * @param isNameToValue the isNameToValue is boolean value nameToValue or valueToName
+	 * @param isNameToValue the isNameToValue is boolean value.
 	 * @return Map<String, String> are map name and value
 	 */
-	public static Map<String, String> getNameToValueOrParamValueToValueMap(boolean isNameToValue) {
+	public static Map<String, String> getMapOfAlgorithmDropdown(boolean isNameToValue) {
 		Map<String, String> nameMap = new HashMap<>();
-		for (AlgorithmDropdown algorithmDropdown : AlgorithmDropdown.values()) {
+		for (AlgorithmEnum algorithmDropdown : AlgorithmEnum.values()) {
 			if (isNameToValue) {
 				nameMap.put(algorithmDropdown.getValue(), algorithmDropdown.getName());
 			} else {

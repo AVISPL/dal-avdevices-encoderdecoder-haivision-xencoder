@@ -4,7 +4,7 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
- * SystemInfoMonitoringMetric class defined the enum for the monitoring process
+ * SystemInfoMonitoringMetric class defined the enum of the monitoring metrics
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022

@@ -8,13 +8,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * BitRateDropdown class defined the enum for monitoring and controlling process
+ * BitRateEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/25/2022
  * @since 1.0.0
  */
-public enum BitRateDropdown {
+public enum BitRateEnum {
 
 	NUMBER_56("56 kbps", "56", false, true),
 	NUMBER_64("64 kbps", "64", false, true),
@@ -32,14 +32,14 @@ public enum BitRateDropdown {
 	private final boolean isMono;
 
 	/**
-	 * BitRateDropdown instantiation
+	 * BitRateEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param value {@code {@link #value}}
 	 * @param isStereo {@code {@link #isStereo}}
 	 * @param isMono {@code {@link #isMono}}
 	 */
-	BitRateDropdown(String name, String value, boolean isStereo, boolean isMono) {
+	BitRateEnum(String name, String value, boolean isStereo, boolean isMono) {
 		this.name = name;
 		this.value = value;
 		this.isStereo = isStereo;
@@ -90,7 +90,7 @@ public enum BitRateDropdown {
 	 */
 	public static String[] getArrayOfNameByStereoOrMonoMode(boolean isStereoMode) {
 		List<String> channelModeList = new LinkedList<>();
-		for (BitRateDropdown bitRateDropdown : BitRateDropdown.values()) {
+		for (BitRateEnum bitRateDropdown : BitRateEnum.values()) {
 			if (isStereoMode) {
 				if (bitRateDropdown.isStereo()) {
 					channelModeList.add(bitRateDropdown.getName());
@@ -113,10 +113,10 @@ public enum BitRateDropdown {
 	 */
 	public static String getDefaultBitRate(String bitRate, String channelMode) {
 		String defaultBitRate = NUMBER_56.getName();
-		boolean isStereo = ChannelModeDropdown.STEREO.getName().equals(channelMode);
+		boolean isStereo = ChannelModeEnum.STEREO.getName().equals(channelMode);
 		if (isStereo) {
 			defaultBitRate = NUMBER_80.getName();
 		}
-		return Arrays.asList(BitRateDropdown.getArrayOfNameByStereoOrMonoMode(isStereo)).contains(bitRate) ? bitRate : defaultBitRate;
+		return Arrays.asList(BitRateEnum.getArrayOfNameByStereoOrMonoMode(isStereo)).contains(bitRate) ? bitRate : defaultBitRate;
 	}
 }
