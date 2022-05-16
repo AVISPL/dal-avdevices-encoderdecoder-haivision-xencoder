@@ -1254,7 +1254,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				}
 			} catch (Exception e) {
 				logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
-				throw new CommandFailureException(this.getHost(), request, "Error while setting action audio config: " + e.getMessage(), e);
+				throw new ResourceNotReachableException("Error while setting action audio config: " + e.getMessage(), e);
 			}
 		}
 	}
