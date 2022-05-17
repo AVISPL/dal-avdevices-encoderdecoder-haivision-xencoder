@@ -1773,7 +1773,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			if (min < valueCompare && valueCompare < max) {
 				return valueCompare;
 			}
-			if (valueCompare > max) {
+			if (valueCompare >= max) {
 				initial = max;
 			}
 			return initial;
