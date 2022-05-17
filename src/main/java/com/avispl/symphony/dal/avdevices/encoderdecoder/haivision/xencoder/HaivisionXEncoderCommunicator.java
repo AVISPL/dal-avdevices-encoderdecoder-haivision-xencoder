@@ -1858,10 +1858,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		int initial = min;
 		try {
 			int valueCompare = Integer.parseInt(value);
-			if (min < valueCompare && valueCompare < max) {
+			if (min <= valueCompare && valueCompare <= max) {
 				return valueCompare;
 			}
-			if (valueCompare >= max) {
+			if (valueCompare > max) {
 				initial = max;
 			}
 			return initial;
