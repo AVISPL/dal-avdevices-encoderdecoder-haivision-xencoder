@@ -22,6 +22,7 @@ public enum EncoderCommand {
 	CONFIG("config "),
 	PAUSE("pause "),
 	RESUME("resume "),
+	LIST(" list "),
 
 	//stream command
 	OPERATION_STREAM("stream "),
@@ -36,6 +37,10 @@ public enum EncoderCommand {
 
 	//input command
 	OPERATION_VIDIN("vidin "),
+	OPERATION_STILL("still "),
+
+	// still image command
+
 
 	//temperatures command
 	OPERATION_TEMPERATURE("temperature "),

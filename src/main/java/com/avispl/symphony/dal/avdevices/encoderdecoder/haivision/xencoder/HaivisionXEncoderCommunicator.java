@@ -34,6 +34,7 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderUtil;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamControllingMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoControllingMetric;
@@ -47,10 +48,12 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropd
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EntropyCodingEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.FecEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.FrameRateEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.FramingEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ProtocolEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ResolutionEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.SampleRateEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.TimeCodeSource;
@@ -62,6 +65,7 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.S
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.TemperatureStatus;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.audio.AudioConfig;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.audio.AudioStatistics;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream.Audio;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream.StreamConfig;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream.StreamStatistics;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.video.VideoConfig;
@@ -91,40 +95,17 @@ import com.avispl.symphony.dal.util.StringUtils;
  */
 public class HaivisionXEncoderCommunicator extends SshCommunicator implements Monitorable, Controller {
 
-	private String roleBased;
-	private boolean isConfigManagement;
 	private ExtendedStatistics localExtendedStatistics;
-	private Integer noOfMonitoringMetric = 0;
-	private final Map<String, String> failedMonitor = new HashMap<>();
-	ObjectMapper objectMapper = new ObjectMapper();
+	private ExtendedStatistics localCreateOutputStream;
 	private boolean isEmergencyDelivery;
-
+	private boolean isCreateStreamCalled;
+	private boolean isConfigManagement;
+	private ObjectMapper objectMapper = new ObjectMapper();
+	private Integer noOfMonitoringMetric = 0;
+	private String roleBased;
+	private final Map<String, String> failedMonitor = new HashMap<>();
+	private final Map<String, String> localStatsStreamOutput = new HashMap<>();
 	private final String uuidDay = UUID.randomUUID().toString().replace(EncoderConstant.DASH, EncoderConstant.EMPTY_STRING);
-
-	/**
-	 * Map of Audio statistics with key name of AudioStatistics, value is AudioStatistics
-	 */
-	Map<String, AudioStatistics> mapOfNameAndAudioStatistics = new HashMap<>();
-
-	/**
-	 * Map of Video statistics with key name of VideoStatistics, value is VideoStatistics
-	 */
-	Map<String, VideoStatistics> mapOfNameAndVideoStatistics = new HashMap<>();
-
-	/**
-	 * Map of Audio Config with key is the name of AudioConfig, value is AudioConfig
-	 */
-	Map<String, AudioConfig> mapOfNameAndAudioConfig = new HashMap<>();
-
-	/**
-	 * Map of Video Config with key is the name of VideoConfig, value is VideoConfig
-	 */
-	Map<String, VideoConfig> mapOfNameAndVideoConfig = new HashMap<>();
-
-	/**
-	 * Map of Input Response with key is the name of InputResponse, value is InputResponse
-	 */
-	Map<String, InputResponse> mapOfNameAndInputResponse = new HashMap<>();
 
 	//The properties adapter
 	private String streamNameFilter;
@@ -273,6 +254,46 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private List<StreamConfig> streamConfigList = new ArrayList<>();
 
 	/**
+	 * List of StillImage
+	 */
+	private List<String> stillImageList = new ArrayList<>();
+
+	/**
+	 * Map of Audio statistics with key name of AudioStatistics, value is AudioStatistics
+	 */
+	private Map<String, AudioStatistics> mapOfNameAndAudioStatistics = new HashMap<>();
+
+	/**
+	 * Map of Video statistics with key name of VideoStatistics, value is VideoStatistics
+	 */
+	private Map<String, VideoStatistics> mapOfNameAndVideoStatistics = new HashMap<>();
+
+	/**
+	 * Map of Audio Config with key is the name of AudioConfig, value is AudioConfig
+	 */
+	private Map<String, AudioConfig> mapOfNameAndAudioConfig = new HashMap<>();
+
+	/**
+	 * Map of Video Config with key is the name of VideoConfig, value is VideoConfig
+	 */
+	private Map<String, VideoConfig> mapOfNameAndVideoConfig = new HashMap<>();
+
+	/**
+	 * Map of Input Response with key is the name of InputResponse, value is InputResponse
+	 */
+	private Map<String, InputResponse> mapOfNameAndInputResponse = new HashMap<>();
+
+	/**
+	 * Map of Audio with key is the name AudioConfig, value is Audio
+	 */
+	private Map<String, Audio> mapOfNameAndSourceAudio = new HashMap<>();
+
+	/**
+	 * Map of Id and Name with key is the Id of AudioConfig, value is name of AudioConfig
+	 */
+	private Map<String, String> mapOfIdAndNameAudioConfig = new HashMap<>();
+
+	/**
 	 * ReentrantLock to prevent null pointer exception to localExtendedStatistics when controlProperty method is called before GetMultipleStatistics method.
 	 */
 	private final ReentrantLock reentrantLock = new ReentrantLock();
@@ -302,7 +323,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		try {
 			ExtendedStatistics extendedStatistics = new ExtendedStatistics();
 			Map<String, String> stats = new HashMap<>();
+			Map<String, String> statsCreateOutputStream = new HashMap<>();
 			List<AdvancedControllableProperty> advancedControllableProperties = new ArrayList<>();
+			List<AdvancedControllableProperty> createStreamAdvancedControllable = new ArrayList<>();
 			failedMonitor.clear();
 			if (!isEmergencyDelivery) {
 				roleBased = retrieveUserRole();
@@ -314,6 +337,27 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				extendedStatistics.setStatistics(stats);
 				localExtendedStatistics = extendedStatistics;
 			}
+			if (EncoderConstant.ADMIN.equals(roleBased) || EncoderConstant.OPERATOR.equals(roleBased) && !isCreateStreamCalled && isConfigManagement) {
+				localCreateOutputStream = new ExtendedStatistics();
+				createOutputStream(statsCreateOutputStream, createStreamAdvancedControllable);
+				localCreateOutputStream.setStatistics(statsCreateOutputStream);
+				localCreateOutputStream.setControllableProperties(createStreamAdvancedControllable);
+				localStatsStreamOutput.putAll(statsCreateOutputStream);
+				isCreateStreamCalled = true;
+			}
+
+			// add all stats of create output stream into local stats
+			Map<String, String> localStats = localExtendedStatistics.getStatistics();
+			Map<String, String> localStreamStats = localCreateOutputStream.getStatistics();
+			localStats.putAll(localStreamStats);
+
+			//remove and update control property for create output stream into localExtendedStatistics
+			List<AdvancedControllableProperty> localAdvancedControl = localExtendedStatistics.getControllableProperties();
+			List<AdvancedControllableProperty> localStreamAdvancedControl = localCreateOutputStream.getControllableProperties();
+			List<String> nameList = localStreamAdvancedControl.stream().map(AdvancedControllableProperty::getName).collect(Collectors.toList());
+			localAdvancedControl.removeIf(item -> nameList.contains(item.getName()));
+			localAdvancedControl.addAll(localStreamAdvancedControl);
+
 		} finally {
 			reentrantLock.unlock();
 		}
@@ -372,9 +416,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 		//clear data before fetching data
 		clearBeforeFetchingData();
-
+		retrieveStillImageList();
 		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
-			if (EncoderMonitoringMetric.ACCOUNT.equals(encoderMonitoringMetric)) {
+			if (EncoderMonitoringMetric.ACCOUNT.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.STILL_IMAGE.equals(encoderMonitoringMetric)) {
 				continue;
 			}
 			retrieveDataByMetric(stats, encoderMonitoringMetric);
@@ -393,6 +437,26 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		getFilteredForEncoderStatistics();
 		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
 			populateDataByMetric(stats, advancedControllableProperties, encoderMonitoringMetric);
+		}
+	}
+
+	/**
+	 * Retrieve list name of Still Image
+	 */
+	private void retrieveStillImageList() {
+		try {
+			String response = send(EncoderUtil.getMonitorCommand(EncoderMonitoringMetric.STILL_IMAGE));
+			if (response != null) {
+				String[] stillList = response.split(EncoderConstant.REGEX_DATA);
+				for (String stileImageItem : stillList) {
+					if (stileImageItem.contains(EncoderConstant.MP4)) {
+						stillImageList.add(stileImageItem.trim().replace(EncoderConstant.SPACE + EncoderConstant.SPACE, EncoderConstant.EMPTY_STRING));
+					}
+				}
+				stillImageList.add(EncoderConstant.NONE);
+			}
+		} catch (Exception e) {
+			failedMonitor.put(EncoderMonitoringMetric.STILL_IMAGE.getName(), e.getMessage());
 		}
 	}
 
@@ -418,6 +482,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		//stream
 		streamConfigList.clear();
 		streamStatisticsList.clear();
+
+		//Still Image
+		stillImageList.clear();
 	}
 
 	/**
@@ -794,6 +861,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			case ACCOUNT:
 			case ROLE_BASED:
+			case STILL_IMAGE:
 				break;
 			default:
 				throw new IllegalArgumentException("Do not support encoderStatisticsMetric: " + metric.name());
@@ -872,7 +940,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			case AUDIO_CONFIG:
 				AudioConfig audioConfig = objectMapper.convertValue(mappingData, AudioConfig.class);
-				mapOfNameAndAudioConfig.put(audioConfig.getName(), audioConfig);
+				String audioName = audioConfig.getName();
+				String language = audioConfig.getLang();
+				if (!language.contains(EncoderConstant.NONE)) {
+					language = language.substring(language.indexOf(EncoderConstant.SPACE));
+					audioName = String.format("%s %s", audioName, language);
+				}
+				audioConfig.setName(audioName);
+				mapOfNameAndAudioConfig.put(audioName, audioConfig);
+				mapOfIdAndNameAudioConfig.put(audioConfig.getId(), audioName);
 				audioConfigList.add(audioConfig);
 				break;
 			case VIDEO_STATISTICS:
@@ -1088,12 +1164,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 		Map<String, String> channelModeMap = EnumTypeHandler.getMapOfEnumNames(ChannelModeEnum.class, false);
 		String audioName = audioConfig.getName();
+		int indexName = audioName.indexOf(EncoderConstant.SPACE, EncoderConstant.AUDIO_ENCODER.length());
+		if (indexName != -1) {
+			audioName = audioName.substring(0, indexName);
+		}
 		String value;
 		for (AudioControllingMetric audioMetric : AudioControllingMetric.values()) {
 			String audioKeyName = audioName + EncoderConstant.HASH + audioMetric.getName();
 			switch (audioMetric) {
 				case STATE:
-					String stateAudio = mapOfNameAndAudioStatistics.get(audioConfig.getName()).getState();
+					String stateAudio = mapOfNameAndAudioStatistics.get(audioName).getState();
 					stats.put(audioKeyName, stateAudio);
 					break;
 				case INPUT:
@@ -1135,7 +1215,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, languageControlProperty);
 					break;
 				case ACTION:
-					stateAudio = mapOfNameAndAudioStatistics.get(audioConfig.getName()).getState();
+					stateAudio = mapOfNameAndAudioStatistics.get(audioName).getState();
 					String[] dropdownAction = AudioActionEnum.getArrayOfEnumByAction(stateAudio);
 					value = stateDropdown.get(stateAudio);
 					AdvancedControllableProperty actionDropdownControlProperty = controlDropdownAcceptNoneValue(stats, dropdownAction, audioKeyName, value);
@@ -1320,6 +1400,14 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		Map<String, String> algorithmParamMap = AlgorithmEnum.getMapOfAlgorithmDropdown(false);
 		String id = EncoderConstant.EMPTY_STRING;
 		AudioConfig audio = mapOfNameAndAudioConfig.get(audioName);
+		if (audio == null) {
+			for (Map.Entry<String, AudioConfig> audioKey : mapOfNameAndAudioConfig.entrySet()) {
+				if (audioKey.getKey().contains(audioName)) {
+					audio = mapOfNameAndAudioConfig.get(audioKey.getKey());
+					break;
+				}
+			}
+		}
 		if (audio != null) {
 			id = audio.getId();
 		}
@@ -1778,6 +1866,113 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		}
 		return initial;
 	}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// create Stream
+
+	/**
+	 * Create output stream
+	 *
+	 * @param stats is list statistics
+	 * @param advancedControllableProperties is list advancedControllableProperties
+	 */
+	private void createOutputStream(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
+		String streamKey = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
+		String[] videoNames = mapOfNameAndVideoConfig.keySet().toArray(new String[mapOfNameAndVideoConfig.size()]);
+		String[] protocolDropdown = EnumTypeHandler.getEnumNames(ProtocolEnum.class);
+		String[] fecDropdown = FecEnum.getArrayOfNameByUDPMode();
+		String[] stillImageDropdown = stillImageList.toArray(new String[stillImageList.size()]);
+
+		String contentName = streamKey + StreamControllingMetric.NAME.getName();
+		String sourceVideoName = streamKey + StreamControllingMetric.SOURCE_VIDEO.getName();
+		String protocolName = streamKey + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String addressName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+		String portName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+		String fecName = streamKey + StreamControllingMetric.PARAMETER_FEC.getName();
+		String trafficShapingName = streamKey + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName();
+		String mtuName = streamKey + StreamControllingMetric.PARAMETER_MTU.getName();
+		String ttlName = streamKey + StreamControllingMetric.PARAMETER_TTL.getName();
+		String tosName = streamKey + StreamControllingMetric.PARAMETER_TOS.getName();
+		String transmitSAPName = streamKey + StreamControllingMetric.SAP_TRANSMIT.getName();
+		String stillImageName = streamKey + StreamControllingMetric.STILL_IMAGE.getName();
+		String vfEncryption = streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName();
+
+		//add stream name
+		advancedControllableProperties.add(controlTextOrNumeric(stats, contentName, EncoderConstant.EMPTY_STRING, false));
+		//add source video
+		advancedControllableProperties.add(controlDropdown(stats, videoNames, sourceVideoName, videoNames[0]));
+		//add audio source. Initialize source audio list
+		for (int index = 0; index < EncoderConstant.MAX_SOURCE_AUDIO_DROPDOWN; index++) {
+			mapOfNameAndSourceAudio.put(StreamControllingMetric.SOURCE_AUDIO.getName() + EncoderConstant.SPACE + index, null);
+		}
+		addSourceAudioForOutputStream(stats, advancedControllableProperties);
+		// add Streaming Protocol default Ts over UDP
+		advancedControllableProperties.add(controlDropdown(stats, protocolDropdown, protocolName, ProtocolEnum.TS_UDP.getValue()));
+		//add Streaming Destination Address
+		advancedControllableProperties.add(controlTextOrNumeric(stats, addressName, EncoderConstant.EMPTY_STRING, false));
+		//add Streaming Destination Port
+		advancedControllableProperties.add(controlTextOrNumeric(stats, portName, EncoderConstant.EMPTY_STRING, false));
+		//add FEC
+		advancedControllableProperties.add(controlDropdownAcceptNoneValue(stats, fecDropdown, fecName, EncoderConstant.NONE));
+		//add Traffic Shaping
+		advancedControllableProperties.add(controlSwitch(stats, trafficShapingName, String.valueOf(EncoderConstant.ZERO), EncoderConstant.DISABLE, EncoderConstant.ENABLE));
+		//add MTU and TTL
+		advancedControllableProperties.add(controlTextOrNumeric(stats, mtuName, String.valueOf(EncoderConstant.DEFAULT_MTU), true));
+		advancedControllableProperties.add(controlTextOrNumeric(stats, ttlName, String.valueOf(EncoderConstant.DEFAULT_TTL), true));
+		//add TOS
+		advancedControllableProperties.add(controlTextOrNumeric(stats, tosName, String.valueOf(EncoderConstant.DEFAULT_TOS), false));
+		// add monitoring VF Encryption
+		stats.put(vfEncryption, EncoderConstant.OFF);
+		//add Transmit SAP
+		advancedControllableProperties.add(controlSwitch(stats, transmitSAPName, String.valueOf(EncoderConstant.ZERO), EncoderConstant.DISABLE, EncoderConstant.ENABLE));
+		//add still image
+		advancedControllableProperties.add(controlDropdownAcceptNoneValue(stats, stillImageDropdown, stillImageName, EncoderConstant.NONE));
+	}
+
+	/**
+	 * Add new Source Audio for output stream
+	 *
+	 * @param stats is list of stats
+	 * @param advancedControllablePropertyList is list AdvancedControllableProperty instance
+	 * @throws ResourceNotReachableException if assign more than 7 source audio
+	 */
+	private void addSourceAudioForOutputStream(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllablePropertyList) {
+		mapOfNameAndAudioConfig.put(EncoderConstant.NONE, new AudioConfig());
+		String prefixName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
+		String[] audioNames = mapOfNameAndAudioConfig.keySet().toArray(new String[mapOfNameAndAudioConfig.size()]);
+		Arrays.sort(audioNames);
+		Map<Integer, String> audioIdList = new HashMap<>();
+		int countSource = 0;
+
+		//Check list source audio assigned in stream
+		for (Map.Entry<String, Audio> audioKey : mapOfNameAndSourceAudio.entrySet()) {
+			if (audioKey.getValue() != null && audioKey.getValue().getAudioId() != null) {
+				audioIdList.put(Integer.valueOf(audioKey.getValue().getAudioId()), audioKey.getValue().getAudioName());
+				countSource++;
+			}
+		}
+		//Maximum of source audio is 8,
+		if (countSource == EncoderConstant.MAX_SOURCE_AUDIO_DROPDOWN) {
+			throw new ResourceNotReachableException("The audio source just assign max audio source is 8.");
+		}
+		for (Map.Entry<String, Audio> audioEntry : mapOfNameAndSourceAudio.entrySet()) {
+			String defaultName = audioNames[0];
+			for (int i = 0; i < EncoderConstant.MAX_SOURCE_AUDIO_DROPDOWN; i++) {
+				if (!audioIdList.containsKey(i)) {
+					defaultName = mapOfIdAndNameAudioConfig.get(String.valueOf(i));
+					break;
+				}
+			}
+			if (audioEntry.getValue() == null) {
+				advancedControllablePropertyList.add(controlDropdown(stats, audioNames, prefixName + audioEntry.getKey(), defaultName));
+				Audio audio = new Audio();
+				audio.setAudioId(mapOfNameAndAudioConfig.get(defaultName).getId());
+				audioEntry.setValue(audio);
+				break;
+			}
+		}
+	}
+
 
 	/**
 	 * Update the value for the control metric
