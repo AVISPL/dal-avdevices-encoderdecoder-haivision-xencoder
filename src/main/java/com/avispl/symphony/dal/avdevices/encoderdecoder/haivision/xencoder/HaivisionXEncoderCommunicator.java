@@ -1504,11 +1504,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		isEmergencyDelivery = true;
 		switch (videoControllingMetric) {
 			case GOP_SIZE:
-				BigInteger gopSize = getValueByRange(new BigInteger(EncoderConstant.MIN_GOP_SIZE), new BigInteger(EncoderConstant.MAX_GOP_SIZE), new BigInteger(value));
+				int gopSize = getValueByRange(EncoderConstant.MIN_GOP_SIZE, EncoderConstant.MAX_GOP_SIZE, value);
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(gopSize), extendedStatistics, advancedControllableProperties);
 				break;
 			case BITRATE:
-				BigInteger bitrate = getValueByRange(new BigInteger(EncoderConstant.MIN_BITRATE), new BigInteger(EncoderConstant.MAX_BITRATE), new BigInteger(value) );
+				int bitrate = getValueByRange(EncoderConstant.MIN_BITRATE, EncoderConstant.MAX_BITRATE, value);
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(bitrate), extendedStatistics, advancedControllableProperties);
 				break;
 			case RESOLUTION:
@@ -1550,7 +1550,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				}
 				break;
 			case INTRA_REFRESH_RATE:
-				BigInteger intraRefreshRate = getValueByRange(new BigInteger(EncoderConstant.MIN_REFRESH_RATE), new BigInteger(EncoderConstant.MAX_REFRESH_RATE), new BigInteger(value));
+				int intraRefreshRate = getValueByRange(EncoderConstant.MIN_REFRESH_RATE, EncoderConstant.MAX_REFRESH_RATE, value);
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(intraRefreshRate), extendedStatistics, advancedControllableProperties);
 
 				//update intra refresh rate
@@ -1764,19 +1764,27 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param min is the minimum value
 	 * @param max is the maximum value
 	 * @param value is the value to compare between min and max value
-	 * @return BigInteger is value or initial value
+	 * @return int is value or initial value
 	 */
-	private BigInteger getValueByRange(BigInteger min, BigInteger max, BigInteger value) {
-		if (min.compareTo(value) <= 0 && value.compareTo(max) <= 0) {
-			return value;
+	private int getValueByRange(int min, int max, String value) {
+		int initial = min;
+		try {
+			int valueCompare = Integer.parseInt(value);
+			if (min < valueCompare && valueCompare < max) {
+				return valueCompare;
+			}
+			if (valueCompare > max) {
+				initial = max;
+			}
+			return initial;
+		} catch (Exception e) {
+			//example value  1xxxxxxx, return max value
+			//example value -1xxxxxxx, return min value
+			if (!value.contains(EncoderConstant.DASH)) {
+				initial = max;
+			}
+			return initial;
 		}
-		BigInteger initial;
-		if (value.compareTo(min) < 0) {
-			initial = min;
-		} else {
-			initial = max;
-		}
-		return initial;
 	}
 
 	/**
