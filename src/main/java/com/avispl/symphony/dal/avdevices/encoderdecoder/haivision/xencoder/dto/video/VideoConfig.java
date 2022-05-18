@@ -6,6 +6,9 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
+import com.avispl.symphony.dal.util.StringUtils;
+
 /**
  * VideoConfig DTO class
  *
@@ -69,6 +72,11 @@ public class VideoConfig  {
 
 	@JsonAlias("Picture Partitioning")
 	private String picturePartitioning;
+
+	@JsonAlias("Partial Frame Skip")
+	private String partialFrameSkip;
+
+	private String action;
 
 	/**
 	 * Retrieves {@code {@link #id}}
@@ -392,5 +400,62 @@ public class VideoConfig  {
 	 */
 	public void setPicturePartitioning(String picturePartitioning) {
 		this.picturePartitioning = picturePartitioning;
+	}
+
+	/**
+	 * Retrieves {@code {@link #partialFrameSkip}}
+	 *
+	 * @return value of {@link #partialFrameSkip}
+	 */
+	public String getPartialFrameSkip() {
+		return partialFrameSkip;
+	}
+
+	/**
+	 * Sets {@code partialFrameSkip}
+	 *
+	 * @param partialFrameSkip the {@code java.lang.String} field
+	 */
+	public void setPartialFrameSkip(String partialFrameSkip) {
+		this.partialFrameSkip = partialFrameSkip;
+	}
+
+	/**
+	 * Retrieves {@code {@link #action}}
+	 *
+	 * @return value of {@link #action}
+	 */
+	public String getAction() {
+		return action;
+	}
+
+	/**
+	 * Sets {@code action}
+	 *
+	 * @param action the {@code java.lang.String} field
+	 */
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	/**
+	 * Get To String of Video configs
+	 *
+	 * @return String is full param of Video config
+	 */
+	@Override
+	public String toString() {
+		String intraRefreshRateValue = EncoderConstant.EMPTY_STRING;
+		String croppingValue = EncoderConstant.EMPTY_STRING;
+		if (!StringUtils.isNullOrEmpty(intraRefreshRate)) {
+			intraRefreshRateValue = String.format(" refreshRate=%s", intraRefreshRate);
+		}
+		if (!StringUtils.isNullOrEmpty(cropping)) {
+			croppingValue = String.format(" reSizeMode=%s", cropping);
+		}
+		return String.format(
+				" bitrate=%s gopSize=%s closedCaption=%s input=%s timeCode=%s aspectRatio=%s resolution=%s gopStructure=%s picRate=%s intraRefresh=%s entropyCoding=%s partitioning=%s skipFrames=%s%s%s",
+				bitrate, gopSize, closedCaption, inputInterface, timeCode, aspectRatio, resolution, framing, frameRate, intraRefresh, entropyCoding, picturePartitioning, partialFrameSkip,
+				intraRefreshRateValue, croppingValue);
 	}
 }

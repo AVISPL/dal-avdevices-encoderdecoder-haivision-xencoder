@@ -13,13 +13,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.avispl.symphony.api.dal.dto.control.ControllableProperty;
 import com.avispl.symphony.api.dal.dto.monitor.ExtendedStatistics;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioControllingMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.StreamMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.SystemMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoMonitoringMetric;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AlgorithmEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.AudioActionEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EntropyCodingEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ResolutionEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.TimeCodeSource;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.VideoControllingMetric;
 
 /**
  * Unit test for HaivisionXEncoderCommunicator
@@ -34,6 +46,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@BeforeEach()
 	public void setUp() throws Exception {
 		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
+		haivisionXEncoderCommunicator.setConfigManagement("true");
 		haivisionXEncoderCommunicator.setHost("***REMOVED***");
 		haivisionXEncoderCommunicator.setPort(22);
 		haivisionXEncoderCommunicator.setLogin("admin");
@@ -131,5 +144,688 @@ public class HaivisionXEncoderCommunicatorTest {
 		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
 		Assertions.assertNotNull(stats.get(EncoderMonitoringMetric.TEMPERATURE.getName()));
+	}
+
+	/**
+	 * Test get Audio control: with Input properties is SDI 1 (1-2)
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlInput() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.INPUT.getName();
+		String propValue = InputEnum.SDI_1_1_2.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Channel Mode properties is stereo
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlChannelModeIsStereo() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.CHANGE_MODE.getName();
+		String propValue = ChannelModeEnum.STEREO.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Bitrate properties is 128 kbps
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlBitrate() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.BITRATE.getName();
+		String propValue = BitRateEnum.NUMBER_128.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Algorithm properties is MPEG-4 LOAS/LATM
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlAlgorithmModeIsLOAS() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.ALGORITHM.getName();
+		String propValue = AlgorithmEnum.MPEG_4.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Language properties is English
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlLanguageIsEnglish() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.LANGUAGE.getName();
+		String propValue = LanguageEnum.ENGLISH.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Action properties is Start
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlActionIsStart() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.ACTION.getName();
+		String propValue = AudioActionEnum.START.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+
+	/**
+	 * Test get Audio control: with Apply Change properties
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlApplyChange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#BitRate";
+		String propValue = "2";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameAction = "Audio Encoder 0#" + AudioControllingMetric.ACTION.getName();
+		String propValueAction = AudioActionEnum.START.getName();
+		controllableProperty.setProperty(propNameAction);
+		controllableProperty.setValue(propValueAction);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameApplyChange = "Audio Encoder 0#" + AudioControllingMetric.APPLY_CHANGE.getName();
+		String propValueApplyChange = "1";
+		controllableProperty.setProperty(propNameApplyChange);
+		controllableProperty.setValue(propValueApplyChange);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValueAction,stats.get(propNameAction));
+	}
+
+	// UT for video Control--------------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Test Video control: with Input properties is BNC-1
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlInput() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" +VideoControllingMetric.INPUT.getName();
+		String propValue = "BNC-1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats  = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with BitRate properties in range 32-25000
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlBitRateInRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.BITRATE.getName();
+		String propValue = "46";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with BitRate properties out off min range <32
+	 *
+	 * Expect bitRate to take the minimum value of 32
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlBitRateOutOfMinRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.BITRATE.getName();
+		String gOPSize = "HD Video Encoder 0#" + VideoControllingMetric.GOP_SIZE.getName();
+		String propValue = "32";
+		String gOPSizeValue = "105";
+
+		controllableProperty.setProperty(gOPSize);
+		controllableProperty.setValue(gOPSizeValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		 haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("32",stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with BitRate properties out off max range >25000
+	 *
+	 * Expect bitRate to take the Maximum value of 25000
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlBitRateOutOfMaxRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.BITRATE.getName();
+		String propValue = "25001";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("25000",stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Resolution properties is Automatic
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlResolutionIsAutomatic() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.RESOLUTION.getName();
+		String propValue = ResolutionEnum.RESOLUTION_AUTOMATIC.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String croppingName = "HD Video Encoder 0#" + VideoControllingMetric.CROPPING.getName();
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+		Assertions.assertNull(stats.get(croppingName));
+	}
+
+	/**
+	 * Test Video control: with Resolution properties different Automatic
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlResolutionDifferentAutomatic() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.RESOLUTION.getName();
+		String propValue = ResolutionEnum.RESOLUTION_800_600.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String croppingName = "HD Video Encoder 0#" + VideoControllingMetric.CROPPING.getName();
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+
+		Assertions.assertEquals(propValue,stats.get(propName));
+		Assertions.assertNotNull(stats.get(croppingName));
+	}
+
+	/**
+	 * Test Video control: with Frame Rate properties is 60
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlFrameRate() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.FRAME_RATE.getName();
+		String propValue = "60";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Framing properties is IBP
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlFramingIsIBP() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.FRAMING.getName();
+		String propValue = "IBP";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with GOP Size properties in range 1-1000
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlGOPSizeInRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.GOP_SIZE.getName();
+		String propValue = "50";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with GOP Size properties out off min range <1
+	 *
+	 * Expect GOPSize to take the minimum value of 1
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlGOPSizeOutOfMinRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.GOP_SIZE.getName();
+		String propValue = "-1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("1",stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with GOP Size properties out off max range >1000
+	 *
+	 * Expect GOPSize to take the Maximum value of 1000
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlGOPSizeOutOfMaxRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.GOP_SIZE.getName();
+		String propValue = "10001";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("1000",stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Aspect Ratio properties is mode 3:2
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlAspectRatioMode_3_2() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.ASPECT_RATIO.getName();
+		String propValue = "3:2";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Closed Caption properties is mode enable
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlClosedCaptionEnable() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.CLOSED_CAPTION.getName();
+		String propValue = "1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Closed Caption properties is mode disable
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlClosedCaptionDisable() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.CLOSED_CAPTION.getName();
+		String propValue = "0";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with time code source properties is system
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlTimeCodeSourceIsSystem() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.TIME_CODE_SOURCE.getName();
+		String propValue = TimeCodeSource.SYSTEM.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with time code source properties is None
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlTimeCodeSourceIsNone() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.TIME_CODE_SOURCE.getName();
+		String propValue = TimeCodeSource.None.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Entropy Coding properties is CAVLC
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlEntropyCodingIsCAVLC() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.ENTROPY_CODING.getName();
+		String propValue = EntropyCodingEnum.CAVLC.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Entropy Coding properties is CABAC
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlEntropyCodingIsCABAC() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.ENTROPY_CODING.getName();
+		String propValue = EntropyCodingEnum.CABAC.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Partitioning properties is mode enable
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlPartitioningEnable() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.PARTITIONING.getName();
+		String propValue = "1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Partitioning properties is mode disable
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlPartitioningDisable() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.PARTITIONING.getName();
+		String propValue = "0";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Intra Refresh properties is mode enable
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlIntraRefreshEnable() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.PARTITIONING.getName();
+		String propValue = "1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String intraRefreshRate = "HD Video Encoder 0#" + VideoControllingMetric.INTRA_REFRESH_RATE.getName();
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+		Assertions.assertNotNull(stats.get(intraRefreshRate));
+	}
+
+	/**
+	 * Test Video control: with Intra Refresh properties is mode disable
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlIntraRefreshDisable() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.INTRA_REFRESH.getName();
+		String propValue = "0";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String intraRefreshRate = "HD Video Encoder 0#" + VideoControllingMetric.INTRA_REFRESH_RATE.getName();
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals("",stats.get(intraRefreshRate));
+	}
+
+	/**
+	 * Test Video control: with Partial Image Skip properties is mode enable
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlPartialImageSkipEnable() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.PARTIAL_IMAGE_SKIP.getName();
+		String propValue = "1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
+	}
+
+	/**
+	 * Test Video control: with Partial Image Skip properties is mode disable
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlPartialImageSkipDisable() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.PARTIAL_IMAGE_SKIP.getName();
+		String propValue = "0";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue,stats.get(propName));
 	}
 }

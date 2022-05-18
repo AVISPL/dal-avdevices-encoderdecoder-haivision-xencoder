@@ -4,7 +4,7 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
- * AudioMonitoringMetric class defined the enum for the monitoring process
+ * AudioMonitoringMetric class defined the enum of the monitoring metrics
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022
@@ -18,7 +18,7 @@ public enum AudioMonitoringMetric {
 	ENCODED_FRAMES("EncodedFrames"),
 	STC_SOURCE_INTERFACE("STCSourceInterface"),
 	ENCODER_ERRORS("EncoderErrors"),
-	ENCODED_BITRATE("EncodedBitrate"),
+	ENCODED_BITRATE("EncodedBitrate (kbps)"),
 	MAX_SAMPLE_VALUE("MaxSampleValue"),
 	NAME("Name");
 

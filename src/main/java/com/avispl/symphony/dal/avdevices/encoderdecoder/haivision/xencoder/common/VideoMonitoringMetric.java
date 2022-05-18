@@ -4,7 +4,7 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
- * VideoMonitoringMetric class defined the enum for the monitoring process
+ * VideoMonitoringMetric class defined the enum of the monitoring metrics
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022
@@ -19,15 +19,22 @@ public enum VideoMonitoringMetric {
 	ENCODER_BYTES("EncodedBytes"),
 	ENCODER_FRAME_RATE("EncodedFrameRate"),
 	DROPPED_FRAMES("DroppedFrames"),
-	ENCODER_BITRATE("EncodeBitrate"),
+	ENCODER_BITRATE("EncodedBitrate (kbps)"),
 	ENCODER_RESETS("EncoderResets"),
 	ENCODER_PTS("EncoderPTS"),
-	ENCODER_LOAD("EncoderLoad"),
+	ENCODER_LOAD("EncoderLoad (%)"),
 	CLOSED_CAPTIONING("ClosedCaptioning"),
 	PROFILE("H.264Profile"),
 	LEVEL("H.264Level"),
 	TIME_CODE_SOURCE("TimeCodeSource"),
-	TIME_CODE("TimeCode");
+	TIME_CODE("TimeCode"),
+	EXTRACTED_CC_BYTES("ExtractedCCBytes"),
+	CC_ERRORS("CCErrors"),
+	EXTRACTED_CSD_BYTES("ExtractedCSDBytes"),
+	INPUT_TYPE("InputType"),
+	INPUT_FORMAT("InputFormat"),
+	ASPECT_RATIO("AspectRatio"),
+	RESOLUTION("OutputResolution");
 
 	public final String name;
 

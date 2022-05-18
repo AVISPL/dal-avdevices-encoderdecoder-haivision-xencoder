@@ -4,7 +4,7 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common;
 
 /**
- * EncoderMonitoringMetric class defined the enum for the monitoring process
+ * EncoderMonitoringMetric class defined the enum of the monitoring metrics
  *
  * @author Kevin / Symphony Dev Team<br>
  * Created on 4/19/2022
@@ -14,13 +14,14 @@ public enum EncoderMonitoringMetric {
 
 	ROLE_BASED("RoleBased", false),
 	ACCOUNT("Account", false),
-	TEMPERATURE("TemperatureStatus", true),
+	TEMPERATURE("Temperature", true),
 	SYSTEM_INFORMATION("SystemInformation", true),
 	AUDIO_STATISTICS("AudioStatistics", true),
 	AUDIO_CONFIG("AudioConfig", true),
 	VIDEO_STATISTICS("AudioStatistics", true),
 	VIDEO_CONFIG("AudioConfig", true),
 	STREAM_STATISTICS("StreamStatistics", true),
+	INPUT("Vidin", true),
 	STREAM_CONFIG("StreamConfig", true);
 
 	private final String name;
