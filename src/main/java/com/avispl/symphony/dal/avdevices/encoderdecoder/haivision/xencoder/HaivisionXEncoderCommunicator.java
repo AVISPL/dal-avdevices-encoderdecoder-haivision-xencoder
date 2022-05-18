@@ -1274,7 +1274,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					throw new ResourceNotReachableException(String.format("Change action %s failed", audioConfig.getAction()));
 				}
 			} catch (Exception e) {
-				logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 				throw new ResourceNotReachableException("Error while setting action audio config: " + e.getMessage(), e);
 			}
 		}
@@ -1298,7 +1297,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				throw new ResourceNotReachableException(responseData);
 			}
 		} catch (Exception e) {
-			logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 			throw new ResourceNotReachableException("Error while setting audio config: " + e.getMessage(), e);
 		}
 	}
@@ -1636,7 +1634,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					throw new ResourceNotReachableException(String.format("Change video %s failed", videoConfigData.getAction()));
 				}
 			} catch (Exception e) {
-				logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 				throw new ResourceNotReachableException("Error while setting action video config: " + e.getMessage(), e);
 			}
 		}
