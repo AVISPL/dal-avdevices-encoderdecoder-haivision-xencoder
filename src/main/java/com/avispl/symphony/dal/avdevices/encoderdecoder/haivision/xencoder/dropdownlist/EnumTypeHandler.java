@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.avispl.symphony.api.dal.error.ResourceNotReachableException;
+
 /**
  * EnumTypeHandler class defined the enum for monitoring and controlling process
  *
@@ -62,5 +63,27 @@ public class EnumTypeHandler {
 			}
 		}
 		return nameMap;
+	}
+
+	/**
+	 * Get metric name of enum by name
+	 *
+	 * @param enumType the enumtype is enum class
+	 * @param name is String
+	 * @return T is metric instance
+	 */
+	public static <T extends Enum<T>> T getMetricOfEnumByName(Class<T> enumType, String name) {
+		try {
+			for (T metric : enumType.getEnumConstants()) {
+				Method methodName = metric.getClass().getMethod("getName");
+				String nameMetric = (String) methodName.invoke(metric); // getName executed
+				if (name.equals(nameMetric)) {
+					return metric;
+				}
+			}
+			throw new ResourceNotReachableException("Error to convert enum " + enumType.getSimpleName() + " to names");
+		} catch (Exception e) {
+			throw new ResourceNotReachableException(e.getMessage(), e);
+		}
 	}
 }

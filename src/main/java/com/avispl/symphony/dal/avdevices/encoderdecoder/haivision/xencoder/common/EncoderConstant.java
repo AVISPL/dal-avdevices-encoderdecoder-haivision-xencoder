@@ -75,9 +75,18 @@ public class EncoderConstant {
 	public static final String CREATE_STREAM = "CreateStream";
 	public static final String AUDIO_ENCODER = "Audio Encoder ";
 	public static final String MP4 = "mp4";
-	public static final int DEFAULT_TOS = 0x80;
+	public static final String DEFAULT_TOS = "0x80";
+	public static final String MAX_TOS = "FF";
+	public static final String MIN_TOS = "00";
 	public static final int MAX_SOURCE_AUDIO_DROPDOWN = 8;
 	public static final int DEFAULT_MTU = 1496;
+	public static final int MIN_MTU = 228;
+	public static final int MAX_MTU = 1500;
 	public static final int DEFAULT_TTL = 64;
+	public static final int MIN_TTL = 1;
+	public static final int MAX_TTL = 255;
+	public static final String ADD = "+";
+	public static final String ADDING = "Adding";
+	public static final String HEX_PREFIX = "0x";
 
 }

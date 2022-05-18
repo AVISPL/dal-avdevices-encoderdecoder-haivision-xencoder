@@ -8,6 +8,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ProtocolEnum;
+import com.avispl.symphony.dal.util.StringUtils;
+
 /**
  * StreamStatistics DTO class
  *
@@ -82,6 +85,18 @@ public class StreamConfig {
 
 	@JsonAlias("Persistent")
 	private String persistent;
+
+	@JsonAlias("FEC")
+	private String fec;
+
+	@JsonAlias("Idle Cells")
+	private String idleCells;
+
+	@JsonAlias("Delayed Audio")
+	private String delayAudio;
+
+	@JsonAlias("Ceiling")
+	private String bandwidthOverhead;
 
 	/**
 	 * Retrieves {@code {@link #state}}
@@ -513,5 +528,112 @@ public class StreamConfig {
 	 */
 	public void setPersistent(String persistent) {
 		this.persistent = persistent;
+	}
+
+	/**
+	 * Retrieves {@code {@link #fec}}
+	 *
+	 * @return value of {@link #fec}
+	 */
+	public String getFec() {
+		return fec;
+	}
+
+	/**
+	 * Sets {@code fec}
+	 *
+	 * @param fec the {@code java.lang.String} field
+	 */
+	public void setFec(String fec) {
+		this.fec = fec;
+	}
+
+	/**
+	 * Retrieves {@code {@link #idleCells}}
+	 *
+	 * @return value of {@link #idleCells}
+	 */
+	public String getIdleCells() {
+		return idleCells;
+	}
+
+	/**
+	 * Sets {@code idleCells}
+	 *
+	 * @param idleCells the {@code java.lang.String} field
+	 */
+	public void setIdleCells(String idleCells) {
+		this.idleCells = idleCells;
+	}
+
+	/**
+	 * Retrieves {@code {@link #delayAudio}}
+	 *
+	 * @return value of {@link #delayAudio}
+	 */
+	public String getDelayAudio() {
+		return delayAudio;
+	}
+
+	/**
+	 * Sets {@code delayAudio}
+	 *
+	 * @param delayAudio the {@code java.lang.String} field
+	 */
+	public void setDelayAudio(String delayAudio) {
+		this.delayAudio = delayAudio;
+	}
+
+	/**
+	 * Retrieves {@code {@link #bandwidthOverhead}}
+	 *
+	 * @return value of {@link #bandwidthOverhead}
+	 */
+	public String getBandwidthOverhead() {
+		return bandwidthOverhead;
+	}
+
+	/**
+	 * Sets {@code bandwidthOverhead}
+	 *
+	 * @param bandwidthOverhead the {@code java.lang.String} field
+	 */
+	public void setBandwidthOverhead(String bandwidthOverhead) {
+		this.bandwidthOverhead = bandwidthOverhead;
+	}
+
+	@Override
+	public String toString() {
+		String paramRequest = null;
+		if (ProtocolEnum.TS_UDP.getValue().equals(encapsulation)) {
+			String nameValue = getFormatNameByValue(name, "name");
+			String videoSrcValue = getFormatNameByValue(video, "videoSrc");
+			String audioSrcValue = getFormatNameByValue(audioList.toString(), "audioSrc");
+			String protocolValue = getFormatNameByValue(encapsulation, "encapsulation");
+			String addressValue = getFormatNameByValue(address, "addR");
+			String portValue = getFormatNameByValue(address, "port");
+			String fecValue = getFormatNameByValue(fec, "efc");
+			String trafficShapingValue = getFormatNameByValue(shaping, "shaping");
+			String idleCellsValue = getFormatNameByValue(idleCells, "idleCells");
+			String delayAudioValue = getFormatNameByValue(delayAudio, "delayAudio");
+			String mtuValue = getFormatNameByValue(mtu, "mtu");
+			String ttlValue = getFormatNameByValue(ttl, "ttl");
+			String tosValue = getFormatNameByValue(tos, "tos");
+			String stillImageValue = getFormatNameByValue(stillImageFile, "stillImage");
+			paramRequest = String.format(" %s %s %s %s %s %s %s %s %s %s %s %s %s %s", nameValue, videoSrcValue, audioSrcValue, protocolValue, addressValue, portValue, fecValue, trafficShapingValue,
+					idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, stillImageValue);
+		}
+		return paramRequest;
+	}
+
+	/**
+	 * Get format name if value different null or empty
+	 *
+	 * @param value is value of StreamConfig instance
+	 * @param name is name of param request to send command
+	 * @return String is format name or empty string
+	 */
+	private String getFormatNameByValue(String value, String name) {
+		return StringUtils.isNullOrEmpty(value) ? "" : String.format(name + "=%", value);
 	}
 }

@@ -16,6 +16,7 @@ public enum StreamControllingMetric {
 	NAME("Name"),
 	SOURCE_VIDEO("SourceVideo"),
 	SOURCE_AUDIO("SourceAudio"),
+	ADD_SOURCE_AUDIO("AddSourceAudio"),
 	STREAMING_PROTOCOL("StreamingProtocol"),
 	STREAMING_DESTINATION_ADDRESS("StreamingDestinationAddress"),
 	STREAMING_DESTINATION_PORT("StreamingDestinationPort"),

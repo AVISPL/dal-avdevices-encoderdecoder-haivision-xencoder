@@ -381,9 +381,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 			Map<String, String> extendedStatistics = localExtendedStatistics.getStatistics();
 			List<AdvancedControllableProperty> advancedControllableProperties = localExtendedStatistics.getControllableProperties();
-			String propertiesAudioAndVideo = property.substring(0, EncoderConstant.AUDIO.length());
-			if (EncoderConstant.AUDIO.equals(propertiesAudioAndVideo)) {
+			String propertiesAudio = property.substring(0, EncoderConstant.AUDIO.length());
+			String propertiesStreamOutput = property.substring(0, EncoderConstant.STREAM.length());
+			if (EncoderConstant.AUDIO.equals(propertiesAudio)) {
 				controlAudioProperty(property, value, extendedStatistics, advancedControllableProperties);
+			} else if (EncoderConstant.STREAM.equals(propertiesStreamOutput)) {
+				controlCreateStreamProperty(property, value, extendedStatistics, advancedControllableProperties);
 			} else {
 				controlVideoProperty(property, value, extendedStatistics, advancedControllableProperties);
 			}
@@ -1354,7 +1357,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					throw new ResourceNotReachableException(String.format("Change action %s failed", audioConfig.getAction()));
 				}
 			} catch (Exception e) {
-				logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 				throw new ResourceNotReachableException("Error while setting action audio config: " + e.getMessage(), e);
 			}
 		}
@@ -1378,7 +1380,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				throw new ResourceNotReachableException(responseData);
 			}
 		} catch (Exception e) {
-			logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 			throw new ResourceNotReachableException("Error while setting audio config: " + e.getMessage(), e);
 		}
 	}
@@ -1724,7 +1725,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					throw new ResourceNotReachableException(String.format("Change video %s failed", videoConfigData.getAction()));
 				}
 			} catch (Exception e) {
-				logger.error(String.format(EncoderConstant.COMMAND_FAILED_FORMAT, this.host, request, e));
 				throw new ResourceNotReachableException("Error while setting action video config: " + e.getMessage(), e);
 			}
 		}
@@ -1875,12 +1875,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// create Stream
+// create Stream stream
 
 	/**
 	 * Create output stream
 	 *
-	 * @param stats is list statistics
+	 * @param stats is list of statistics
 	 * @param advancedControllableProperties is list advancedControllableProperties
 	 */
 	private void createOutputStream(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
@@ -1892,6 +1892,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 		String contentName = streamKey + StreamControllingMetric.NAME.getName();
 		String sourceVideoName = streamKey + StreamControllingMetric.SOURCE_VIDEO.getName();
+		String addSourceAudioName = streamKey + StreamControllingMetric.ADD_SOURCE_AUDIO.getName();
 		String protocolName = streamKey + StreamControllingMetric.STREAMING_PROTOCOL.getName();
 		String addressName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
 		String portName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
@@ -1903,6 +1904,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String transmitSAPName = streamKey + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String stillImageName = streamKey + StreamControllingMetric.STILL_IMAGE.getName();
 		String vfEncryption = streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName();
+		String editedName = streamKey + EncoderConstant.EDITED;
 
 		//add stream name
 		advancedControllableProperties.add(controlTextOrNumeric(stats, contentName, EncoderConstant.EMPTY_STRING, false));
@@ -1913,6 +1915,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			mapOfNameAndSourceAudio.put(StreamControllingMetric.SOURCE_AUDIO.getName() + EncoderConstant.SPACE + index, null);
 		}
 		addSourceAudioForOutputStream(stats, advancedControllableProperties);
+		//AddSourceAudio
+		advancedControllableProperties.add(createButton(addSourceAudioName, EncoderConstant.ADD, EncoderConstant.ADDING, 0));
 		// add Streaming Protocol default Ts over UDP
 		advancedControllableProperties.add(controlDropdown(stats, protocolDropdown, protocolName, ProtocolEnum.TS_UDP.getValue()));
 		//add Streaming Destination Address
@@ -1927,13 +1931,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		advancedControllableProperties.add(controlTextOrNumeric(stats, mtuName, String.valueOf(EncoderConstant.DEFAULT_MTU), true));
 		advancedControllableProperties.add(controlTextOrNumeric(stats, ttlName, String.valueOf(EncoderConstant.DEFAULT_TTL), true));
 		//add TOS
-		advancedControllableProperties.add(controlTextOrNumeric(stats, tosName, String.valueOf(EncoderConstant.DEFAULT_TOS), false));
+		advancedControllableProperties.add(controlTextOrNumeric(stats, tosName, EncoderConstant.DEFAULT_TOS, false));
 		// add monitoring VF Encryption
 		stats.put(vfEncryption, EncoderConstant.OFF);
 		//add Transmit SAP
 		advancedControllableProperties.add(controlSwitch(stats, transmitSAPName, String.valueOf(EncoderConstant.ZERO), EncoderConstant.DISABLE, EncoderConstant.ENABLE));
 		//add still image
 		advancedControllableProperties.add(controlDropdownAcceptNoneValue(stats, stillImageDropdown, stillImageName, EncoderConstant.NONE));
+		// add edited = false
+		stats.put(editedName, EncoderConstant.FALSE);
 	}
 
 	/**
@@ -1977,6 +1983,79 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				audioEntry.setValue(audio);
 				break;
 			}
+		}
+	}
+
+	/**
+	 * Control create a stream property
+	 *
+	 * @param property the property is the filed name of controlling metric
+	 * @param value the value is value of metric
+	 * @param stats list stats
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 */
+	private void controlCreateStreamProperty(String property, String value, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
+		// property format: GroupName#PropertyName
+		String[] streamProperty = property.split(EncoderConstant.HASH);
+		String propertyName = streamProperty[1];
+		StreamControllingMetric streamControllingMetric = EnumTypeHandler.getMetricOfEnumByName(StreamControllingMetric.class, propertyName);
+		isEmergencyDelivery = true;
+		switch (streamControllingMetric) {
+			case NAME:
+			case SOURCE_VIDEO:
+			case SOURCE_AUDIO:
+			case STREAMING_DESTINATION_ADDRESS:
+			case PARAMETER_FEC:
+			case PARAMETER_TRAFFIC_SHAPING:
+			case STILL_IMAGE:
+			case SAP_TRANSMIT:
+				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+				break;
+			case PARAMETER_MTU:
+				value = String.valueOf(getValueByRange(EncoderConstant.MIN_MTU, EncoderConstant.MAX_MTU, value));
+				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+				break;
+			case PARAMETER_TTL:
+				value = String.valueOf(getValueByRange(EncoderConstant.MIN_TTL, EncoderConstant.MAX_TTL, value));
+				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+				break;
+			case PARAMETER_TOS:
+				value = getTOSValueByRange(value);
+				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+				break;
+			default:
+				if (logger.isDebugEnabled()) {
+						logger.debug(String.format("Controlling stream create output group %s is not supported.", streamControllingMetric.getName()));
+					}
+				break;
+		}
+	}
+
+	/**
+	 * Get TOS by Range
+	 *
+	 * @param value is tos instance
+	 * @return String is value, if value out of range return min or max value
+	 * @throws NumberFormatException if convert tos failed
+	 */
+	private String getTOSValueByRange(String value) {
+		try {
+			Integer copyValue;
+			if (value.startsWith(EncoderConstant.HEX_PREFIX)) {
+				copyValue = Integer.parseInt(value.replace(EncoderConstant.HEX_PREFIX, ""), 16);
+			} else {
+				copyValue = (int) Float.parseFloat(value);
+			}
+			String copyHexValue = EncoderConstant.HEX_PREFIX + String.format("%02X", 0xFF & copyValue);
+			if (copyValue < Integer.parseInt(EncoderConstant.MIN_TOS, 16)) {
+				copyHexValue = EncoderConstant.HEX_PREFIX + EncoderConstant.MIN_TOS;
+			}
+			if (copyValue > Integer.parseInt(EncoderConstant.MAX_TOS, 16)) {
+				copyHexValue = EncoderConstant.HEX_PREFIX + EncoderConstant.MAX_TOS;
+			}
+			return copyHexValue;
+		} catch (Exception var60) {
+			throw new NumberFormatException("Value of ParameterToS is invalid. TOS must be hex value range to 00-FF");
 		}
 	}
 
