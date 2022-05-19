@@ -16,7 +16,7 @@ public enum StreamControllingMetric {
 	NAME("Name"),
 	SOURCE_VIDEO("SourceVideo"),
 	SOURCE_AUDIO("SourceAudio"),
-	ADD_SOURCE_AUDIO("AddSourceAudio"),
+	ADD_SOURCE_AUDIO("SourceAddAudio"),
 	STREAMING_PROTOCOL("StreamingProtocol"),
 	STREAMING_DESTINATION_ADDRESS("StreamingDestinationAddress"),
 	STREAMING_DESTINATION_PORT("StreamingDestinationPort"),
@@ -29,8 +29,10 @@ public enum StreamControllingMetric {
 	STILL_IMAGE("StillImage"),
 	SAP_TRANSMIT("SAPTransmit"),
 	// end create default stream
-	PARAMETER_CELLS("ParameterIdleCells"),
-	PARAMETER_DELAYED_AUDIO("ParameterDelayedAudio");
+	PARAMETER_IDLE_CELLS("ParameterIdleCells"),
+	PARAMETER_DELAYED_AUDIO("ParameterDelayedAudio"),
+	ACTION("Action"),
+	CANCEL("Cancel");
 
 	private String name;
 

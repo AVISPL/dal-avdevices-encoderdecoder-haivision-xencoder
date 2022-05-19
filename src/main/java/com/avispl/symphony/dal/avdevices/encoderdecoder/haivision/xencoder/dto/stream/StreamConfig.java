@@ -4,6 +4,7 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -604,14 +605,15 @@ public class StreamConfig {
 
 	@Override
 	public String toString() {
-		String paramRequest = null;
+		String paramRequest = "";
+		String audioSource = audioList.stream().map(Audio::getAudioId).collect(Collectors.toList()).toString().replace("[", "").replace("]", "");
 		if (ProtocolEnum.TS_UDP.getValue().equals(encapsulation)) {
 			String nameValue = getFormatNameByValue(name, "name");
 			String videoSrcValue = getFormatNameByValue(video, "videoSrc");
-			String audioSrcValue = getFormatNameByValue(audioList.toString(), "audioSrc");
+			String audioSrcValue = getFormatNameByValue(audioSource, "audioSrc");
 			String protocolValue = getFormatNameByValue(encapsulation, "encapsulation");
 			String addressValue = getFormatNameByValue(address, "addR");
-			String portValue = getFormatNameByValue(address, "port");
+			String portValue = getFormatNameByValue(port, "port");
 			String fecValue = getFormatNameByValue(fec, "efc");
 			String trafficShapingValue = getFormatNameByValue(shaping, "shaping");
 			String idleCellsValue = getFormatNameByValue(idleCells, "idleCells");
@@ -634,6 +636,6 @@ public class StreamConfig {
 	 * @return String is format name or empty string
 	 */
 	private String getFormatNameByValue(String value, String name) {
-		return StringUtils.isNullOrEmpty(value) ? "" : String.format(name + "=%", value);
+		return StringUtils.isNullOrEmpty(value) ? "" : String.format("%s=%s", name, value);
 	}
 }

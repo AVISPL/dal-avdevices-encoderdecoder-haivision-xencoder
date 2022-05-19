@@ -85,8 +85,14 @@ public class EncoderConstant {
 	public static final int DEFAULT_TTL = 64;
 	public static final int MIN_TTL = 1;
 	public static final int MAX_TTL = 255;
-	public static final String ADD = "+";
+	public static final int MIN_PORT = 1025;
+	public static final int MAX_PORT = 65535;
+	public static final String PLUS = "+";
 	public static final String ADDING = "Adding";
 	public static final String HEX_PREFIX = "0x";
+	public static final String CREATE = "Create";
+	public static final String CREATING = "Creating";
+	public static final String YES = "Yes";
+	public static final String SOURCE_AUDIO_0 = "SourceAudio 0";
 
 }

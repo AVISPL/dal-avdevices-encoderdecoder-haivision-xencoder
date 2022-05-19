@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
@@ -94,14 +95,14 @@ import com.avispl.symphony.dal.util.StringUtils;
  */
 public class HaivisionXEncoderCommunicator extends SshCommunicator implements Monitorable, Controller {
 
-	private ExtendedStatistics localExtendedStatistics;
-	private ExtendedStatistics localCreateOutputStream;
+	private boolean isOperatorOrAdministratorRole;
+	private boolean isConfigManagement;
 	private boolean isEmergencyDelivery;
 	private boolean isCreateStreamCalled;
-	private boolean isConfigManagement;
-	private ObjectMapper objectMapper = new ObjectMapper();
 	private Integer noOfMonitoringMetric = 0;
-	private String roleBased;
+	private ExtendedStatistics localExtendedStatistics;
+	private ExtendedStatistics localCreateOutputStream;
+	private ObjectMapper objectMapper = new ObjectMapper();
 	private final Map<String, String> failedMonitor = new HashMap<>();
 	private final Map<String, String> localStatsStreamOutput = new HashMap<>();
 	private final String uuidDay = UUID.randomUUID().toString().replace(EncoderConstant.DASH, EncoderConstant.EMPTY_STRING);
@@ -320,43 +321,45 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		}
 		reentrantLock.lock();
 		try {
-			ExtendedStatistics extendedStatistics = new ExtendedStatistics();
 			Map<String, String> stats = new HashMap<>();
 			Map<String, String> statsCreateOutputStream = new HashMap<>();
+			ExtendedStatistics extendedStatistics = new ExtendedStatistics();
 			List<AdvancedControllableProperty> advancedControllableProperties = new ArrayList<>();
 			List<AdvancedControllableProperty> createStreamAdvancedControllable = new ArrayList<>();
 			failedMonitor.clear();
+
 			if (!isEmergencyDelivery) {
-				roleBased = retrieveUserRole();
+				isOperatorOrAdministratorRole = isControllingByRoleBased(retrieveUserRole());
 				isConfigManagement = isConfigManagementProperties();
 				populateInformationFromDevice(stats, advancedControllableProperties);
-				if ((EncoderConstant.OPERATOR.equals(roleBased) || EncoderConstant.ADMIN.equals(roleBased)) && isConfigManagement) {
+				if (isOperatorOrAdministratorRole && isConfigManagement) {
 					extendedStatistics.setControllableProperties(advancedControllableProperties);
 				}
 				extendedStatistics.setStatistics(stats);
 				localExtendedStatistics = extendedStatistics;
 			}
-			if (EncoderConstant.ADMIN.equals(roleBased) || EncoderConstant.OPERATOR.equals(roleBased) && !isCreateStreamCalled && isConfigManagement) {
-				localCreateOutputStream = new ExtendedStatistics();
-				createOutputStream(statsCreateOutputStream, createStreamAdvancedControllable);
-				localCreateOutputStream.setStatistics(statsCreateOutputStream);
-				localCreateOutputStream.setControllableProperties(createStreamAdvancedControllable);
-				localStatsStreamOutput.putAll(statsCreateOutputStream);
-				isCreateStreamCalled = true;
+
+			if (isOperatorOrAdministratorRole && isConfigManagement) {
+				if (!isCreateStreamCalled) {
+					localCreateOutputStream = new ExtendedStatistics();
+					createOutputStream(statsCreateOutputStream, createStreamAdvancedControllable);
+					localCreateOutputStream.setStatistics(statsCreateOutputStream);
+					localCreateOutputStream.setControllableProperties(createStreamAdvancedControllable);
+					localStatsStreamOutput.putAll(statsCreateOutputStream);
+					isCreateStreamCalled = true;
+				}
+				// add all stats of create output stream into local stats
+				Map<String, String> localStats = localExtendedStatistics.getStatistics();
+				Map<String, String> localStreamStats = localCreateOutputStream.getStatistics();
+				localStats.putAll(localStreamStats);
+
+				//remove and update control property for create output stream into localExtendedStatistics
+				List<AdvancedControllableProperty> localAdvancedControl = localExtendedStatistics.getControllableProperties();
+				List<AdvancedControllableProperty> localStreamAdvancedControl = localCreateOutputStream.getControllableProperties();
+				List<String> nameList = localStreamAdvancedControl.stream().map(AdvancedControllableProperty::getName).collect(Collectors.toList());
+				localAdvancedControl.removeIf(item -> nameList.contains(item.getName()));
+				localAdvancedControl.addAll(localStreamAdvancedControl);
 			}
-
-			// add all stats of create output stream into local stats
-			Map<String, String> localStats = localExtendedStatistics.getStatistics();
-			Map<String, String> localStreamStats = localCreateOutputStream.getStatistics();
-			localStats.putAll(localStreamStats);
-
-			//remove and update control property for create output stream into localExtendedStatistics
-			List<AdvancedControllableProperty> localAdvancedControl = localExtendedStatistics.getControllableProperties();
-			List<AdvancedControllableProperty> localStreamAdvancedControl = localCreateOutputStream.getControllableProperties();
-			List<String> nameList = localStreamAdvancedControl.stream().map(AdvancedControllableProperty::getName).collect(Collectors.toList());
-			localAdvancedControl.removeIf(item -> nameList.contains(item.getName()));
-			localAdvancedControl.addAll(localStreamAdvancedControl);
-
 		} finally {
 			reentrantLock.unlock();
 		}
@@ -376,19 +379,26 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		}
 		reentrantLock.lock();
 		try {
-			if (localExtendedStatistics == null) {
+			if (localExtendedStatistics == null || localCreateOutputStream == null) {
 				return;
 			}
 			Map<String, String> extendedStatistics = localExtendedStatistics.getStatistics();
+			Map<String, String> updateCreateOutputStream = localCreateOutputStream.getStatistics();
 			List<AdvancedControllableProperty> advancedControllableProperties = localExtendedStatistics.getControllableProperties();
-			String propertiesAudio = property.substring(0, EncoderConstant.AUDIO.length());
-			String propertiesStreamOutput = property.substring(0, EncoderConstant.STREAM.length());
-			if (EncoderConstant.AUDIO.equals(propertiesAudio)) {
-				controlAudioProperty(property, value, extendedStatistics, advancedControllableProperties);
-			} else if (EncoderConstant.STREAM.equals(propertiesStreamOutput)) {
-				controlCreateStreamProperty(property, value, extendedStatistics, advancedControllableProperties);
+			List<AdvancedControllableProperty> advancedControllableCreateOutputProperties = localCreateOutputStream.getControllableProperties();
+
+			if (property.contains(EncoderConstant.CREATE_STREAM)) {
+				controlCreateStreamProperty(property, value, updateCreateOutputStream, advancedControllableCreateOutputProperties);
+				if (!updateCreateOutputStream.isEmpty()) {
+					localStatsStreamOutput.putAll(updateCreateOutputStream);
+				}
 			} else {
-				controlVideoProperty(property, value, extendedStatistics, advancedControllableProperties);
+				String propertiesAudio = property.substring(0, EncoderConstant.AUDIO.length());
+				if (EncoderConstant.AUDIO.equals(propertiesAudio)) {
+					controlAudioProperty(property, value, extendedStatistics, advancedControllableProperties);
+				} else {
+					controlVideoProperty(property, value, extendedStatistics, advancedControllableProperties);
+				}
 			}
 		} finally {
 			reentrantLock.unlock();
@@ -406,6 +416,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		for (ControllableProperty controllableProperty : list) {
 			controlProperty(controllableProperty);
 		}
+	}
+
+	/**
+	 * Check roles based on user as operator or administrator
+	 *
+	 * @param roleBased the role is String
+	 * @return boolean type, returns true if roleBased is operator or administrator and vice versa
+	 */
+	private boolean isControllingByRoleBased(String roleBased) {
+		return EncoderConstant.OPERATOR.equals(roleBased) || EncoderConstant.ADMIN.equals(roleBased);
 	}
 
 	/**
@@ -533,7 +553,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void populateConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, EncoderMonitoringMetric metric) {
 		Objects.requireNonNull(stats);
 		Objects.requireNonNull(advancedControllableProperties);
-		if ((EncoderConstant.ADMIN.equals(roleBased) || EncoderConstant.OPERATOR.equals(roleBased)) && isConfigManagement) {
+		if (isOperatorOrAdministratorRole && isConfigManagement) {
 			switch (metric) {
 				case AUDIO_CONFIG:
 					for (AudioConfig audioConfig : audioConfigList) {
@@ -1017,6 +1037,19 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
+	 * Get empty value by none value
+	 *
+	 * @param value the value of properties
+	 * @return String (Empty String/value)
+	 */
+	private String getEmptyValueIfValueIsNone(String value) {
+		if (EncoderConstant.NONE.equals(value)) {
+			return EncoderConstant.EMPTY_STRING;
+		}
+		return value;
+	}
+
+	/**
 	 * Value of list statistics property of system info is none
 	 *
 	 * @param stats list statistics
@@ -1281,7 +1314,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				String[] levelDropdown = EnumTypeHandler.getEnumNames(AudioLevel.class);
 				AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(stats, inputDropdown, property, value);
 				addOrUpdateAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
-				String level = mapOfNameAndAudioConfig.get(audioName).getLevel();
+				String level = EncoderConstant.EMPTY_STRING;
+				for (Entry<String, AudioConfig> audioNameConfig : mapOfNameAndAudioConfig.entrySet()) {
+					if (audioNameConfig.getKey().contains(audioName)) {
+						level = mapOfNameAndAudioConfig.get(audioNameConfig.getKey()).getLevel();
+						break;
+					}
+				}
 				if (StringUtils.isNullOrEmpty(level)) {
 					level = EncoderConstant.DEFAULT_AUDIO_LEVEL;
 				}
@@ -1886,6 +1925,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void createOutputStream(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 		String streamKey = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
 		String[] videoNames = mapOfNameAndVideoConfig.keySet().toArray(new String[mapOfNameAndVideoConfig.size()]);
+		Arrays.sort(videoNames);
 		String[] protocolDropdown = EnumTypeHandler.getEnumNames(ProtocolEnum.class);
 		String[] fecDropdown = FecEnum.getArrayOfNameByUDPMode();
 		String[] stillImageDropdown = stillImageList.toArray(new String[stillImageList.size()]);
@@ -1916,7 +1956,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		}
 		addSourceAudioForOutputStream(stats, advancedControllableProperties);
 		//AddSourceAudio
-		advancedControllableProperties.add(createButton(addSourceAudioName, EncoderConstant.ADD, EncoderConstant.ADDING, 0));
+		stats.put(addSourceAudioName, EncoderConstant.EMPTY_STRING);
+		advancedControllableProperties.add(createButton(addSourceAudioName, EncoderConstant.PLUS, EncoderConstant.ADDING, 0));
 		// add Streaming Protocol default Ts over UDP
 		advancedControllableProperties.add(controlDropdown(stats, protocolDropdown, protocolName, ProtocolEnum.TS_UDP.getValue()));
 		//add Streaming Destination Address
@@ -1996,39 +2037,212 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void controlCreateStreamProperty(String property, String value, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 		// property format: GroupName#PropertyName
+		isCreateStreamCalled = true;
 		String[] streamProperty = property.split(EncoderConstant.HASH);
+		String streamName = streamProperty[0];
 		String propertyName = streamProperty[1];
-		StreamControllingMetric streamControllingMetric = EnumTypeHandler.getMetricOfEnumByName(StreamControllingMetric.class, propertyName);
-		isEmergencyDelivery = true;
-		switch (streamControllingMetric) {
-			case NAME:
-			case SOURCE_VIDEO:
-			case SOURCE_AUDIO:
-			case STREAMING_DESTINATION_ADDRESS:
-			case PARAMETER_FEC:
-			case PARAMETER_TRAFFIC_SHAPING:
-			case STILL_IMAGE:
-			case SAP_TRANSMIT:
-				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
-				break;
-			case PARAMETER_MTU:
-				value = String.valueOf(getValueByRange(EncoderConstant.MIN_MTU, EncoderConstant.MAX_MTU, value));
-				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
-				break;
-			case PARAMETER_TTL:
-				value = String.valueOf(getValueByRange(EncoderConstant.MIN_TTL, EncoderConstant.MAX_TTL, value));
-				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
-				break;
-			case PARAMETER_TOS:
-				value = getTOSValueByRange(value);
-				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
-				break;
-			default:
-				if (logger.isDebugEnabled()) {
+		if (propertyName.contains(StreamControllingMetric.SOURCE_AUDIO.getName())) {
+			if (EncoderConstant.NONE.equals(value) && !EncoderConstant.SOURCE_AUDIO_0.equals(propertyName)) {
+				stats.remove(property);
+				mapOfNameAndSourceAudio.remove(propertyName);
+				mapOfNameAndSourceAudio.put(propertyName, null);
+			} else {
+				String[] audioNames = mapOfNameAndAudioConfig.keySet().toArray(new String[mapOfNameAndAudioConfig.size()]);
+				Arrays.sort(audioNames);
+				AdvancedControllableProperty sourceAudioControlProperty = controlDropdown(stats, audioNames, property, value);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, sourceAudioControlProperty);
+				Audio audio = new Audio();
+				audio.setAudioId(mapOfNameAndAudioConfig.get(value).getId());
+				mapOfNameAndSourceAudio.put(propertyName, audio);
+			}
+		} else {
+			StreamControllingMetric streamControllingMetric = EnumTypeHandler.getMetricOfEnumByName(StreamControllingMetric.class, propertyName);
+			switch (streamControllingMetric) {
+				case NAME:
+				case STILL_IMAGE:
+				case SOURCE_VIDEO:
+				case SOURCE_AUDIO:
+				case SAP_TRANSMIT:
+				case PARAMETER_FEC:
+				case PARAMETER_IDLE_CELLS:
+				case PARAMETER_DELAYED_AUDIO:
+				case STREAMING_DESTINATION_ADDRESS:
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					break;
+				case PARAMETER_TRAFFIC_SHAPING:
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+
+					String idleCellsName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName();
+					String delayedAudioName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName();
+					if (value.equals(String.valueOf(EncoderConstant.NUMBER_ONE))) {
+						String idleCellsValue = localStatsStreamOutput.get(idleCellsName);
+						String delayedAudioValue = localStatsStreamOutput.get(delayedAudioName);
+						//add idleCells
+						if (idleCellsValue == null) {
+							idleCellsValue = String.valueOf(EncoderConstant.ZERO);
+						}
+						AdvancedControllableProperty idleCellsControlProperty = controlSwitch(stats, idleCellsName, idleCellsValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+						addOrUpdateAdvanceControlProperties(advancedControllableProperties, idleCellsControlProperty);
+
+						//add delayedAudio
+						if (delayedAudioValue == null) {
+							delayedAudioValue = String.valueOf(EncoderConstant.ZERO);
+						}
+						AdvancedControllableProperty delayedAudioControlProperty = controlSwitch(stats, delayedAudioName, delayedAudioValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+						addOrUpdateAdvanceControlProperties(advancedControllableProperties, delayedAudioControlProperty);
+					} else {
+						//remove idleCells delayedAudio control if shaping disable
+						stats.remove(idleCellsName);
+						stats.remove(delayedAudioName);
+						advancedControllableProperties.removeIf(item -> item.getName().equals(idleCellsName));
+						advancedControllableProperties.removeIf(item -> item.getName().equals(delayedAudioName));
+					}
+					break;
+				case PARAMETER_MTU:
+					value = String.valueOf(getValueByRange(EncoderConstant.MIN_MTU, EncoderConstant.MAX_MTU, value));
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					break;
+				case PARAMETER_TTL:
+					value = String.valueOf(getValueByRange(EncoderConstant.MIN_TTL, EncoderConstant.MAX_TTL, value));
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					break;
+				case PARAMETER_TOS:
+					value = getTOSValueByRange(value);
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					break;
+				case ADD_SOURCE_AUDIO:
+					addSourceAudioForOutputStream(stats, advancedControllableProperties);
+					break;
+				case STREAMING_DESTINATION_PORT:
+					value = String.valueOf(getValueByRange(EncoderConstant.MIN_PORT, EncoderConstant.MAX_PORT, value));
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					break;
+				case ACTION:
+					StreamConfig streamConfig = convertStreamConfigByValue(stats, EncoderConstant.CREATE_STREAM + EncoderConstant.HASH);
+					sendCommandToCreateStream(streamConfig);
+					isCreateStreamCalled = false;
+					isEmergencyDelivery = false;
+					stats.clear();
+					localStatsStreamOutput.clear();
+					localCreateOutputStream = new ExtendedStatistics();
+					break;
+				case CANCEL:
+					isCreateStreamCalled = false;
+					stats.clear();
+					localStatsStreamOutput.clear();
+					localCreateOutputStream = new ExtendedStatistics();
+					break;
+				case STREAMING_PROTOCOL:
+				default:
+					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("Controlling stream create output group %s is not supported.", streamControllingMetric.getName()));
 					}
-				break;
+					break;
+			}
 		}
+		Map<String, String> extendedStats = localExtendedStatistics.getStatistics();
+		if (isCreateStreamCalled) {
+			//add Edited = True
+			stats.put(streamName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.TRUE);
+
+			//Add action = Create
+			stats.put(streamName + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName(), EncoderConstant.EMPTY_STRING);
+			advancedControllableProperties.add(createButton(streamName + EncoderConstant.HASH + VideoControllingMetric.ACTION.getName(), EncoderConstant.CREATE, EncoderConstant.CREATING, 0));
+
+			//Add Cancel Button
+			stats.put(streamName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.EMPTY_STRING);
+			advancedControllableProperties.add(createButton(streamName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.CANCEL, EncoderConstant.CANCELING, 0));
+
+			//remove all old value of property in localStatsStreamOutput and update it with new value and new property
+			localStatsStreamOutput.keySet().stream().filter(extendedStats::containsKey).collect(Collectors.toList()).forEach(extendedStats::remove);
+			extendedStats.putAll(stats);
+			List<AdvancedControllableProperty> listControlProperty = localExtendedStatistics.getControllableProperties();
+
+			//update or add props form advancedControllableProperties to listControlProperty
+			List<String> newPropNames = advancedControllableProperties.stream().map(AdvancedControllableProperty::getName).collect(Collectors.toList());
+			listControlProperty.removeIf(item -> newPropNames.contains(item.getName()));
+			listControlProperty.addAll(new ArrayList<>(advancedControllableProperties));
+		}
+	}
+
+	/**
+	 * Send command to create new stream
+	 *
+	 * @param streamConfig the streamConfig is instance in StreamConfig
+	 * @throws ResourceNotReachableException if create new stream failed
+	 */
+	private void sendCommandToCreateStream(StreamConfig streamConfig) {
+		String data = streamConfig.toString();
+		String request = EncoderCommand.OPERATION_STREAM.getName() + EncoderCommand.OPERATION_CREATE.getName() + data;
+		try {
+			String responseData = send(request);
+			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
+				throw new ResourceNotReachableException(responseData);
+			}
+		} catch (Exception e) {
+			throw new ResourceNotReachableException("Error while creating new stream: " + e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Convert StreamConfig by value
+	 *
+	 * @return StreamConfig is instance in StreamConfig
+	 */
+	private StreamConfig convertStreamConfigByValue(Map<String, String> stats, String name) {
+		StreamConfig streamConfig = new StreamConfig();
+		String contentValue = stats.get(name + StreamControllingMetric.NAME.getName());
+		String fecValue = stats.get(name + StreamControllingMetric.PARAMETER_FEC.getName());
+		String mtuValue = stats.get(name + StreamControllingMetric.PARAMETER_MTU.getName());
+		String ttlValue = stats.get(name + StreamControllingMetric.PARAMETER_TTL.getName());
+		String tosValue = stats.get(name + StreamControllingMetric.PARAMETER_TOS.getName());
+		String sourceVideoValue = stats.get(name + StreamControllingMetric.SOURCE_VIDEO.getName());
+		String protocolValue = stats.get(name + StreamControllingMetric.STREAMING_PROTOCOL.getName());
+		String portValue = stats.get(name + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName());
+		String addressValue = stats.get(name + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName());
+		String trafficShapingValue = stats.get(name + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName());
+		String stillImageValue = stats.get(name + StreamControllingMetric.STILL_IMAGE.getName());
+		String videoId = mapOfNameAndVideoConfig.get(sourceVideoValue).getId();
+		trafficShapingValue = convertByState(trafficShapingValue, false);
+		String fecMode = EncoderConstant.EMPTY_STRING;
+		List<Audio> audioList = new ArrayList<>();
+		for (Audio audioName : mapOfNameAndSourceAudio.values()) {
+			if (audioName != null && audioName.getAudioId() != null) {
+				audioList.add(audioName);
+			}
+		}
+		if (!FecEnum.NONE.getName().equals(fecValue)) {
+			fecMode = EncoderConstant.YES;
+		}
+		stillImageValue = getEmptyValueIfValueIsNone(stillImageValue);
+		if (!StringUtils.isNullOrEmpty(stillImageValue)) {
+			//subString from 0 to .pm4 of stillImageValue with format havisionImage.pm4 => return haivisionImage
+			stillImageValue = stillImageValue.substring(0, stillImageValue.lastIndexOf(EncoderConstant.MP4) - 1);
+		}
+		streamConfig.setFec(fecMode);
+		streamConfig.setMtu(mtuValue);
+		streamConfig.setTtl(ttlValue);
+		streamConfig.setTos(tosValue);
+		streamConfig.setVideo(videoId);
+		streamConfig.setPort(portValue);
+		streamConfig.setAudioList(audioList);
+		streamConfig.setAddress(addressValue);
+		streamConfig.setEncapsulation(protocolValue);
+		streamConfig.setShaping(trafficShapingValue);
+		streamConfig.setStillImageFile(stillImageValue);
+		streamConfig.setName(replaceSpecialCharacter(contentValue));
+
+		return streamConfig;
+	}
+
+	/**
+	 * Replace special character as space,(,), etc to 'character'
+	 *
+	 * @param str the str is String value
+	 * @return String the String is String to be converted
+	 */
+	private String replaceSpecialCharacter(String str) {
+		return str.replace(EncoderConstant.SPACE, "' '").replace("(", "'('").replace(")", "')'");
 	}
 
 	/**

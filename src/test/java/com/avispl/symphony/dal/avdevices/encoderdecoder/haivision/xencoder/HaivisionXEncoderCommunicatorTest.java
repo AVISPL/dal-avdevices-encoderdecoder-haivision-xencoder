@@ -29,7 +29,6 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropd
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EntropyCodingEnum;
-import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.LanguageEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ResolutionEnum;
@@ -826,8 +825,50 @@ public class HaivisionXEncoderCommunicatorTest {
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
-		ExtendedStatistics extendedStatistics = (ExtendedStatistics)  haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		Map<String, String> stats = extendedStatistics.getStatistics();
-		Assertions.assertEquals(propValue,stats.get(propName));
+		Assertions.assertEquals(propValue, stats.get(propName));
 	}
+
+	//UT for control create stream----------------------------------------------------------------------
+
+	/**
+	 * Test Video control: with Partial Image Skip properties is mode disable
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithNameContent() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + "#" + StreamControllingMetric.NAME.getName();
+		String propValue = "stream Test ";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + "#" + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+		propValue = "126.3.3.2";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + "#SourceAudio 0" ;
+		propValue = "Audio Encoder 4";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+//		Assertions.assertEquals(propValue, stats.get(propName));
+
+		String propNameApplyChange = EncoderConstant.CREATE_STREAM + "#" + StreamControllingMetric.ACTION.getName();
+		String propValueApplyChange = "1";
+		controllableProperty.setProperty(propNameApplyChange);
+		controllableProperty.setValue(propValueApplyChange);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+	}
+
 }
