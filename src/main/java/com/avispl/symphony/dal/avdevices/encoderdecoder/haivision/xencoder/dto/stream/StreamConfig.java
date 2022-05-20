@@ -3,6 +3,8 @@
  */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream;
 
+import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler.replaceSpecialCharacter;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,7 +69,7 @@ public class StreamConfig {
 	private String tos;
 
 	@JsonAlias("Bandwidth")
-	private String bandwidth;
+	private String averageBandwidth;
 
 	@JsonAlias("Traffic Shaping")
 	private String shaping;
@@ -406,21 +408,21 @@ public class StreamConfig {
 	}
 
 	/**
-	 * Retrieves {@code {@link #bandwidth}}
+	 * Retrieves {@code {@link #averageBandwidth }}
 	 *
-	 * @return value of {@link #bandwidth}
+	 * @return value of {@link #averageBandwidth}
 	 */
-	public String getBandwidth() {
-		return bandwidth;
+	public String getAverageBandwidth() {
+		return averageBandwidth;
 	}
 
 	/**
 	 * Sets {@code bandwidth}
 	 *
-	 * @param bandwidth the {@code java.lang.String} field
+	 * @param averageBandwidth the {@code java.lang.String} field
 	 */
-	public void setBandwidth(String bandwidth) {
-		this.bandwidth = bandwidth;
+	public void setAverageBandwidth(String averageBandwidth) {
+		this.averageBandwidth = averageBandwidth;
 	}
 
 	/**
@@ -614,16 +616,17 @@ public class StreamConfig {
 			String protocolValue = getFormatNameByValue(encapsulation, "encapsulation");
 			String addressValue = getFormatNameByValue(address, "addR");
 			String portValue = getFormatNameByValue(port, "port");
-			String fecValue = getFormatNameByValue(fec, "efc");
+			String fecValue = getFormatNameByValue(fec, "fec");
 			String trafficShapingValue = getFormatNameByValue(shaping, "shaping");
 			String idleCellsValue = getFormatNameByValue(idleCells, "idleCells");
 			String delayAudioValue = getFormatNameByValue(delayAudio, "delayAudio");
+			String bandwidthOverHeadValue = getFormatNameByValue(bandwidthOverhead, "ceiling");
 			String mtuValue = getFormatNameByValue(mtu, "mtu");
 			String ttlValue = getFormatNameByValue(ttl, "ttl");
 			String tosValue = getFormatNameByValue(tos, "tos");
 			String stillImageValue = getFormatNameByValue(stillImageFile, "stillImage");
-			paramRequest = String.format(" %s %s %s %s %s %s %s %s %s %s %s %s %s %s", nameValue, videoSrcValue, audioSrcValue, protocolValue, addressValue, portValue, fecValue, trafficShapingValue,
-					idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, stillImageValue);
+			paramRequest = String.format(" %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", nameValue, videoSrcValue, audioSrcValue, protocolValue, addressValue, portValue, fecValue, trafficShapingValue,
+					idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, stillImageValue, bandwidthOverHeadValue);
 		}
 		return paramRequest;
 	}
@@ -636,6 +639,6 @@ public class StreamConfig {
 	 * @return String is format name or empty string
 	 */
 	private String getFormatNameByValue(String value, String name) {
-		return StringUtils.isNullOrEmpty(value) ? "" : String.format("%s=%s", name, value);
+		return StringUtils.isNullOrEmpty(value) ? "" : String.format("%s=%s", name, replaceSpecialCharacter(value));
 	}
 }

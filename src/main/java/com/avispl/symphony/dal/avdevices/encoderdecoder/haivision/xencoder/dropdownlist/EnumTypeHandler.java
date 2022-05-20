@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.avispl.symphony.api.dal.error.ResourceNotReachableException;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
 
 /**
  * EnumTypeHandler class defined the enum for monitoring and controlling process
@@ -85,5 +86,15 @@ public class EnumTypeHandler {
 		} catch (Exception e) {
 			throw new ResourceNotReachableException(e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Replace special character as space,(,), etc to 'character'
+	 *
+	 * @param str the str is String value
+	 * @return String the String is String to be converted
+	 */
+	public static String replaceSpecialCharacter(String str) {
+		return str.replace(EncoderConstant.SPACE, "' '").replace("(", "'('").replace(")", "')'");
 	}
 }

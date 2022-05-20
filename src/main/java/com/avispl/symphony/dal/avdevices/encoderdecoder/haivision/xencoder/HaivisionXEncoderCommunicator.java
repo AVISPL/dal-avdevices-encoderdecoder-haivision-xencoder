@@ -67,6 +67,7 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.a
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.audio.AudioStatistics;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream.Audio;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream.StreamConfig;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream.StreamSAP;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream.StreamStatistics;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.video.VideoConfig;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.video.VideoStatistics;
@@ -592,7 +593,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 			String metricName = EncoderConstant.STREAM + EncoderConstant.SPACE + streamName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (StreamMonitoringMetric streamMonitoringMetric : StreamMonitoringMetric.values()) {
-				String streamValue = getDefaultValueForNullData(streamStatistics.getValueByMetric(streamMonitoringMetric));
+				String streamValue = getDefaultValueForNullOrNoneData(streamStatistics.getValueByMetric(streamMonitoringMetric), true);
 				String streamKeyName = metricName + streamMonitoringMetric.getName();
 
 				//Normalize for the stream metric
@@ -659,7 +660,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String audioName = audioStatistics.getName();
 			String metricName = audioName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (AudioMonitoringMetric audioMetric : AudioMonitoringMetric.values()) {
-				String audioValue = getDefaultValueForNullData(audioStatistics.getValueByMetric(audioMetric));
+				String audioValue = getDefaultValueForNullOrNoneData(audioStatistics.getValueByMetric(audioMetric), true);
 				String audioKeyName = metricName + audioMetric.getName();
 				if (audioMetric.equals(AudioMonitoringMetric.ENCODED_BITRATE)) {
 					stats.put(audioKeyName, convertValueByIndexOfSpace(audioValue));
@@ -684,7 +685,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String videoName = videoStatistics.getName();
 			String metricName = videoName + EncoderConstant.SPACE + EncoderConstant.STATISTICS + EncoderConstant.HASH;
 			for (VideoMonitoringMetric videoMetric : VideoMonitoringMetric.values()) {
-				String videoValue = getDefaultValueForNullData(videoStatistics.getValueByMetric(videoMetric));
+				String videoValue = getDefaultValueForNullOrNoneData(videoStatistics.getValueByMetric(videoMetric), true);
 				String videoKeyName = metricName + videoMetric.getName();
 
 				//Normalize for the video metric
@@ -901,7 +902,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String responseData = send(request);
 			if (responseData != null) {
 				TemperatureStatus systemInfoResponse = objectMapper.convertValue(populateConvertDataToObject(responseData, request, true), TemperatureStatus.class);
-				String temperatureStatus = getDefaultValueForNullData(systemInfoResponse.getTemperature());
+				String temperatureStatus = getDefaultValueForNullOrNoneData(systemInfoResponse.getTemperature(), true);
 				int index = temperatureStatus.indexOf(EncoderConstant.SPACE);
 				if (index != -1) {
 					temperatureStatus = temperatureStatus.substring(0, index);
@@ -1012,7 +1013,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			if (responseData != null) {
 				SystemInfoResponse systemInfoResponse = objectMapper.convertValue(populateConvertDataToObject(responseData, request, true), SystemInfoResponse.class);
 				for (SystemMonitoringMetric systemInfoMetric : SystemMonitoringMetric.values()) {
-					stats.put(systemInfoMetric.getName(), getDefaultValueForNullData(systemInfoResponse.getValueByMetric(systemInfoMetric)));
+					stats.put(systemInfoMetric.getName(), getDefaultValueForNullOrNoneData(systemInfoResponse.getValueByMetric(systemInfoMetric), true));
 				}
 			} else {
 				contributeNoneValueForSystemInfo(stats);
@@ -1024,26 +1025,33 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Get default None if the value is Null or Empty
+	 * Get default value by Null/None value. if value different Null/None return the value instead.
 	 *
 	 * @param value the value of monitoring properties
+	 * @param isCheckNullData is boolean type if isCheckNullData = true convert null to None value and vice versa convert None to Empty String
 	 * @return String (none/value)
 	 */
-	private String getDefaultValueForNullData(String value) {
-		if (StringUtils.isNullOrEmpty(value)) {
-			return EncoderConstant.NONE;
+	private String getDefaultValueForNullOrNoneData(String value, boolean isCheckNullData) {
+		if (isCheckNullData) {
+			if (StringUtils.isNullOrEmpty(value)) {
+				value = EncoderConstant.NONE;
+			}
+		} else {
+			if (EncoderConstant.NONE.equals(value)) {
+				value = EncoderConstant.EMPTY_STRING;
+			}
 		}
 		return value;
 	}
 
 	/**
-	 * Get empty value by none value
+	 * Get empty value by null or empty value, if value different Null/Empty return the value instead.
 	 *
 	 * @param value the value of properties
 	 * @return String (Empty String/value)
 	 */
-	private String getEmptyValueIfValueIsNone(String value) {
-		if (EncoderConstant.NONE.equals(value)) {
+	private String getEmptyValueForNullData(String value) {
+		if (StringUtils.isNullOrEmpty(value)) {
 			return EncoderConstant.EMPTY_STRING;
 		}
 		return value;
@@ -1500,7 +1508,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					stats.put(videoKeyName, stateVideo);
 					break;
 				case INPUT_FORMAT:
-					String videoValue = getDefaultValueForNullData(mapOfNameAndVideoStatistics.get(videoName).getInputFormat());
+					String videoValue = getDefaultValueForNullOrNoneData(mapOfNameAndVideoStatistics.get(videoName).getInputFormat(), true);
 					boolean isValidValue = videoValue.equals(EncoderConstant.NONE) || videoValue.equals(EncoderConstant.UNKNOWN);
 					if (isValidValue) {
 						videoValue = EncoderConstant.NO_INPUT;
@@ -2062,41 +2070,21 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				case STILL_IMAGE:
 				case SOURCE_VIDEO:
 				case SOURCE_AUDIO:
-				case SAP_TRANSMIT:
 				case PARAMETER_FEC:
 				case PARAMETER_IDLE_CELLS:
 				case PARAMETER_DELAYED_AUDIO:
+				case PARAMETER_BANDWIDTH_OVERHEAD:
 				case STREAMING_DESTINATION_ADDRESS:
+				case SAP_NAME:
+				case SAP_KEYWORDS:
+				case SAP_DESCRIPTION:
+				case SAP_AUTHOR:
+				case SAP_COPYRIGHT:
+				case SAP_ADDRESS:
 					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
 					break;
 				case PARAMETER_TRAFFIC_SHAPING:
-					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
-
-					String idleCellsName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName();
-					String delayedAudioName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName();
-					if (value.equals(String.valueOf(EncoderConstant.NUMBER_ONE))) {
-						String idleCellsValue = localStatsStreamOutput.get(idleCellsName);
-						String delayedAudioValue = localStatsStreamOutput.get(delayedAudioName);
-						//add idleCells
-						if (idleCellsValue == null) {
-							idleCellsValue = String.valueOf(EncoderConstant.ZERO);
-						}
-						AdvancedControllableProperty idleCellsControlProperty = controlSwitch(stats, idleCellsName, idleCellsValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-						addOrUpdateAdvanceControlProperties(advancedControllableProperties, idleCellsControlProperty);
-
-						//add delayedAudio
-						if (delayedAudioValue == null) {
-							delayedAudioValue = String.valueOf(EncoderConstant.ZERO);
-						}
-						AdvancedControllableProperty delayedAudioControlProperty = controlSwitch(stats, delayedAudioName, delayedAudioValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-						addOrUpdateAdvanceControlProperties(advancedControllableProperties, delayedAudioControlProperty);
-					} else {
-						//remove idleCells delayedAudio control if shaping disable
-						stats.remove(idleCellsName);
-						stats.remove(delayedAudioName);
-						advancedControllableProperties.removeIf(item -> item.getName().equals(idleCellsName));
-						advancedControllableProperties.removeIf(item -> item.getName().equals(delayedAudioName));
-					}
+					populateStreamCreateModeTrafficShapingMode(property, value, stats, advancedControllableProperties, streamName);
 					break;
 				case PARAMETER_MTU:
 					value = String.valueOf(getValueByRange(EncoderConstant.MIN_MTU, EncoderConstant.MAX_MTU, value));
@@ -2114,25 +2102,22 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addSourceAudioForOutputStream(stats, advancedControllableProperties);
 					break;
 				case STREAMING_DESTINATION_PORT:
+				case SAP_PORT:
 					value = String.valueOf(getValueByRange(EncoderConstant.MIN_PORT, EncoderConstant.MAX_PORT, value));
 					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
 					break;
+				case SAP_TRANSMIT:
+					populateStreamCreateWithSAPMode(property, value, stats, advancedControllableProperties, streamName);
+					break;
 				case ACTION:
-					StreamConfig streamConfig = convertStreamConfigByValue(stats, EncoderConstant.CREATE_STREAM + EncoderConstant.HASH);
+					StreamConfig streamConfig = convertStreamConfigByValue(localStatsStreamOutput, EncoderConstant.CREATE_STREAM + EncoderConstant.HASH);
 					sendCommandToCreateStream(streamConfig);
 					isCreateStreamCalled = false;
-					isEmergencyDelivery = false;
-					stats.clear();
-					localStatsStreamOutput.clear();
-					localCreateOutputStream = new ExtendedStatistics();
 					break;
 				case CANCEL:
 					isCreateStreamCalled = false;
-					stats.clear();
-					localStatsStreamOutput.clear();
-					localCreateOutputStream = new ExtendedStatistics();
 					break;
-				case STREAMING_PROTOCOL:
+
 				default:
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("Controlling stream create output group %s is not supported.", streamControllingMetric.getName()));
@@ -2162,6 +2147,139 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			List<String> newPropNames = advancedControllableProperties.stream().map(AdvancedControllableProperty::getName).collect(Collectors.toList());
 			listControlProperty.removeIf(item -> newPropNames.contains(item.getName()));
 			listControlProperty.addAll(new ArrayList<>(advancedControllableProperties));
+		} else {
+			stats.clear();
+			isEmergencyDelivery = false;
+			localStatsStreamOutput.clear();
+			localCreateOutputStream = new ExtendedStatistics();
+		}
+	}
+
+	/**
+	 * Control property with mode is SAP
+	 *
+	 * @param property the property is the filed name of controlling metric
+	 * @param value the value is value of metric
+	 * @param stats is list of stats
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 * @param streamName is name of Stream
+	 */
+	private void populateStreamCreateWithSAPMode(String property, String value, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, String streamName) {
+		updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+
+		String keyProperty = streamName + EncoderConstant.HASH;
+		String sapName = keyProperty + StreamControllingMetric.SAP_NAME.getName();
+		String keywordsName = keyProperty + StreamControllingMetric.SAP_KEYWORDS.getName();
+		String descName = keyProperty + StreamControllingMetric.SAP_DESCRIPTION.getName();
+		String authorName = keyProperty + StreamControllingMetric.SAP_AUTHOR.getName();
+		String copyrightName = keyProperty + StreamControllingMetric.SAP_COPYRIGHT.getName();
+		String addressName = keyProperty + StreamControllingMetric.SAP_ADDRESS.getName();
+		String portName = keyProperty + StreamControllingMetric.SAP_PORT.getName();
+		if (value.equals(String.valueOf(EncoderConstant.NUMBER_ONE))) {
+			String sapNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(sapName));
+			String keywordsNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(keywordsName));
+			String descNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(descName));
+			String authorNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(authorName));
+			String copyrightNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(copyrightName));
+			String addressNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(addressName));
+			String portNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(portName));
+
+			//add sapName
+			AdvancedControllableProperty sapNameControlProperty = controlTextOrNumeric(stats, sapName, sapNameValue, false);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, sapNameControlProperty);
+
+			//add keywordsName
+			AdvancedControllableProperty sapKeywordsControlProperty = controlTextOrNumeric(stats, keywordsName, keywordsNameValue, false);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, sapKeywordsControlProperty);
+
+			//add descName
+			AdvancedControllableProperty sapDescControlProperty = controlTextOrNumeric(stats, descName, descNameValue, false);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, sapDescControlProperty);
+
+			//add authorName
+			AdvancedControllableProperty sapAuthorControlProperty = controlTextOrNumeric(stats, authorName, authorNameValue, false);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, sapAuthorControlProperty);
+
+			//add copyrightName
+			AdvancedControllableProperty sapCopyrightControlProperty = controlTextOrNumeric(stats, copyrightName, copyrightNameValue, false);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, sapCopyrightControlProperty);
+
+			//add addressName
+			AdvancedControllableProperty sapAddressControlProperty = controlTextOrNumeric(stats, addressName, addressNameValue, false);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, sapAddressControlProperty);
+
+			//add portName
+			if (StringUtils.isNullOrEmpty(portNameValue)) {
+				portNameValue = String.valueOf(EncoderConstant.DEFAULT_SAP_PORT);
+			}
+			AdvancedControllableProperty sapPortControlProperty = controlTextOrNumeric(stats, portName, portNameValue, true);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, sapPortControlProperty);
+		} else {
+			stats.remove(sapName);
+			stats.remove(keywordsName);
+			stats.remove(descName);
+			stats.remove(authorName);
+			stats.remove(copyrightName);
+			stats.remove(addressName);
+			stats.remove(portName);
+			advancedControllableProperties.removeIf(item -> item.getName().equals(sapName));
+			advancedControllableProperties.removeIf(item -> item.getName().equals(keywordsName));
+			advancedControllableProperties.removeIf(item -> item.getName().equals(descName));
+			advancedControllableProperties.removeIf(item -> item.getName().equals(authorName));
+			advancedControllableProperties.removeIf(item -> item.getName().equals(copyrightName));
+			advancedControllableProperties.removeIf(item -> item.getName().equals(addressName));
+			advancedControllableProperties.removeIf(item -> item.getName().equals(portName));
+		}
+	}
+
+	/**
+	 * Control property with mode is Traffic Shaping
+	 *
+	 * @param property the property is the filed name of controlling metric
+	 * @param value the value is value of metric
+	 * @param stats is list of stats
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 * @param streamName is name of Stream
+	 */
+	private void populateStreamCreateModeTrafficShapingMode(String property, String value, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties,
+			String streamName) {
+		updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+		String idleCellsName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName();
+		String delayedAudioName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName();
+		String bandwidthOverheadName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_BANDWIDTH_OVERHEAD.getName();
+
+		if (value.equals(String.valueOf(EncoderConstant.NUMBER_ONE))) {
+			String idleCellsValue = localStatsStreamOutput.get(idleCellsName);
+			String delayedAudioValue = localStatsStreamOutput.get(delayedAudioName);
+			String bandwidthOverheadValue = localStatsStreamOutput.get(bandwidthOverheadName);
+			//add idleCells
+			if (idleCellsValue == null) {
+				idleCellsValue = String.valueOf(EncoderConstant.ZERO);
+			}
+			AdvancedControllableProperty idleCellsControlProperty = controlSwitch(stats, idleCellsName, idleCellsValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, idleCellsControlProperty);
+
+			//add delayedAudio
+			if (delayedAudioValue == null) {
+				delayedAudioValue = String.valueOf(EncoderConstant.ZERO);
+			}
+			AdvancedControllableProperty delayedAudioControlProperty = controlSwitch(stats, delayedAudioName, delayedAudioValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, delayedAudioControlProperty);
+
+			//add bandwidth overhead
+			if (bandwidthOverheadValue == null) {
+				bandwidthOverheadValue = String.valueOf(EncoderConstant.DEFAULT_BANDWIDTH_OVERHEAD);
+			}
+			AdvancedControllableProperty refreshRateControlProperty = controlTextOrNumeric(stats, bandwidthOverheadName, bandwidthOverheadValue, true);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
+		} else {
+			//remove idleCells, delayedAudio, bandwidthOverhead control if shaping disable
+			stats.remove(idleCellsName);
+			stats.remove(delayedAudioName);
+			stats.remove(bandwidthOverheadName);
+			advancedControllableProperties.removeIf(item -> item.getName().equals(idleCellsName));
+			advancedControllableProperties.removeIf(item -> item.getName().equals(delayedAudioName));
+			advancedControllableProperties.removeIf(item -> item.getName().equals(bandwidthOverheadName));
 		}
 	}
 
@@ -2175,9 +2293,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String data = streamConfig.toString();
 		String request = EncoderCommand.OPERATION_STREAM.getName() + EncoderCommand.OPERATION_CREATE.getName() + data;
 		try {
-			String responseData = send(request);
+			String responseData = send(request.replace("\r", ""));
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new ResourceNotReachableException(responseData);
+			}
+			StreamSAP streamSAP = streamConfig.getSap();
+			if (streamSAP != null && StringUtils.isNullOrEmpty(streamSAP.getName())) {
+				sendCommandToCreateStreamTransmitSAP(responseData, streamSAP);
 			}
 		} catch (Exception e) {
 			throw new ResourceNotReachableException("Error while creating new stream: " + e.getMessage(), e);
@@ -2185,25 +2307,65 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
+	 * Send command to create new stream
+	 *
+	 * @param data the data is response data of the device
+	 * @param streamSAP the streamSAP is instance in StreamSAP DTO
+	 * @throws ResourceNotReachableException if create new stream failed
+	 */
+	private void sendCommandToCreateStreamTransmitSAP(String data, StreamSAP streamSAP) {
+		String idStream = getIdStreamFromResponse(data);
+		String dataRequest = streamSAP.toString();
+		String request = EncoderCommand.OPERATION_SESSION.getName() + EncoderCommand.OPERATION_CREATE.getName() + EncoderCommand.OPERATION_STREAM.getName() + EncoderConstant.EQUAL + idStream + dataRequest;
+		try {
+			String responseData = send(request.replace("\r", ""));
+			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
+				throw new ResourceNotReachableException(responseData);
+			}
+		} catch (Exception e) {
+			throw new ResourceNotReachableException("Error while creating new SAP: " + e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Get ID Stream from responseData
+	 *
+	 * @param responseData the responseData is data received from device
+	 * @return String is Id of stream
+	 */
+	private String getIdStreamFromResponse(String responseData) {
+		String[] listId = responseData.split("ID:");
+		return listId[1].replace(".", "");
+	}
+
+	/**
 	 * Convert StreamConfig by value
 	 *
+	 * @param stats the stats is list of stats
+	 * @param streamName the streamName is name of stream
 	 * @return StreamConfig is instance in StreamConfig
 	 */
-	private StreamConfig convertStreamConfigByValue(Map<String, String> stats, String name) {
+	private StreamConfig convertStreamConfigByValue(Map<String, String> stats, String streamName) {
 		StreamConfig streamConfig = new StreamConfig();
-		String contentValue = stats.get(name + StreamControllingMetric.NAME.getName());
-		String fecValue = stats.get(name + StreamControllingMetric.PARAMETER_FEC.getName());
-		String mtuValue = stats.get(name + StreamControllingMetric.PARAMETER_MTU.getName());
-		String ttlValue = stats.get(name + StreamControllingMetric.PARAMETER_TTL.getName());
-		String tosValue = stats.get(name + StreamControllingMetric.PARAMETER_TOS.getName());
-		String sourceVideoValue = stats.get(name + StreamControllingMetric.SOURCE_VIDEO.getName());
-		String protocolValue = stats.get(name + StreamControllingMetric.STREAMING_PROTOCOL.getName());
-		String portValue = stats.get(name + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName());
-		String addressValue = stats.get(name + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName());
-		String trafficShapingValue = stats.get(name + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName());
-		String stillImageValue = stats.get(name + StreamControllingMetric.STILL_IMAGE.getName());
+		String contentValue = stats.get(streamName + StreamControllingMetric.NAME.getName());
+		String fecValue = stats.get(streamName + StreamControllingMetric.PARAMETER_FEC.getName());
+		String mtuValue = stats.get(streamName + StreamControllingMetric.PARAMETER_MTU.getName());
+		String ttlValue = stats.get(streamName + StreamControllingMetric.PARAMETER_TTL.getName());
+		String tosValue = stats.get(streamName + StreamControllingMetric.PARAMETER_TOS.getName());
+		String sourceVideoValue = stats.get(streamName + StreamControllingMetric.SOURCE_VIDEO.getName());
+		String protocolValue = stats.get(streamName + StreamControllingMetric.STREAMING_PROTOCOL.getName());
+		String portValue = stats.get(streamName + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName());
+		String addressValue = stats.get(streamName + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName());
+		String trafficShapingValue = stats.get(streamName + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName());
+		String stillImageValue = stats.get(streamName + StreamControllingMetric.STILL_IMAGE.getName());
+		String idleCellsValue = stats.get(streamName + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName());
+		String delayedAudioValue = stats.get(streamName + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName());
+		String bandwidthOverHeadValue = stats.get(streamName + StreamControllingMetric.PARAMETER_BANDWIDTH_OVERHEAD.getName());
 		String videoId = mapOfNameAndVideoConfig.get(sourceVideoValue).getId();
 		trafficShapingValue = convertByState(trafficShapingValue, false);
+		idleCellsValue = convertByState(idleCellsValue, false);
+		delayedAudioValue = convertByState(delayedAudioValue, false);
+		stillImageValue = getDefaultValueForNullOrNoneData(stillImageValue, false);
 		String fecMode = EncoderConstant.EMPTY_STRING;
 		List<Audio> audioList = new ArrayList<>();
 		for (Audio audioName : mapOfNameAndSourceAudio.values()) {
@@ -2214,12 +2376,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (!FecEnum.NONE.getName().equals(fecValue)) {
 			fecMode = EncoderConstant.YES;
 		}
-		stillImageValue = getEmptyValueIfValueIsNone(stillImageValue);
 		if (!StringUtils.isNullOrEmpty(stillImageValue)) {
 			//subString from 0 to .pm4 of stillImageValue with format havisionImage.pm4 => return haivisionImage
 			stillImageValue = stillImageValue.substring(0, stillImageValue.lastIndexOf(EncoderConstant.MP4) - 1);
 		}
+		StreamSAP streamSAP = getStreamSAPFromStatsByStreamName(stats, streamName);
 		streamConfig.setFec(fecMode);
+		streamConfig.setSap(streamSAP);
 		streamConfig.setMtu(mtuValue);
 		streamConfig.setTtl(ttlValue);
 		streamConfig.setTos(tosValue);
@@ -2229,20 +2392,48 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		streamConfig.setAddress(addressValue);
 		streamConfig.setEncapsulation(protocolValue);
 		streamConfig.setShaping(trafficShapingValue);
+		streamConfig.setName(contentValue);
 		streamConfig.setStillImageFile(stillImageValue);
-		streamConfig.setName(replaceSpecialCharacter(contentValue));
+		streamConfig.setIdleCells(idleCellsValue);
+		streamConfig.setDelayAudio(delayedAudioValue);
+		streamConfig.setBandwidthOverhead(bandwidthOverHeadValue);
 
 		return streamConfig;
 	}
 
 	/**
-	 * Replace special character as space,(,), etc to 'character'
+	 * Get stream SAP from stats by stream name
 	 *
-	 * @param str the str is String value
-	 * @return String the String is String to be converted
+	 * @param stats is list of stats
+	 * @param streamName the streamName is name of stream
+	 * @return StreamSAP the StreamSAP instance in StreamSAP DTO
+	 * @throws ResourceNotReachableException if SAP name is Null or Empty
 	 */
-	private String replaceSpecialCharacter(String str) {
-		return str.replace(EncoderConstant.SPACE, "' '").replace("(", "'('").replace(")", "')'");
+	private StreamSAP getStreamSAPFromStatsByStreamName(Map<String, String> stats, String streamName) {
+		StreamSAP streamSAP = new StreamSAP();
+		String transmitSAP = convertByState(stats.get(streamName + StreamControllingMetric.SAP_TRANSMIT.getName()), false);
+		if (transmitSAP.equals(EncoderConstant.ON)) {
+			String sapName = stats.get(streamName + StreamControllingMetric.SAP_NAME.getName());
+			String sapKeywords = stats.get(streamName + StreamControllingMetric.SAP_KEYWORDS.getName());
+			String sapDesc = stats.get(streamName + StreamControllingMetric.SAP_DESCRIPTION.getName());
+			String sapCopyright = stats.get(streamName + StreamControllingMetric.SAP_COPYRIGHT.getName());
+			String sapAddress = stats.get(streamName + StreamControllingMetric.SAP_ADDRESS.getName());
+			String sapPort = stats.get(streamName + StreamControllingMetric.SAP_PORT.getName());
+			String sapAuthor = stats.get(streamName + StreamControllingMetric.SAP_AUTHOR.getName());
+
+			if (StringUtils.isNullOrEmpty(sapName)) {
+				throw new ResourceNotReachableException("Create stream failed, the SAP name can't Null or Empty");
+			}
+			streamSAP.setAdvertise(EncoderConstant.YES);
+			streamSAP.setName(sapName);
+			streamSAP.setKeywords(sapKeywords);
+			streamSAP.setDesc(sapDesc);
+			streamSAP.setCopyright(sapCopyright);
+			streamSAP.setAddress(sapAddress);
+			streamSAP.setPort(sapPort);
+			streamSAP.setAuthor(sapAuthor);
+		}
+		return streamSAP;
 	}
 
 	/**

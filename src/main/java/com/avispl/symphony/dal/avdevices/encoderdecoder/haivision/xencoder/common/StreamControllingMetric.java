@@ -28,9 +28,19 @@ public enum StreamControllingMetric {
 	PARAMETER_VF_ENCRYPTION("ParameterVFEncryption"),
 	STILL_IMAGE("StillImage"),
 	SAP_TRANSMIT("SAPTransmit"),
+	//SAP mode
+	SAP_NAME("SAPName"),
+	SAP_KEYWORDS("SAPKeywords"),
+	SAP_DESCRIPTION("SAPDescription"),
+	SAP_AUTHOR("SAPAuthor"),
+	SAP_COPYRIGHT("SAPCopyright"),
+	SAP_ADDRESS("SAPAddress"),
+	SAP_PORT("SAPPort"),
 	// end create default stream
 	PARAMETER_IDLE_CELLS("ParameterIdleCells"),
 	PARAMETER_DELAYED_AUDIO("ParameterDelayedAudio"),
+	PARAMETER_BANDWIDTH_OVERHEAD("ParameterBandwidthOverhead (%)"),
+
 	ACTION("Action"),
 	CANCEL("Cancel");
 

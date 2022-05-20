@@ -28,6 +28,7 @@ public enum EncoderCommand {
 	OPERATION_STREAM("stream "),
 	OPERATION_CREATE("create "),
 	OPERATION_DELETE("delete "),
+	OPERATION_SESSION("session "),
 
 	//video command
 	OPERATION_VIDENC("videnc "),
