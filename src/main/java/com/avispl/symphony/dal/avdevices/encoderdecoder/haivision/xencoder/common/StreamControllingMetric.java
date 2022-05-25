@@ -40,7 +40,24 @@ public enum StreamControllingMetric {
 	PARAMETER_IDLE_CELLS("ParameterIdleCells"),
 	PARAMETER_DELAYED_AUDIO("ParameterDelayedAudio"),
 	PARAMETER_BANDWIDTH_OVERHEAD("ParameterBandwidthOverhead (%)"),
-
+	//RTMP protocol
+	RTMP_PUBLISH_NAME("RTMPPublishName"),
+	RTMP_USERNAME("RTMPUsername"),
+	RTMP_PASSWORD("RTMPPassword"),
+	RTMP_CONFIRMATION_PASSWORD("RTMPConfirmationPassword"),
+	// DIRECT_RTP
+	STREAMING_DESTINATION_ADDRESS_PORT_AUDIO("StreamingDestinationPortAudio"),
+	//SRT protocol
+	STREAM_CONNECTION_MODE("StreamingConnectionMode"),
+	STREAM_CONNECTION_ADDRESS("StreamingConnectionAddress"),
+	STREAM_CONNECTION_SOURCE_PORT("StreamingConnectionSourcePort"),
+	STREAM_CONNECTION_DESTINATION_PORT("StreamingConnectionDestinationPort"),
+	STREAM_NETWORK_ADAPTIVE("StreamingNetworkAdaptive"),
+	STREAM_LATENCY("StreamingLatency"),
+	STREAM_ENCRYPTION("StreamingEncryption"),
+	STREAM_PASSPHRASE("StreamingPassphrase"),
+	//Listener Mode
+	STREAM_CONNECTION_PORT("StreamingConnectionPort"),
 	ACTION("Action"),
 	CANCEL("Cancel");
 

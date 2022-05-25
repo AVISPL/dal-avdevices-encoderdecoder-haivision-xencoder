@@ -15,13 +15,15 @@ import java.util.List;
  */
 public enum FecEnum {
 
-	VF("VF", "Furnace", "yes", true),
-	NONE("None", "", "no", true);
+	VF("VF", "Furnace", "yes", true, false),
+	PRO_MPEG("Pro-MPEG", "Pro-MPEG", "yes", false, true),
+	NONE("None", "", "no", true, true);
 
 	private final String name;
 	private final String value;
 	private final String paramValue;
 	private final boolean isUDPMode;
+	private final boolean isRTPMode;
 
 	/**
 	 * FecEnum instantiation
@@ -30,12 +32,14 @@ public enum FecEnum {
 	 * @param value {@code {@link #value}}
 	 * @param paramValue {@code {@link #paramValue}}
 	 * @param isUDPMode {@code {@link #isUDPMode}}
+	 * @param isRTPMode {@code {@link #isRTPMode}}
 	 */
-	FecEnum(String name, String value, String paramValue, boolean isUDPMode) {
+	FecEnum(String name, String value, String paramValue, boolean isUDPMode, boolean isRTPMode) {
 		this.name = name;
 		this.value = value;
 		this.paramValue = paramValue;
 		this.isUDPMode = isUDPMode;
+		this.isRTPMode = isRTPMode;
 	}
 
 	/**
@@ -66,15 +70,39 @@ public enum FecEnum {
 	}
 
 	/**
-	 * Receive array is all names of FECEnum with mode TS over UDP
+	 * Retrieves {@code {@link #isUDPMode}}
+	 *
+	 * @return value of {@link #isUDPMode}
+	 */
+	public boolean isUDPMode() {
+		return isUDPMode;
+	}
+
+	/**
+	 * Retrieves {@code {@link #isRTPMode}}
+	 *
+	 * @return value of {@link #isRTPMode}
+	 */
+	public boolean isRTPMode() {
+		return isRTPMode;
+	}
+
+	/**
+	 * Receive array is all names of FECEnum with mode TS over UDP or TS over RTP
 	 *
 	 * @return Array is list name of FEC
 	 */
-	public static String[] getArrayOfNameByUDPMode() {
+	public static String[] getArrayOfNameByUDPOrRTPMode(boolean isUDPMode) {
 		List<String> arrayFec = new ArrayList<>();
 		for (FecEnum fecEnum : FecEnum.values()) {
-			if (fecEnum.isUDPMode) {
-				arrayFec.add(fecEnum.getName());
+			if (isUDPMode) {
+				if (fecEnum.isUDPMode()) {
+					arrayFec.add(fecEnum.getName());
+				}
+			} else {
+				if (fecEnum.isRTPMode()) {
+					arrayFec.add(fecEnum.getName());
+				}
 			}
 		}
 		return arrayFec.toArray(new String[arrayFec.size()]);
