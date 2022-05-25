@@ -88,6 +88,8 @@ public class EncoderConstant {
 	public static final int MIN_PORT = 1025;
 	public static final int MAX_PORT = 65535;
 	public static final int DEFAULT_BANDWIDTH_OVERHEAD = 15;
+	public static final int MIN_BANDWIDTH_OVERHEAD = 5;
+	public static final int MAX_BANDWIDTH_OVERHEAD = 50;
 	public static final int DEFAULT_SAP_PORT = 9875;
 	public static final String PLUS = "+";
 	public static final String ADDING = "Adding";
@@ -97,5 +99,7 @@ public class EncoderConstant {
 	public static final String YES = "Yes";
 	public static final String SOURCE_AUDIO_0 = "SourceAudio 0";
 	public static final String EQUAL = "=";
+	public static final String DOT = ".";
+	public static final String STREAM_CREATE_RESPONSE = "Stream created successfully";
 
 }

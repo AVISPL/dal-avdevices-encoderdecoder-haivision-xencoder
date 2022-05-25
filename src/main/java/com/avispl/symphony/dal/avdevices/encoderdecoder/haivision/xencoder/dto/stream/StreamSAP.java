@@ -3,8 +3,12 @@
  */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream;
 
+import com.avispl.symphony.dal.util.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler.replaceSpecialCharacter;
 
 /**
  * StreamSAP DTO class
@@ -224,5 +228,29 @@ public class StreamSAP {
 	 */
 	public void setStreamId(String streamId) {
 		this.streamId = streamId;
+	}
+
+	@Override
+	public String toString() {
+		String advertiseValue = getFormatNameByValue(advertise, "advertise");
+		String keywordsValue = getFormatNameByValue(keywords, "keywords");
+		String authorValue = getFormatNameByValue(author, "author");
+		String addressValue = getFormatNameByValue(address, "address");
+		String portValue = getFormatNameByValue(port, "port");
+		String descValue = getFormatNameByValue(desc, "description");
+		String nameValue = getFormatNameByValue(name, "name");
+		String copyrightValue = getFormatNameByValue(copyright, "copyright");
+		return String.format(" %s %s %s %s %s %s %s %s", advertiseValue, keywordsValue, authorValue, addressValue, portValue, descValue, nameValue, copyrightValue);
+	}
+
+	/**
+	 * Get format name if value different null or empty
+	 *
+	 * @param value is value of StreamConfig instance
+	 * @param name is name of param request to send command
+	 * @return String is format name or empty string
+	 */
+	private String getFormatNameByValue(String value, String name) {
+		return StringUtils.isNullOrEmpty(value) ? "" : String.format("%s=%s", name, replaceSpecialCharacter(value));
 	}
 }
