@@ -54,7 +54,7 @@ public class StreamConfig {
 	private String stillImageFile;
 
 	@JsonAlias("Transport Stream ID")
-	private String transportStreamID ;
+	private String transportStreamID;
 
 	@JsonAlias("Program Number")
 	private String programNumber;
@@ -100,6 +100,19 @@ public class StreamConfig {
 
 	@JsonAlias("Ceiling")
 	private String bandwidthOverhead;
+
+	@JsonAlias("Publish Name")
+	private String publishName;
+
+	@JsonAlias("TCP Port")
+	private String tcpPort;
+
+	@JsonAlias("User Name")
+	private String username;
+
+	@JsonAlias("Password")
+	private String password;
+
 
 	/**
 	 * Retrieves {@code {@link #state}}
@@ -609,25 +622,38 @@ public class StreamConfig {
 	public String toString() {
 		String paramRequest = "";
 		String audioSource = audioList.stream().map(Audio::getAudioId).collect(Collectors.toList()).toString().replace("[", "").replace("]", "");
-		if (ProtocolEnum.TS_UDP.getValue().equals(encapsulation)) {
-			String nameValue = getFormatNameByValue(name, "name");
-			String videoSrcValue = getFormatNameByValue(video, "videoSrc");
-			String audioSrcValue = getFormatNameByValue(audioSource, "audioSrc");
-			String protocolValue = getFormatNameByValue(encapsulation, "encapsulation");
-			String addressValue = getFormatNameByValue(address, "addR");
-			String portValue = getFormatNameByValue(port, "port");
-			String fecValue = getFormatNameByValue(fec, "fec");
-			String trafficShapingValue = getFormatNameByValue(shaping, "shaping");
-			String idleCellsValue = getFormatNameByValue(idleCells, "idleCells");
-			String delayAudioValue = getFormatNameByValue(delayAudio, "delayAudio");
-			String bandwidthOverHeadValue = getFormatNameByValue(bandwidthOverhead, "ceiling");
-			String mtuValue = getFormatNameByValue(mtu, "mtu");
-			String ttlValue = getFormatNameByValue(ttl, "ttl");
-			String tosValue = getFormatNameByValue(tos, "tos");
-			String stillImageValue = getFormatNameByValue(stillImageFile, "stillImage");
-			paramRequest = String.format(" %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", nameValue, videoSrcValue, audioSrcValue, protocolValue, addressValue, portValue, fecValue, trafficShapingValue,
-					idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, stillImageValue, bandwidthOverHeadValue);
+		String nameValue = getFormatNameByValue(name, "name");
+		String videoSrcValue = getFormatNameByValue(video, "videoSrc");
+		String audioSrcValue = getFormatNameByValue(audioSource, "audioSrc");
+		String protocolValue = getFormatNameByValue(encapsulation, "encapsulation");
+		String addressValue = getFormatNameByValue(address, "addR");
+		String stillImageValue = getFormatNameByValue(stillImageFile, "stillImage");
+		String ttlValue = getFormatNameByValue(ttl, "ttl");
+		String tosValue = getFormatNameByValue(tos, "tos");
+		String portValue = getFormatNameByValue(port, "port");
+		String fecValue = getFormatNameByValue(fec, "fec");
+		String trafficShapingValue = getFormatNameByValue(shaping, "shaping");
+		String idleCellsValue = getFormatNameByValue(idleCells, "idleCells");
+		String delayAudioValue = getFormatNameByValue(delayAudio, "delayAudio");
+		String bandwidthOverHeadValue = getFormatNameByValue(bandwidthOverhead, "ceiling");
+		String mtuValue = getFormatNameByValue(mtu, "mtu");
+		String publishNameValue = getFormatNameByValue(publishName, "publish");
+		String usernameValue = getFormatNameByValue(username, "username");
+		String passwordValue = getFormatNameByValue(password, "password");
+		if (ProtocolEnum.TS_UDP.getValue().equals(encapsulation) || ProtocolEnum.TS_RTP.getValue().equals(encapsulation)) {
+			paramRequest = String.format(" %s %s %s %s %s %s %s %s %s %s", portValue, fecValue, trafficShapingValue, idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, stillImageValue,
+					bandwidthOverHeadValue);
 		}
+		if (ProtocolEnum.RTMP.getValue().equals(encapsulation)) {
+			paramRequest = String.format(" %s %s %s ", publishNameValue, usernameValue, passwordValue);
+		}
+		if (ProtocolEnum.DIRECT_RTP.getValue().equals(encapsulation)) {
+			paramRequest = String.format(" %s %s ", mtuValue, bandwidthOverHeadValue);
+		}
+		if (ProtocolEnum.TS_SRT.getValue().equals(encapsulation)) {
+			paramRequest = String.format(" %s", mtuValue,bandwidthOverHeadValue);
+		}
+		paramRequest = paramRequest + String.format(" %s %s %s %s %s ", nameValue, videoSrcValue, audioSrcValue, protocolValue, addressValue);
 		return paramRequest;
 	}
 

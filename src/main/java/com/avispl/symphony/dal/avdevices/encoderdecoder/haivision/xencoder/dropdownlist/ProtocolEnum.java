@@ -49,4 +49,21 @@ public enum ProtocolEnum {
 	public String getValue() {
 		return value;
 	}
+
+	/**
+	 * Get value of Protocol by name
+	 *
+	 * @param name the name is name of ProtocolEnum
+	 * @return String is protocol value
+	 */
+	public static String getValueOfProtocolEnumByName(String name) {
+		String defaultValue = name;
+		for (ProtocolEnum protocolEnum : ProtocolEnum.values()) {
+			if (protocolEnum.getName().equals(name)) {
+				defaultValue = protocolEnum.getValue();
+				break;
+			}
+		}
+		return defaultValue;
+	}
 }
