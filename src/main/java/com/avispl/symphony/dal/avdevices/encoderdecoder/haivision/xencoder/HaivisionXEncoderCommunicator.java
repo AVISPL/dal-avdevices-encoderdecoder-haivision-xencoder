@@ -58,6 +58,7 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropd
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ProtocolEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ResolutionEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.SampleRateEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.SourceType;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.TimeCodeSource;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.VideoActionEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.VideoStateEnum;
@@ -1934,6 +1935,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void createOutputStream(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 		String streamKey = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
+		mapOfNameAndVideoConfig.put(EncoderConstant.NONE, new VideoConfig());
 		String[] videoNames = mapOfNameAndVideoConfig.keySet().toArray(new String[0]);
 		Arrays.sort(videoNames);
 		String[] protocolDropdown = EnumTypeHandler.getEnumNames(ProtocolEnum.class);
@@ -1969,7 +1971,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		stats.put(addSourceAudioName, EncoderConstant.EMPTY_STRING);
 		advancedControllableProperties.add(createButton(addSourceAudioName, EncoderConstant.PLUS, EncoderConstant.ADDING, 0));
 		// add Streaming Protocol default Ts over UDP
-		advancedControllableProperties.add(controlDropdown(stats, protocolDropdown, protocolName, ProtocolEnum.TS_UDP.getValue()));
+		advancedControllableProperties.add(controlDropdown(stats, protocolDropdown, protocolName, ProtocolEnum.TS_UDP.getName()));
 		//add Streaming Destination Address
 		advancedControllableProperties.add(controlTextOrNumeric(stats, addressName, EncoderConstant.EMPTY_STRING, false));
 		//add Streaming Destination Port
@@ -2054,12 +2056,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (propertyName.contains(StreamControllingMetric.SOURCE_AUDIO.getName())) {
 			if (EncoderConstant.NONE.equals(value) && !EncoderConstant.SOURCE_AUDIO_0.equals(propertyName)) {
 				stats.remove(property);
-				mapOfNameAndSourceAudio.remove(propertyName);
-				mapOfNameAndSourceAudio.put(propertyName, null);
+				mapOfNameAndSourceAudio.replace(propertyName, null);
 			} else {
+				mapOfNameAndAudioConfig.put(EncoderConstant.NONE, new AudioConfig());
 				String[] audioNames = mapOfNameAndAudioConfig.keySet().toArray(new String[0]);
 				Arrays.sort(audioNames);
-				AdvancedControllableProperty sourceAudioControlProperty = controlDropdown(stats, audioNames, property, value);
+				AdvancedControllableProperty sourceAudioControlProperty = controlDropdownAcceptNoneValue(stats, audioNames, property, value);
 				addOrUpdateAdvanceControlProperties(advancedControllableProperties, sourceAudioControlProperty);
 				Audio audio = new Audio();
 				audio.setAudioId(mapOfNameAndAudioConfig.get(value).getId());
@@ -2067,6 +2069,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 		} else {
 			StreamControllingMetric streamControllingMetric = EnumTypeHandler.getMetricOfEnumByName(StreamControllingMetric.class, propertyName);
+			String streamKey = streamName + EncoderConstant.HASH;
 			switch (streamControllingMetric) {
 				case NAME:
 				case STILL_IMAGE:
@@ -2082,10 +2085,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				case SAP_AUTHOR:
 				case SAP_COPYRIGHT:
 				case SAP_ADDRESS:
+				case STREAM_ENCRYPTION:
 					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
 					break;
 				case PARAMETER_TRAFFIC_SHAPING:
-					populateStreamCreateModeTrafficShapingMode(property, value, stats, advancedControllableProperties, streamName);
+					populateStreamCreateModeTrafficShapingMode(property, value, stats, advancedControllableProperties, streamName, true);
 					break;
 				case PARAMETER_MTU:
 					value = String.valueOf(getValueByRange(EncoderConstant.MIN_MTU, EncoderConstant.MAX_MTU, value));
@@ -2102,13 +2106,14 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				case ADD_SOURCE_AUDIO:
 					addSourceAudioForOutputStream(stats, advancedControllableProperties);
 					break;
+				case STREAM_CONNECTION_SOURCE_PORT:
 				case STREAMING_DESTINATION_PORT:
 				case SAP_PORT:
 					value = String.valueOf(getValueByRange(EncoderConstant.MIN_PORT, EncoderConstant.MAX_PORT, value));
 					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
 					break;
 				case SAP_TRANSMIT:
-					populateStreamCreateWithSAPMode(property, value, stats, advancedControllableProperties, streamName);
+					populateStreamCreateWithSAPMode(value, property, stats, advancedControllableProperties, streamName);
 					break;
 				case PARAMETER_BANDWIDTH_OVERHEAD:
 					value = String.valueOf(getValueByRange(EncoderConstant.MIN_BANDWIDTH_OVERHEAD, EncoderConstant.MAX_BANDWIDTH_OVERHEAD, value));
@@ -2116,18 +2121,91 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					break;
 				case STREAMING_PROTOCOL:
 					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
-
-					//update value by mode is RTP and UPD
-
 					populateCreateStreamWithProtocolMode(value, stats, advancedControllableProperties, streamName);
 					break;
 				case ACTION:
-					StreamConfig streamConfig = convertStreamConfigByValue(localStatsStreamOutput, EncoderConstant.CREATE_STREAM + EncoderConstant.HASH);
+					StreamConfig streamConfig = convertStreamConfigByValue(stats, EncoderConstant.CREATE_STREAM + EncoderConstant.HASH);
 					sendCommandToCreateStream(streamConfig);
 					isCreateStreamCalled = false;
 					break;
 				case CANCEL:
 					isCreateStreamCalled = false;
+					break;
+				case STREAM_LATENCY:
+					value = String.valueOf(getValueByRange(EncoderConstant.MIN_LATENCY, EncoderConstant.MAX_LATENCY, value));
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					break;
+				case STREAM_CONNECTION_ADDRESS:
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					String addressName = streamName + EncoderConstant.HASH + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+					localStatsStreamOutput.put(addressName, value);
+					break;
+				case STREAM_CONNECTION_DESTINATION_PORT:
+					value = String.valueOf(getValueByRange(EncoderConstant.MIN_PORT, EncoderConstant.MAX_PORT, value));
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					String portName = streamName + EncoderConstant.HASH + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+					localStatsStreamOutput.put(portName, value);
+					break;
+				case STREAM_CONNECTION_PORT:
+					value = String.valueOf(getValueByRange(EncoderConstant.MIN_PORT, EncoderConstant.MAX_PORT, value));
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					portName = streamName + EncoderConstant.HASH + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+					localStatsStreamOutput.put(portName, value);
+					break;
+				case STREAM_CONNECTION_MODE:
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					ConnectionModeEnum connectionModeEnum = EnumTypeHandler.getMetricOfEnumByName(ConnectionModeEnum.class, value);
+					switch (connectionModeEnum) {
+						case CALLER:
+							addControlForSRTWithModeCaller(stats, advancedControllableProperties);
+							String connectionSourcePortName = streamKey + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
+							String connectionSourcePortNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(streamKey + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName()));
+							updateValueForTheControllableProperty(connectionSourcePortName, connectionSourcePortNameValue, stats, advancedControllableProperties);
+							stats.remove(streamKey + StreamControllingMetric.STREAM_CONNECTION_PORT.getName());
+							break;
+						case RENDEZVOUS:
+							addControlForSRTWithModeCaller(stats, advancedControllableProperties);
+							//update connection source port
+							connectionSourcePortName = streamKey + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
+							stats.put(connectionSourcePortName, getEmptyValueForNullData(localStatsStreamOutput.get(streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName())));
+
+							stats.remove(streamKey + StreamControllingMetric.STREAM_CONNECTION_PORT.getName());
+							advancedControllableProperties.removeIf(item -> item.getName().equals(connectionSourcePortName));
+							break;
+						case LISTENER:
+							//add connection port
+							String connectionPort = streamKey + StreamControllingMetric.STREAM_CONNECTION_PORT.getName();
+							String connectionPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName()));
+
+							AdvancedControllableProperty connectionPortProperty = controlTextOrNumeric(stats, connectionPort, connectionPortValue, true);
+							addOrUpdateAdvanceControlProperties(advancedControllableProperties, connectionPortProperty);
+
+							//remove connection source port, destination port and connection address
+							stats.remove(streamKey + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName());
+							stats.remove(streamKey + StreamControllingMetric.STREAM_CONNECTION_DESTINATION_PORT.getName());
+							stats.remove(streamKey + StreamControllingMetric.STREAM_CONNECTION_ADDRESS.getName());
+							break;
+						default:
+							break;
+					}
+					break;
+				case STREAM_SOURCE_TYPE:
+					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+					if (SourceType.AUDIO.getName().equals(value)) {
+						addSourceAudioForOutputStream(stats, advancedControllableProperties);
+						stats.remove(streamKey + StreamControllingMetric.SOURCE_VIDEO.getName());
+						break;
+					}
+					if (SourceType.VIDEO.getName().equals(value)) {
+						mapOfNameAndVideoConfig.put(EncoderConstant.NONE, new VideoConfig());
+						String[] videoNames = mapOfNameAndVideoConfig.keySet().toArray(new String[0]);
+						Arrays.sort(videoNames);
+						String videoName = streamKey + StreamControllingMetric.SOURCE_VIDEO.getName();
+						//add video source
+						AdvancedControllableProperty videoSourceProperty = controlDropdown(stats, videoNames, videoName, videoNames[0]);
+						addOrUpdateAdvanceControlProperties(advancedControllableProperties, videoSourceProperty);
+						stats.remove(streamKey + EncoderConstant.SOURCE_AUDIO_0);
+					}
 					break;
 				default:
 					if (logger.isDebugEnabled()) {
@@ -2166,27 +2244,116 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		}
 	}
 
+	private void removeControlWithModeDifferentSRT(Map<String, String> stats, String streamKey) {
+		stats.remove(streamKey + StreamControllingMetric.STREAM_LATENCY.getName());
+		stats.remove(streamKey + StreamControllingMetric.STREAM_ENCRYPTION.getName());
+		stats.remove(streamKey + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName());
+		stats.remove(streamKey + StreamControllingMetric.STREAM_CONNECTION_MODE.getName());
+		stats.remove(streamKey + StreamControllingMetric.STREAM_CONNECTION_DESTINATION_PORT.getName());
+		stats.remove(streamKey + StreamControllingMetric.STREAM_CONNECTION_ADDRESS.getName());
+		stats.remove(streamKey + StreamControllingMetric.STREAM_NETWORK_ADAPTIVE.getName());
+		stats.remove(streamKey + StreamControllingMetric.RTMP_USERNAME.getName());
+		stats.remove(streamKey + StreamControllingMetric.RTMP_PUBLISH_NAME.getName());
+		stats.remove(streamKey + StreamControllingMetric.RTMP_PASSWORD.getName());
+		stats.remove(streamKey + StreamControllingMetric.RTMP_CONFIRMATION_PASSWORD.getName());
+		stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName());
+		stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
+	}
+
+	/**
+	 * Control property with protocol mode
+	 *
+	 * @param value the value is value of metric
+	 * @param stats the stats are list of stats
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 * @param streamName the streamName is name of stream
+	 */
 	private void populateCreateStreamWithProtocolMode(String value, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, String streamName) {
 		ProtocolEnum protocolEnum = EnumTypeHandler.getMetricOfEnumByName(ProtocolEnum.class, value);
 		String streamKey = streamName + EncoderConstant.HASH;
+		String sapTransmitName = streamKey + StreamControllingMetric.SAP_TRANSMIT.getName();
+		removeControlPropertiesForSAPMode(stats, advancedControllableProperties);
+		String mtuName = streamKey + StreamControllingMetric.PARAMETER_MTU.getName();
+		String mtuValue = getEmptyValueForNullData(localStatsStreamOutput.get(mtuName));
+		if (StringUtils.isNullOrEmpty(mtuValue)) {
+			mtuValue = String.valueOf(EncoderConstant.DEFAULT_MTU);
+		}
+		AdvancedControllableProperty mtuPropertyControl = controlTextOrNumeric(stats, mtuName, mtuValue, true);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, mtuPropertyControl);
 		switch (protocolEnum) {
 			case TS_UDP:
-			case TS_RTP:
-				String fecName = streamKey + StreamControllingMetric.PARAMETER_FEC.getName();
-				value = getDefaultValueForNullOrNoneData(localStatsStreamOutput.get(fecName), true);
 				String[] fecDropdown = FecEnum.getArrayOfNameByUDPOrRTPMode(true);
-				if (ProtocolEnum.TS_RTP.getName().equals(value)) {
-					fecDropdown = FecEnum.getArrayOfNameByUDPOrRTPMode(false);
-					String vfEncryption = streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName();
-					stats.remove(vfEncryption);
+				String fecName = streamKey + StreamControllingMetric.PARAMETER_FEC.getName();
+				String destinationPort = streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+				String destinationAddress = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+				String vfEncryptionName = streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName();
+				String vfEncryptionValue = getEmptyValueForNullData(localStatsStreamOutput.get(vfEncryptionName));
+				String trafficShaping = streamKey + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName();
+				String trafficShapingValue = getEmptyValueForNullData(localStatsStreamOutput.get(streamKey + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName()));
+
+				String fecValue = FecEnum.getNameOfFecEnumByMode(getEmptyValueForNullData(localStatsStreamOutput.get(fecName)));
+				if (StringUtils.isNullOrEmpty(vfEncryptionValue)) {
+					vfEncryptionValue = EncoderConstant.OFF;
 				}
-				AdvancedControllableProperty fecControlProperty = controlDropdownAcceptNoneValue(stats, fecDropdown, fecName, value);
+				stats.put(vfEncryptionName, vfEncryptionValue);
+				//add fec control
+				AdvancedControllableProperty fecControlProperty = controlDropdownAcceptNoneValue(stats, fecDropdown, fecName, fecValue);
 				addOrUpdateAdvanceControlProperties(advancedControllableProperties, fecControlProperty);
+
+				//add destination port
+				String destinationPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationPort));
+				AdvancedControllableProperty destinationPortProperty = controlTextOrNumeric(stats, destinationPort, destinationPortValue, true);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, destinationPortProperty);
+
+				//add destination address port
+				String destinationAddressValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationAddress));
+				AdvancedControllableProperty destinationAddressProperty = controlTextOrNumeric(stats, destinationAddress, destinationAddressValue, false);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, destinationAddressProperty);
+
+				populateStreamCreateModeTrafficShapingMode(trafficShaping, trafficShapingValue, stats, advancedControllableProperties, streamName, false);
+				populateStreamCreateWithSAPMode(null, sapTransmitName, stats, advancedControllableProperties, streamName);
+
+				addAudioOrVideoSource(stats, advancedControllableProperties, streamKey);
+
+				removeControlWithModeDifferentSRT(stats, streamKey);
+				stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
+				break;
+			case TS_RTP:
+				fecName = streamKey + StreamControllingMetric.PARAMETER_FEC.getName();
+				fecDropdown = FecEnum.getArrayOfNameByUDPOrRTPMode(false);
+				fecValue = FecEnum.getNameOfFecEnumByMode(getEmptyValueForNullData(localStatsStreamOutput.get(fecName)));
+
+				destinationAddressProperty = controlDropdownAcceptNoneValue(stats, fecDropdown, fecName, fecValue);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, destinationAddressProperty);
+
+				addButtonSourceAudio(stats, advancedControllableProperties, streamKey);
+				addAudioOrVideoSource(stats, advancedControllableProperties, streamKey);
+
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName());
+				stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
+				populateStreamCreateWithSAPMode(null, sapTransmitName, stats, advancedControllableProperties, EncoderConstant.CREATE_STREAM);
+				removeControlWithModeDifferentSRT(stats, streamKey);
 				break;
 			case DIRECT_RTP:
-				String portAudioName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS_PORT_AUDIO.getName();
-				String portAudioNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(portAudioName));
-				updateValueForTheControllableProperty(portAudioName, portAudioNameValue, stats, advancedControllableProperties);
+				String sourceTypeName = streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName();
+				String[] sourceTypeDropdown = EnumTypeHandler.getEnumNames(SourceType.class);
+				AdvancedControllableProperty sourceTypeProperty = controlDropdownAcceptNoneValue(stats, sourceTypeDropdown, sourceTypeName, SourceType.VIDEO.getName());
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, sourceTypeProperty);
+
+				for (Map.Entry<String, Audio> audioKey : mapOfNameAndSourceAudio.entrySet()) {
+					String key = audioKey.getKey();
+					stats.remove(streamKey + key);
+					mapOfNameAndSourceAudio.replace(key, null);
+				}
+
+				// remove Fec, VF Encryption, idleCells, delayedAudio, Transmit SAP
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_FEC.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName());
+				stats.remove(streamKey + StreamControllingMetric.SAP_TRANSMIT.getName());
+				stats.remove(streamKey + StreamControllingMetric.ADD_SOURCE_AUDIO.getName());
+				removeControlWithModeDifferentSRT(stats, streamKey);
 				break;
 			case RTMP:
 				//Name Property
@@ -2194,15 +2361,19 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				String rtmpUsername = streamKey + StreamControllingMetric.RTMP_USERNAME.getName();
 				String rtmpPassword = streamKey + StreamControllingMetric.RTMP_PASSWORD.getName();
 				String rtmpConfirmationPassword = streamKey + StreamControllingMetric.RTMP_CONFIRMATION_PASSWORD.getName();
+				String contentName = streamKey + StreamControllingMetric.NAME.getName();
+				String destinationAddressName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
 
 				//Value Property
+				String contentNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(contentName));
 				String rtmpPublishNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(rtmpPublishName));
 				String rtmpUsernameValue = getEmptyValueForNullData(localStatsStreamOutput.get(rtmpUsername));
 				String rtmpPasswordValue = getEmptyValueForNullData(localStatsStreamOutput.get(rtmpPassword));
 				String rtmpConfirmationPasswordValue = getEmptyValueForNullData(localStatsStreamOutput.get(rtmpConfirmationPassword));
+				String destinationAddressNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationAddressName));
 
 				if (StringUtils.isNullOrEmpty(rtmpPublishNameValue)) {
-					rtmpPublishNameValue = streamName;
+					rtmpPublishNameValue = contentNameValue;
 				}
 				//RTMPPublishName
 				AdvancedControllableProperty rtmpPublishNameProperty = controlTextOrNumeric(stats, rtmpPublishName, rtmpPublishNameValue, false);
@@ -2219,23 +2390,43 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				//RTMPConfirmationPassword
 				AdvancedControllableProperty rtmpConfirmationPasswordProperty = controlTextOrNumeric(stats, rtmpConfirmationPassword, rtmpConfirmationPasswordValue, false);
 				addOrUpdateAdvanceControlProperties(advancedControllableProperties, rtmpConfirmationPasswordProperty);
+
+				//destinationAddressName
+				AdvancedControllableProperty destinationAddressNameProperty = controlTextOrNumeric(stats, destinationAddressName, destinationAddressNameValue, false);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, destinationAddressNameProperty);
+
+				//remove MTU
+				String mtuNameProperties = streamKey + StreamControllingMetric.PARAMETER_MTU.getName();
+				stats.remove(mtuNameProperties);
+
+				//clean audio source and update
+				clearSourceAudio(stats, streamKey);
+				addOrUpdateSourceAudio(stats, advancedControllableProperties, streamKey);
+
+				//remove portAudio destinationPort mtuName
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_MTU.getName());
+				stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName());
+
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_FEC.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName());
+				stats.remove(streamKey + StreamControllingMetric.SAP_TRANSMIT.getName());
+				stats.remove(streamKey + StreamControllingMetric.ADD_SOURCE_AUDIO.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName());
+				stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
+				removeControlWithModeDifferentSRT(stats, streamKey);
 				break;
 			case TS_SRT:
 				//Name Property
-				String connectionModeName = streamKey + StreamControllingMetric.STREAM_CONNECTION_MODE.getName();
-				String connectionAddressName = streamKey + StreamControllingMetric.STREAM_CONNECTION_ADDRESS.getName();
-				String connectionSourcePortName = streamKey + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
-				String connectionDestinationPortName = streamKey + StreamControllingMetric.STREAM_CONNECTION_DESTINATION_PORT.getName();
-				String connectionPortName = streamKey + StreamControllingMetric.STREAM_CONNECTION_PORT.getName();
 				String destinationPortName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
-				String destinationAddressName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+				String connectionModeName = streamKey + StreamControllingMetric.STREAM_CONNECTION_MODE.getName();
+				String connectionSourcePortName = streamKey + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
+				String connectionPortName = streamKey + StreamControllingMetric.STREAM_CONNECTION_PORT.getName();
 
 				//Value Property
 				String connectionModeValue = getEmptyValueForNullData(localStatsStreamOutput.get(connectionModeName));
-				String connectionAddressValue = getEmptyValueForNullData(localStatsStreamOutput.get(connectionAddressName));
-				String connectionDestinationPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(connectionDestinationPortName));
 				String connectionSourcePortValue = getEmptyValueForNullData(localStatsStreamOutput.get(connectionSourcePortName));
-				String connectionPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(connectionPortName));
+				String connectionPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationPortName));
 
 				//add connection mode
 				String[] connectionModeDropdown = EnumTypeHandler.getEnumNames(ConnectionModeEnum.class);
@@ -2245,101 +2436,224 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					AdvancedControllableProperty connectionModeProperty = controlDropdown(stats, connectionModeDropdown, connectionModeName, connectionModeValue);
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, connectionModeProperty);
 
-					//add connection destination address
-					if (StringUtils.isNullOrEmpty(connectionAddressValue)) {
-						connectionAddressValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationAddressName));
-					}
-					AdvancedControllableProperty destinationAddressProperty = controlTextOrNumeric(stats, connectionAddressName, connectionAddressValue, false);
-					addOrUpdateAdvanceControlProperties(advancedControllableProperties, destinationAddressProperty);
-
-					//add connection destination port
-					if (StringUtils.isNullOrEmpty(connectionDestinationPortValue)) {
-						connectionDestinationPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationPortName));
-					}
-					AdvancedControllableProperty connectionDestinationPortProperty = controlTextOrNumeric(stats, connectionDestinationPortName, connectionDestinationPortValue, true);
-					addOrUpdateAdvanceControlProperties(advancedControllableProperties, connectionDestinationPortProperty);
-
-					//Add connection destination source port
-					AdvancedControllableProperty connectionSourcePortProperty = controlTextOrNumeric(stats, connectionSourcePortName, connectionSourcePortValue, true);
-					addOrUpdateAdvanceControlProperties(advancedControllableProperties, connectionSourcePortProperty);
+					addControlForSRTWithModeCaller(stats, advancedControllableProperties);
 				}
 
 				if (ConnectionModeEnum.LISTENER.getName().equals(connectionModeValue)) {
 					//Add connection port
-					if (StringUtils.isNullOrEmpty(connectionPortValue)) {
-						connectionPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationPortName));
-					}
 					AdvancedControllableProperty connectionPortProperty = controlTextOrNumeric(stats, connectionPortName, connectionPortValue, true);
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, connectionPortProperty);
 				}
 
 				if (ConnectionModeEnum.RENDEZVOUS.getName().equals(connectionModeValue)) {
 					//Add connection destination source port
-					connectionSourcePortValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationPortName));
 					stats.put(connectionSourcePortName, connectionSourcePortValue);
 					advancedControllableProperties.removeIf(item -> item.getName().equals(connectionSourcePortName));
 				}
-				String networkAdaptiveName = streamKey + StreamControllingMetric.STREAM_NETWORK_ADAPTIVE.getName();
-				String latencyName = streamKey + StreamControllingMetric.STREAM_LATENCY.getName();
-				String encryptionName = streamKey + StreamControllingMetric.STREAM_ENCRYPTION.getName();
-				String passphraseName = streamKey + StreamControllingMetric.STREAM_PASSPHRASE.getName();
 
-				String networkAdaptiveValue = getEmptyValueForNullData(localStatsStreamOutput.get(networkAdaptiveName));
-				String latencyValue = getEmptyValueForNullData(localStatsStreamOutput.get(latencyName));
-				String encryptionValue = getEmptyValueForNullData(localStatsStreamOutput.get(encryptionName));
-				String passphraseValue = getEmptyValueForNullData(localStatsStreamOutput.get(passphraseName));
+				//Add Audio or Video Source
+				addAudioOrVideoSource(stats, advancedControllableProperties, streamKey);
 
-				//add network Adaptive
-				if (StringUtils.isNullOrEmpty(networkAdaptiveValue)) {
-					networkAdaptiveValue = String.valueOf(EncoderConstant.ZERO);
+				trafficShapingValue = getEmptyValueForNullData(localStatsStreamOutput.get(streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName()));
+				if (!StringUtils.isNullOrEmpty(trafficShapingValue) && !String.valueOf(EncoderConstant.ZERO).equals(trafficShapingValue)) {
+					String idleCellsName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName();
+					String idleCellsValue = localStatsStreamOutput.get(idleCellsName);
+					//add idleCells
+					if (idleCellsValue == null) {
+						idleCellsValue = String.valueOf(EncoderConstant.ZERO);
+					}
+					AdvancedControllableProperty idleCellsControlProperty = controlSwitch(stats, idleCellsName, idleCellsValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, idleCellsControlProperty);
 				}
-				AdvancedControllableProperty networkAdaptiveProperty = controlSwitch(stats, networkAdaptiveName, networkAdaptiveValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-				addOrUpdateAdvanceControlProperties(advancedControllableProperties, networkAdaptiveProperty);
 
-				//Add Latency
-				AdvancedControllableProperty latencyProperty = controlTextOrNumeric(stats, latencyName, latencyValue, true);
-				addOrUpdateAdvanceControlProperties(advancedControllableProperties, latencyProperty);
-
-				//Add Encryption
-				String[] encryptionDropdown = EnumTypeHandler.getEnumNames(EncryptionEnum.class);
-				if (StringUtils.isNullOrEmpty(encryptionValue)) {
-					encryptionValue = EncoderConstant.NONE;
-				}
-				AdvancedControllableProperty encryptionProperty = controlDropdown(stats, encryptionDropdown, encryptionName, encryptionValue);
-				addOrUpdateAdvanceControlProperties(advancedControllableProperties, encryptionProperty);
-
-				if(!EncoderConstant.NONE.equals(encryptionValue)){
-					AdvancedControllableProperty passphraseProperty = controlTextOrNumeric(stats, passphraseName, passphraseValue, false);
-					addOrUpdateAdvanceControlProperties(advancedControllableProperties, passphraseProperty);
-
-				}
+				populatePropertyForSRTMode(stats, advancedControllableProperties);
+				stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName());
+				stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName());
+				stats.remove(streamKey + StreamControllingMetric.SAP_TRANSMIT.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_FEC.getName());
+				stats.remove(streamKey + StreamControllingMetric.RTMP_PUBLISH_NAME.getName());
+				stats.remove(streamKey + StreamControllingMetric.RTMP_USERNAME.getName());
+				stats.remove(streamKey + StreamControllingMetric.RTMP_PASSWORD.getName());
+				stats.remove(streamKey + StreamControllingMetric.RTMP_CONFIRMATION_PASSWORD.getName());
+				stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName());
+				removeControlPropertiesForSAPMode(stats, advancedControllableProperties);
 				break;
 			default:
 				break;
 		}
 	}
 
+	private void clearSourceAudio(Map<String, String> stats, String streamKey) {
+		for (Entry<String, Audio> audioKey : mapOfNameAndSourceAudio.entrySet()) {
+			String key = audioKey.getKey();
+			if (!EncoderConstant.SOURCE_AUDIO_0.equals(key)) {
+				stats.remove(streamKey + key);
+				mapOfNameAndSourceAudio.replace(key, null);
+			}
+		}
+	}
+
+	private void addAudioOrVideoSource(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, String streamKey) {
+		//AddSourceAudio
+		addButtonSourceAudio(stats, advancedControllableProperties, streamKey);
+
+		addOrUpdateSourceAudio(stats, advancedControllableProperties, streamKey);
+		addOrUpdateVideoSource(stats, advancedControllableProperties, streamKey);
+	}
+
+	private void addButtonSourceAudio(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, String streamKey) {
+		String addSourceAudioName = streamKey + StreamControllingMetric.ADD_SOURCE_AUDIO.getName();
+		stats.put(addSourceAudioName, EncoderConstant.EMPTY_STRING);
+		advancedControllableProperties.add(createButton(addSourceAudioName, EncoderConstant.PLUS, EncoderConstant.ADDING, 0));
+	}
+
+	private void addOrUpdateVideoSource(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, String streamKey) {
+		String sourceVideoName = streamKey + StreamControllingMetric.SOURCE_VIDEO.getName();
+		String sourceVideoValue = getEmptyValueForNullData(localStatsStreamOutput.get(sourceVideoName));
+		String sourceVideo = getEmptyValueForNullData(stats.get(sourceVideoName));
+		if (StringUtils.isNullOrEmpty(sourceVideo)) {
+			if (StringUtils.isNullOrEmpty(sourceVideoValue)) {
+				mapOfNameAndVideoConfig.put(EncoderConstant.NONE, new VideoConfig());
+				String[] videoNames = mapOfNameAndVideoConfig.keySet().toArray(new String[0]);
+				Arrays.sort(videoNames);
+				//add video source
+				AdvancedControllableProperty videoSourceProperty = controlDropdown(stats, videoNames, sourceVideoName, videoNames[0]);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, videoSourceProperty);
+			} else {
+				updateValueForTheControllableProperty(sourceVideoName, sourceVideoValue, stats, advancedControllableProperties);
+			}
+		}
+	}
+
+	private void addOrUpdateSourceAudio(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, String streamKey) {
+		String sourceAudioName = streamKey + EncoderConstant.SOURCE_AUDIO_0;
+		String sourceAudioValue = getEmptyValueForNullData(localStatsStreamOutput.get(sourceAudioName));
+		String audioName = getEmptyValueForNullData(stats.get(sourceAudioName));
+		if (StringUtils.isNullOrEmpty(audioName)) {
+			if (StringUtils.isNullOrEmpty(sourceAudioValue)) {
+				addSourceAudioForOutputStream(stats, advancedControllableProperties);
+			} else {
+				updateValueForTheControllableProperty(sourceAudioName, sourceAudioValue, stats, advancedControllableProperties);
+				Audio audio = new Audio();
+				audio.setAudioId(mapOfNameAndAudioConfig.get(sourceAudioValue).getId());
+				mapOfNameAndSourceAudio.put(EncoderConstant.SOURCE_AUDIO_0, audio);
+			}
+		}
+	}
+
+	private void addControlForSRTWithModeCaller(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
+		//Name Property
+		String streamKey = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
+		String destinationPortName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+		String connectionAddressName = streamKey + StreamControllingMetric.STREAM_CONNECTION_ADDRESS.getName();
+		String connectionSourcePortName = streamKey + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
+		String connectionDestinationPortName = streamKey + StreamControllingMetric.STREAM_CONNECTION_DESTINATION_PORT.getName();
+		String destinationAddressName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+
+		//Value Property
+		String connectionAddressValue = getEmptyValueForNullData(localStatsStreamOutput.get(connectionAddressName));
+		String connectionDestinationPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(connectionDestinationPortName));
+		String connectionSourcePortValue = getEmptyValueForNullData(localStatsStreamOutput.get(connectionSourcePortName));
+		AdvancedControllableProperty destinationAddressProperty;
+		//add connection destination address
+		if (StringUtils.isNullOrEmpty(connectionAddressValue)) {
+			connectionAddressValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationAddressName));
+		}
+		destinationAddressProperty = controlTextOrNumeric(stats, connectionAddressName, connectionAddressValue, false);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, destinationAddressProperty);
+
+		//add connection destination port
+		if (StringUtils.isNullOrEmpty(connectionDestinationPortValue)) {
+			connectionDestinationPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationPortName));
+		}
+		AdvancedControllableProperty connectionDestinationPortProperty = controlTextOrNumeric(stats, connectionDestinationPortName, connectionDestinationPortValue, true);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, connectionDestinationPortProperty);
+
+		//Add connection destination source port
+		AdvancedControllableProperty connectionSourcePortProperty = controlTextOrNumeric(stats, connectionSourcePortName, connectionSourcePortValue, true);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, connectionSourcePortProperty);
+	}
+
+	/**
+	 * Control property with SRT mode protocol
+	 *
+	 * @param stats the stats are list of stats
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 */
+	private void populatePropertyForSRTMode(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
+		//Add
+		String streamKey = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
+		String networkAdaptiveName = streamKey + StreamControllingMetric.STREAM_NETWORK_ADAPTIVE.getName();
+		String latencyName = streamKey + StreamControllingMetric.STREAM_LATENCY.getName();
+		String encryptionName = streamKey + StreamControllingMetric.STREAM_ENCRYPTION.getName();
+		String passphraseName = streamKey + StreamControllingMetric.STREAM_PASSPHRASE.getName();
+
+		String networkAdaptiveValue = getEmptyValueForNullData(localStatsStreamOutput.get(networkAdaptiveName));
+		String latencyValue = getEmptyValueForNullData(localStatsStreamOutput.get(latencyName));
+		String encryptionValue = getEmptyValueForNullData(localStatsStreamOutput.get(encryptionName));
+		String passphraseValue = getEmptyValueForNullData(localStatsStreamOutput.get(passphraseName));
+
+		//add network Adaptive
+		if (StringUtils.isNullOrEmpty(networkAdaptiveValue)) {
+			networkAdaptiveValue = String.valueOf(EncoderConstant.ZERO);
+		}
+		AdvancedControllableProperty networkAdaptiveProperty = controlSwitch(stats, networkAdaptiveName, networkAdaptiveValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, networkAdaptiveProperty);
+
+		//Add Latency
+		if (StringUtils.isNullOrEmpty(latencyValue)) {
+			latencyValue = String.valueOf(EncoderConstant.DEFAULT_LATENCY);
+		}
+		AdvancedControllableProperty latencyProperty = controlTextOrNumeric(stats, latencyName, latencyValue, true);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, latencyProperty);
+
+		//Add Encryption
+		String[] encryptionDropdown = EnumTypeHandler.getEnumNames(EncryptionEnum.class);
+		if (StringUtils.isNullOrEmpty(encryptionValue)) {
+			encryptionValue = EncoderConstant.NONE;
+		}
+		AdvancedControllableProperty encryptionProperty = controlDropdownAcceptNoneValue(stats, encryptionDropdown, encryptionName, encryptionValue);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, encryptionProperty);
+
+		if (!EncoderConstant.NONE.equals(encryptionValue)) {
+			AdvancedControllableProperty passphraseProperty = controlTextOrNumeric(stats, passphraseName, passphraseValue, false);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, passphraseProperty);
+		}
+	}
+
 	/**
 	 * Control property with mode is SAP
 	 *
+	 * @param value the value is value of SAP transmit
 	 * @param property the property is the filed name of controlling metric
-	 * @param value the value is value of metric
 	 * @param stats is list of stats
 	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
 	 * @param streamName is name of Stream
 	 */
-	private void populateStreamCreateWithSAPMode(String property, String value, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, String streamName) {
-		updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
+	private void populateStreamCreateWithSAPMode(String value, String property, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, String streamName) {
+		String sapTransmit = value;
+		if (StringUtils.isNullOrEmpty(value)) {
+			sapTransmit = getEmptyValueForNullData(localStatsStreamOutput.get(property));
+			if (StringUtils.isNullOrEmpty(sapTransmit)) {
+				sapTransmit = String.valueOf(EncoderConstant.ZERO);
+			}
+		}
 
-		String keyProperty = streamName + EncoderConstant.HASH;
-		String sapName = keyProperty + StreamControllingMetric.SAP_NAME.getName();
-		String keywordsName = keyProperty + StreamControllingMetric.SAP_KEYWORDS.getName();
-		String descName = keyProperty + StreamControllingMetric.SAP_DESCRIPTION.getName();
-		String authorName = keyProperty + StreamControllingMetric.SAP_AUTHOR.getName();
-		String copyrightName = keyProperty + StreamControllingMetric.SAP_COPYRIGHT.getName();
-		String addressName = keyProperty + StreamControllingMetric.SAP_ADDRESS.getName();
-		String portName = keyProperty + StreamControllingMetric.SAP_PORT.getName();
-		if (value.equals(String.valueOf(EncoderConstant.NUMBER_ONE))) {
+		AdvancedControllableProperty sapTransmitProperty = controlSwitch(stats, property, sapTransmit, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, sapTransmitProperty);
+		removeControlPropertiesForSAPMode(stats, advancedControllableProperties);
+		if (sapTransmit.equals(String.valueOf(EncoderConstant.NUMBER_ONE))) {
+
+			String keyProperty = streamName + EncoderConstant.HASH;
+			String sapName = keyProperty + StreamControllingMetric.SAP_NAME.getName();
+			String keywordsName = keyProperty + StreamControllingMetric.SAP_KEYWORDS.getName();
+			String descName = keyProperty + StreamControllingMetric.SAP_DESCRIPTION.getName();
+			String authorName = keyProperty + StreamControllingMetric.SAP_AUTHOR.getName();
+			String copyrightName = keyProperty + StreamControllingMetric.SAP_COPYRIGHT.getName();
+			String addressName = keyProperty + StreamControllingMetric.SAP_ADDRESS.getName();
+			String portName = keyProperty + StreamControllingMetric.SAP_PORT.getName();
 			String sapNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(sapName));
 			String keywordsNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(keywordsName));
 			String descNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(descName));
@@ -2378,22 +2692,32 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 			AdvancedControllableProperty sapPortControlProperty = controlTextOrNumeric(stats, portName, portNameValue, true);
 			addOrUpdateAdvanceControlProperties(advancedControllableProperties, sapPortControlProperty);
-		} else {
-			stats.remove(sapName);
-			stats.remove(keywordsName);
-			stats.remove(descName);
-			stats.remove(authorName);
-			stats.remove(copyrightName);
-			stats.remove(addressName);
-			stats.remove(portName);
-			advancedControllableProperties.removeIf(item -> item.getName().equals(sapName));
-			advancedControllableProperties.removeIf(item -> item.getName().equals(keywordsName));
-			advancedControllableProperties.removeIf(item -> item.getName().equals(descName));
-			advancedControllableProperties.removeIf(item -> item.getName().equals(authorName));
-			advancedControllableProperties.removeIf(item -> item.getName().equals(copyrightName));
-			advancedControllableProperties.removeIf(item -> item.getName().equals(addressName));
-			advancedControllableProperties.removeIf(item -> item.getName().equals(portName));
 		}
+	}
+
+	/**
+	 * Remove property for SAP mode
+	 *
+	 * @param stats the stats are list of stats
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 */
+	private void removeControlPropertiesForSAPMode(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
+		String keyProperty = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
+		String sapName = keyProperty + StreamControllingMetric.SAP_NAME.getName();
+		String keywordsName = keyProperty + StreamControllingMetric.SAP_KEYWORDS.getName();
+		String descName = keyProperty + StreamControllingMetric.SAP_DESCRIPTION.getName();
+		String authorName = keyProperty + StreamControllingMetric.SAP_AUTHOR.getName();
+		String copyrightName = keyProperty + StreamControllingMetric.SAP_COPYRIGHT.getName();
+		String addressName = keyProperty + StreamControllingMetric.SAP_ADDRESS.getName();
+		String portName = keyProperty + StreamControllingMetric.SAP_PORT.getName();
+
+		stats.remove(sapName);
+		stats.remove(keywordsName);
+		stats.remove(descName);
+		stats.remove(authorName);
+		stats.remove(copyrightName);
+		stats.remove(addressName);
+		stats.remove(portName);
 	}
 
 	/**
@@ -2404,46 +2728,62 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param stats is list of stats
 	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
 	 * @param streamName is name of Stream
+	 * @param isTrafficShaping boolean type , if isTrafficShaping is true update bandwidthOverhead with old value or default value, if isTrafficShaping is false update default value
 	 */
 	private void populateStreamCreateModeTrafficShapingMode(String property, String value, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties,
-			String streamName) {
+			String streamName, boolean isTrafficShaping) {
 		updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
 		String idleCellsName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName();
 		String delayedAudioName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName();
 		String bandwidthOverheadName = streamName + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_BANDWIDTH_OVERHEAD.getName();
 
+		//remove idleCells, delayedAudio, bandwidthOverhead control if shaping disable
+		stats.remove(idleCellsName);
+		stats.remove(delayedAudioName);
+		stats.remove(bandwidthOverheadName);
+
 		if (value.equals(String.valueOf(EncoderConstant.NUMBER_ONE))) {
 			String idleCellsValue = localStatsStreamOutput.get(idleCellsName);
 			String delayedAudioValue = localStatsStreamOutput.get(delayedAudioName);
 			String bandwidthOverheadValue = localStatsStreamOutput.get(bandwidthOverheadName);
-			//add idleCells
-			if (idleCellsValue == null) {
-				idleCellsValue = String.valueOf(EncoderConstant.ZERO);
-			}
-			AdvancedControllableProperty idleCellsControlProperty = controlSwitch(stats, idleCellsName, idleCellsValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-			addOrUpdateAdvanceControlProperties(advancedControllableProperties, idleCellsControlProperty);
 
-			//add delayedAudio
-			if (delayedAudioValue == null) {
-				delayedAudioValue = String.valueOf(EncoderConstant.ZERO);
-			}
-			AdvancedControllableProperty delayedAudioControlProperty = controlSwitch(stats, delayedAudioName, delayedAudioValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
-			addOrUpdateAdvanceControlProperties(advancedControllableProperties, delayedAudioControlProperty);
+			String protocolMode = getEmptyValueForNullData(localStatsStreamOutput.get(streamName + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName()));
+			if (!ProtocolEnum.DIRECT_RTP.getName().equals(protocolMode) && !ProtocolEnum.RTMP.getName().equals(protocolMode)) {
+				//add idleCells
+				if (idleCellsValue == null) {
+					idleCellsValue = String.valueOf(EncoderConstant.ZERO);
+				}
+				AdvancedControllableProperty idleCellsControlProperty = controlSwitch(stats, idleCellsName, idleCellsValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, idleCellsControlProperty);
 
+				//add delayedAudio
+				if (delayedAudioValue == null) {
+					delayedAudioValue = String.valueOf(EncoderConstant.ZERO);
+				}
+				AdvancedControllableProperty delayedAudioControlProperty = controlSwitch(stats, delayedAudioName, delayedAudioValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, delayedAudioControlProperty);
+			}
+
+			extracted(stats, advancedControllableProperties, isTrafficShaping, bandwidthOverheadName, bandwidthOverheadValue, protocolMode);
+
+		}
+	}
+
+	private void extracted(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, boolean isTrafficShaping, String bandwidthOverheadName,
+			String bandwidthOverheadValue, String protocolMode) {
+		String defaultBandwidth = String.valueOf(EncoderConstant.DEFAULT_BANDWIDTH_OVERHEAD);
+		if (ProtocolEnum.TS_SRT.getName().equals(protocolMode)) {
+			defaultBandwidth = String.valueOf(EncoderConstant.DEFAULT_BANDWIDTH_OVERHEAD_SRT);
+		}
+		AdvancedControllableProperty refreshRateControlProperty = controlTextOrNumeric(stats, bandwidthOverheadName, defaultBandwidth, true);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
+		if (isTrafficShaping) {
 			//add bandwidth overhead
 			if (bandwidthOverheadValue == null) {
-				bandwidthOverheadValue = String.valueOf(EncoderConstant.DEFAULT_BANDWIDTH_OVERHEAD);
+				bandwidthOverheadValue = defaultBandwidth;
 			}
-			AdvancedControllableProperty refreshRateControlProperty = controlTextOrNumeric(stats, bandwidthOverheadName, bandwidthOverheadValue, true);
+			refreshRateControlProperty = controlTextOrNumeric(stats, bandwidthOverheadName, bandwidthOverheadValue, true);
 			addOrUpdateAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
-		} else {
-			//remove idleCells, delayedAudio, bandwidthOverhead control if shaping disable
-			stats.remove(idleCellsName);
-			stats.remove(delayedAudioName);
-			stats.remove(bandwidthOverheadName);
-			advancedControllableProperties.removeIf(item -> item.getName().equals(idleCellsName));
-			advancedControllableProperties.removeIf(item -> item.getName().equals(delayedAudioName));
-			advancedControllableProperties.removeIf(item -> item.getName().equals(bandwidthOverheadName));
 		}
 	}
 
@@ -2538,11 +2878,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String idleCellsValue = stats.get(streamName + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName());
 		String delayedAudioValue = stats.get(streamName + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName());
 		String bandwidthOverHeadValue = stats.get(streamName + StreamControllingMetric.PARAMETER_BANDWIDTH_OVERHEAD.getName());
-		String videoId = mapOfNameAndVideoConfig.get(sourceVideoValue).getId();
+		VideoConfig videoConfig = mapOfNameAndVideoConfig.get(sourceVideoValue);
+		String videoId = EncoderConstant.EMPTY_STRING;
+		if (videoConfig != null) {
+			videoId = videoConfig.getId();
+		}
 		trafficShapingValue = convertByState(trafficShapingValue, false);
 		idleCellsValue = convertByState(idleCellsValue, false);
 		delayedAudioValue = convertByState(delayedAudioValue, false);
 		stillImageValue = getDefaultValueForNullOrNoneData(stillImageValue, false);
+		protocolValue = ProtocolEnum.getValueOfProtocolEnumByName(protocolValue);
 		String fecMode = EncoderConstant.EMPTY_STRING;
 		List<Audio> audioList = new ArrayList<>();
 		for (Audio audioName : mapOfNameAndSourceAudio.values()) {
@@ -2556,6 +2901,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (!StringUtils.isNullOrEmpty(stillImageValue)) {
 			//subString from 0 to .pm4 of stillImageValue with format havisionImage.pm4 => return haivisionImage
 			stillImageValue = stillImageValue.substring(0, stillImageValue.lastIndexOf(EncoderConstant.MP4) - 1);
+		}
+		if (ProtocolEnum.RTMP.getValue().equals(protocolValue)) {
+			checkFormatForAddressIsModeRTMP(addressValue);
+			if (StringUtils.isNullOrEmpty(contentValue)) {
+				throw new ResourceNotReachableException("Error while creating new stream, stream name can't empty");
+			}
 		}
 		StreamSAP streamSAP = getStreamSAPFromStatsByStreamName(stats, streamName);
 		streamConfig.setFec(fecMode);
@@ -2577,6 +2928,35 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 		return streamConfig;
 	}
+
+	/**
+	 * Correct Ip address with format rtmp://addressName/
+	 *
+	 * @param addressValue the addressValue is an address
+	 * @throws ResourceNotReachableException if Ip address invalid value
+	 */
+	private void checkFormatForAddressIsModeRTMP(String addressValue) {
+		try {
+			if (StringUtils.isNullOrEmpty(addressValue)) {
+				throw new ResourceNotReachableException("Invalid IP Address, IP address can't empty.");
+			}
+			int lenIpFormat = EncoderConstant.ADDRESS_FORMAT.length();
+			int lenIpAddress = addressValue.length() - 1;
+			String endCharacter = addressValue.substring(lenIpAddress);
+			if (addressValue.length() < lenIpFormat || !endCharacter.equals("/")) {
+				throw new ResourceNotReachableException("Invalid IP Address, IP Address must begin rtmp://ipAddress/");
+			}
+			String formatAddress = addressValue.substring(0, lenIpFormat);
+			String ipAddress = addressValue.substring(lenIpFormat, lenIpAddress);
+			if (!EncoderConstant.ADDRESS_FORMAT.equals(formatAddress) || StringUtils.isNullOrEmpty(ipAddress) || EncoderConstant.SPACE.equals(ipAddress)) {
+				throw new ResourceNotReachableException("Invalid stream address contains invalid characters. IP Address format rtmp://ipAddress/");
+			}
+
+		} catch (Exception e) {
+			throw new ResourceNotReachableException("Error while creating IP Address " + e.getMessage(), e);
+		}
+	}
+
 
 	/**
 	 * Get stream SAP from stats by stream name

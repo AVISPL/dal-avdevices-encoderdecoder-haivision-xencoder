@@ -46,7 +46,7 @@ public enum StreamControllingMetric {
 	RTMP_PASSWORD("RTMPPassword"),
 	RTMP_CONFIRMATION_PASSWORD("RTMPConfirmationPassword"),
 	// DIRECT_RTP
-	STREAMING_DESTINATION_ADDRESS_PORT_AUDIO("StreamingDestinationPortAudio"),
+	STREAM_SOURCE_TYPE("SourceType"),
 	//SRT protocol
 	STREAM_CONNECTION_MODE("StreamingConnectionMode"),
 	STREAM_CONNECTION_ADDRESS("StreamingConnectionAddress"),

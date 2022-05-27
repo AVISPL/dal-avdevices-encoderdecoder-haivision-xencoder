@@ -107,4 +107,21 @@ public enum FecEnum {
 		}
 		return arrayFec.toArray(new String[arrayFec.size()]);
 	}
+
+	/**
+	 * Receive name of FECEnum by value, default return None
+	 *
+	 * @param value the value is value of FecEnum
+	 * @return String is name of FecEnum
+	 */
+	public static String getNameOfFecEnumByMode(String value) {
+		String defaultValue = FecEnum.NONE.getName();
+		if (FecEnum.VF.getName().equals(value)) {
+			defaultValue = FecEnum.PRO_MPEG.getName();
+		}
+		if (FecEnum.PRO_MPEG.getName().equals(value)) {
+			defaultValue = FecEnum.VF.getName();
+		}
+		return defaultValue;
+	}
 }
