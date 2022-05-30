@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ConnectionModeEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ProtocolEnum;
 import com.avispl.symphony.dal.util.StringUtils;
 
@@ -40,6 +41,9 @@ public class StreamConfig {
 
 	@JsonAlias("UDP Port")
 	private String port;
+
+	@JsonAlias("Destination Port")
+	private String sourcePort;
 
 	@JsonAlias("Encapsulation")
 	private String encapsulation;
@@ -113,6 +117,7 @@ public class StreamConfig {
 	@JsonAlias("Password")
 	private String password;
 
+	private String passphrase;
 
 	/**
 	 * Retrieves {@code {@link #state}}
@@ -618,6 +623,120 @@ public class StreamConfig {
 		this.bandwidthOverhead = bandwidthOverhead;
 	}
 
+	/**
+	 * Retrieves {@code {@link #sourcePort}}
+	 *
+	 * @return value of {@link #sourcePort}
+	 */
+	public String getSourcePort() {
+		return sourcePort;
+	}
+
+	/**
+	 * Sets {@code sourcePort}
+	 *
+	 * @param sourcePort the {@code java.lang.String} field
+	 */
+	public void setSourcePort(String sourcePort) {
+		this.sourcePort = sourcePort;
+	}
+
+	/**
+	 * Retrieves {@code {@link #publishName}}
+	 *
+	 * @return value of {@link #publishName}
+	 */
+	public String getPublishName() {
+		return publishName;
+	}
+
+	/**
+	 * Sets {@code publishName}
+	 *
+	 * @param publishName the {@code java.lang.String} field
+	 */
+	public void setPublishName(String publishName) {
+		this.publishName = publishName;
+	}
+
+	/**
+	 * Retrieves {@code {@link #tcpPort}}
+	 *
+	 * @return value of {@link #tcpPort}
+	 */
+	public String getTcpPort() {
+		return tcpPort;
+	}
+
+	/**
+	 * Sets {@code tcpPort}
+	 *
+	 * @param tcpPort the {@code java.lang.String} field
+	 */
+	public void setTcpPort(String tcpPort) {
+		this.tcpPort = tcpPort;
+	}
+
+	/**
+	 * Retrieves {@code {@link #username}}
+	 *
+	 * @return value of {@link #username}
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * Sets {@code username}
+	 *
+	 * @param username the {@code java.lang.String} field
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * Retrieves {@code {@link #password}}
+	 *
+	 * @return value of {@link #password}
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * Sets {@code password}
+	 *
+	 * @param password the {@code java.lang.String} field
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * Retrieves {@code {@link #passphrase}}
+	 *
+	 * @return value of {@link #passphrase}
+	 */
+	public String getPassphrase() {
+		return passphrase;
+	}
+
+	/**
+	 * Sets {@code passphrase}
+	 *
+	 * @param passphrase the {@code java.lang.String} field
+	 */
+	public void setPassphrase(String passphrase) {
+		this.passphrase = passphrase;
+	}
+
+	/**
+	 /**
+	 * Get To String of stream configs
+	 *
+	 * @return String is full param of stream config
+	 */
 	@Override
 	public String toString() {
 		String paramRequest = "";
@@ -640,9 +759,15 @@ public class StreamConfig {
 		String publishNameValue = getFormatNameByValue(publishName, "publish");
 		String usernameValue = getFormatNameByValue(username, "username");
 		String passwordValue = getFormatNameByValue(password, "password");
+		String sourcePortValue = getFormatNameByValue(sourcePort, "sourcePort");
+		String srtModeValue = getFormatNameByValue(srtMode, "mode");
+		String networkAdaptiveValue = getFormatNameByValue(networkAdaptive, "adaptive");
+		String latencyValue = getFormatNameByValue(networkAdaptive, "latency");
+		String encryptionValue = getFormatNameByValue(aesEncryption, "encryption");
+		String passphraseValue = getFormatNameByValue(password, "passphrase");
+
 		if (ProtocolEnum.TS_UDP.getValue().equals(encapsulation) || ProtocolEnum.TS_RTP.getValue().equals(encapsulation)) {
-			paramRequest = String.format(" %s %s %s %s %s %s %s %s %s %s", portValue, fecValue, trafficShapingValue, idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, stillImageValue,
-					bandwidthOverHeadValue);
+			paramRequest = String.format(" %s %s %s %s %s %s %s %s ", fecValue, trafficShapingValue, idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, bandwidthOverHeadValue);
 		}
 		if (ProtocolEnum.RTMP.getValue().equals(encapsulation)) {
 			paramRequest = String.format(" %s %s %s ", publishNameValue, usernameValue, passwordValue);
@@ -651,9 +776,16 @@ public class StreamConfig {
 			paramRequest = String.format(" %s %s ", mtuValue, bandwidthOverHeadValue);
 		}
 		if (ProtocolEnum.TS_SRT.getValue().equals(encapsulation)) {
-			paramRequest = String.format(" %s", mtuValue,bandwidthOverHeadValue);
+			paramRequest = String.format(" %s %s %s %s %s %s %s %s %s %s %s", ttlValue, tosValue, bandwidthOverHeadValue, idleCellsValue, srtModeValue, networkAdaptiveValue, latencyValue, encryptionValue,
+					passphraseValue, mtuValue, trafficShapingValue);
+			if (ConnectionModeEnum.CALLER.getName().equals(srtMode)) {
+				paramRequest = paramRequest + String.format(" %s %s ", sourcePortValue, sourcePortValue);
+			}
+			if (ConnectionModeEnum.LISTENER.getName().equals(srtMode)) {
+				paramRequest = paramRequest + String.format(" %s %s ", mtuValue, bandwidthOverHeadValue);
+			}
 		}
-		paramRequest = paramRequest + String.format(" %s %s %s %s %s ", nameValue, videoSrcValue, audioSrcValue, protocolValue, addressValue);
+		paramRequest = paramRequest + String.format(" %s %s %s %s %s %s %s ", nameValue, videoSrcValue, audioSrcValue, protocolValue, addressValue, stillImageValue, portValue);
 		return paramRequest;
 	}
 
