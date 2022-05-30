@@ -29,6 +29,7 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropd
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.BitRateEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ChannelModeEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ConnectionModeEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EncryptionEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EntropyCodingEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.FecEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.InputEnum;
@@ -1667,11 +1668,30 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
 
-		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
-		propValue = ProtocolEnum.TS_UDP.getName();
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
+		propValue = EncryptionEnum.AES_128.getName();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
+		propValue = EncryptionEnum.NONE.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
+		propValue = "44444";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_PORT.getName();
+		propValue = "4444";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
 
 		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName();
 		propValue = "1";

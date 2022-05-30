@@ -95,6 +95,7 @@ public class EncoderConstant {
 	public static final int DEFAULT_LATENCY = 250;
 	public static final int MIN_LATENCY = 20;
 	public static final int MAX_LATENCY = 8000;
+	public static final int MIN_PASSPHRASE = 9;
 	public static final String PLUS = "+";
 	public static final String ADDING = "Adding";
 	public static final String HEX_PREFIX = "0x";
