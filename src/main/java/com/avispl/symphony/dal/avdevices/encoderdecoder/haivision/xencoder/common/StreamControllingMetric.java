@@ -13,6 +13,7 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.comm
 public enum StreamControllingMetric {
 
 	// create default stream
+	STATE("State"),
 	NAME("Name"),
 	SOURCE_VIDEO("SourceVideo"),
 	SOURCE_AUDIO("SourceAudio"),

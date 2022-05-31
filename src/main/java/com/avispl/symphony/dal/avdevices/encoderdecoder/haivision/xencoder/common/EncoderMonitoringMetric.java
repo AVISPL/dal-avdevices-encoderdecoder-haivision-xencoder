@@ -23,7 +23,9 @@ public enum EncoderMonitoringMetric {
 	STREAM_STATISTICS("StreamStatistics", true),
 	INPUT("Vidin", true),
 	STREAM_CONFIG("StreamConfig", true),
-	STILL_IMAGE("StillImage", true);
+	STILL_IMAGE("StillImage", true),
+	TALKBACK("TalkBack", true),
+	SERVICE("Service", true);
 
 	private final String name;
 	private final boolean isMonitoring;

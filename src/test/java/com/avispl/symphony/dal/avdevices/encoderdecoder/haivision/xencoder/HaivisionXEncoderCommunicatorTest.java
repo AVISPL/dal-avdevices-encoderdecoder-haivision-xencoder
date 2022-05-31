@@ -1646,63 +1646,63 @@ public class HaivisionXEncoderCommunicatorTest {
 	void testCreatesss() throws Exception {
 		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
 		ControllableProperty controllableProperty = new ControllableProperty();
-		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH +StreamControllingMetric.ADD_SOURCE_AUDIO.getName();
-		String propValue = "1";
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH +StreamControllingMetric.PARAMETER_MTU.getName();
+		String propValue = "123";
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-
-		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName();
-		propValue = "1";
-		controllableProperty.setProperty(propName);
-		controllableProperty.setValue(propValue);
-		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-
-		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
-		Map<String, String> stats = extendedStatistics.getStatistics();
-
-		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
-		propValue =  ProtocolEnum.TS_SRT.getName();
-		controllableProperty.setProperty(propName);
-		controllableProperty.setValue(propValue);
-		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-
-
-		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
-		propValue = EncryptionEnum.AES_128.getName();
-		controllableProperty.setProperty(propName);
-		controllableProperty.setValue(propValue);
-		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-
-		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
-		propValue = EncryptionEnum.NONE.getName();
-		controllableProperty.setProperty(propName);
-		controllableProperty.setValue(propValue);
-		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-
-		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
-		propValue = "44444";
-		controllableProperty.setProperty(propName);
-		controllableProperty.setValue(propValue);
-		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-
-		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_PORT.getName();
-		propValue = "4444";
-		controllableProperty.setProperty(propName);
-		controllableProperty.setValue(propValue);
-		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-
-
-		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName();
-		propValue = "1";
-		controllableProperty.setProperty(propName);
-		controllableProperty.setValue(propValue);
- 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-
-		 propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName();
-		 propValue = "1";
-		controllableProperty.setProperty(propName);
-		controllableProperty.setValue(propValue);
-		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+//
+//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName();
+//		propValue = "1";
+//		controllableProperty.setProperty(propName);
+//		controllableProperty.setValue(propValue);
+//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+//
+//		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+//		Map<String, String> stats = extendedStatistics.getStatistics();
+//
+//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+//		propValue =  ProtocolEnum.TS_SRT.getName();
+//		controllableProperty.setProperty(propName);
+//		controllableProperty.setValue(propValue);
+//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+//
+//
+//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
+//		propValue = EncryptionEnum.AES_128.getName();
+//		controllableProperty.setProperty(propName);
+//		controllableProperty.setValue(propValue);
+//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+//
+//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
+//		propValue = EncryptionEnum.NONE.getName();
+//		controllableProperty.setProperty(propName);
+//		controllableProperty.setValue(propValue);
+//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+//
+//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
+//		propValue = "44444";
+//		controllableProperty.setProperty(propName);
+//		controllableProperty.setValue(propValue);
+//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+//
+//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_PORT.getName();
+//		propValue = "4444";
+//		controllableProperty.setProperty(propName);
+//		controllableProperty.setValue(propValue);
+//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+//
+//
+//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName();
+//		propValue = "1";
+//		controllableProperty.setProperty(propName);
+//		controllableProperty.setValue(propValue);
+// 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+//
+//		 propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName();
+//		 propValue = "1";
+//		controllableProperty.setProperty(propName);
+//		controllableProperty.setValue(propValue);
+//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 	}
 }

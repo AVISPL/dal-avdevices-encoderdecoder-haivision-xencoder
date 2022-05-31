@@ -107,5 +107,6 @@ public class EncoderConstant {
 	public static final String DOT = ".";
 	public static final String STREAM_CREATE_RESPONSE = "Stream created successfully";
 	public static final String ADDRESS_FORMAT = "rtmp://";
+	public static final String SOURCE_AUDIO = "SourceAudio";
 
 }

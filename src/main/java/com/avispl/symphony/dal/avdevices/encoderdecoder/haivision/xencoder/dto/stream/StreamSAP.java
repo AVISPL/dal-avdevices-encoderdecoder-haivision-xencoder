@@ -18,7 +18,7 @@ import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencode
  * @since 1.0.0
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StreamSAP {
+public class 	StreamSAP {
 
 	@JsonAlias("Session ID")
 	private String id;

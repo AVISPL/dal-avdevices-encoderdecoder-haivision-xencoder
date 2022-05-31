@@ -4,6 +4,7 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream;
 
 import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler.replaceSpecialCharacter;
+import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler.replaceSpecialCharacterToEmptyString;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -740,7 +741,7 @@ public class StreamConfig {
 	@Override
 	public String toString() {
 		String paramRequest = "";
-		String audioSource = audioList.stream().map(Audio::getAudioId).collect(Collectors.toList()).toString().replace("[", "").replace("]", "");
+		String audioSource = replaceSpecialCharacterToEmptyString(audioList.stream().map(Audio::getAudioId).collect(Collectors.toList()).toString());
 		String nameValue = getFormatNameByValue(name, "name");
 		String videoSrcValue = getFormatNameByValue(video, "videoSrc");
 		String audioSrcValue = getFormatNameByValue(audioSource, "audioSrc");
