@@ -82,7 +82,7 @@ public class EnumTypeHandler {
 					return metric;
 				}
 			}
-			throw new ResourceNotReachableException("Error to convert enum " + enumType.getSimpleName() + " to names");
+			throw new ResourceNotReachableException("Fail to get enum " + enumType.getSimpleName() + " with name is " + name);
 		} catch (Exception e) {
 			throw new ResourceNotReachableException(e.getMessage(), e);
 		}
@@ -96,5 +96,15 @@ public class EnumTypeHandler {
 	 */
 	public static String replaceSpecialCharacter(String str) {
 		return str.replace(EncoderConstant.SPACE, "' '").replace("(", "'('").replace(")", "')'");
+	}
+
+	/**
+	 * Replace special character as [,] to empty string
+	 *
+	 * @param str the str is String value
+	 * @return String the String is String to be converted
+	 */
+	public static String replaceSpecialCharacterToEmptyString(String str) {
+		return str.replace("[", EncoderConstant.EMPTY_STRING).replace("]", EncoderConstant.EMPTY_STRING);
 	}
 }

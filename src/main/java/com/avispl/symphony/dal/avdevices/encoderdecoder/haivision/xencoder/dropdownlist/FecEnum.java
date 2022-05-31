@@ -90,12 +90,13 @@ public enum FecEnum {
 	/**
 	 * Receive array is all names of FECEnum with mode TS over UDP or TS over RTP
 	 *
+	 * @param isUDP is boolean type, if isUPD = true get all names with mode UPD else get all names with mode RTP
 	 * @return Array is list name of FEC
 	 */
-	public static String[] getArrayOfNameByUDPOrRTPMode(boolean isUDPMode) {
+	public static String[] getArrayOfNameByUDPOrRTPMode(boolean isUDP) {
 		List<String> arrayFec = new ArrayList<>();
 		for (FecEnum fecEnum : FecEnum.values()) {
-			if (isUDPMode) {
+			if (isUDP) {
 				if (fecEnum.isUDPMode()) {
 					arrayFec.add(fecEnum.getName());
 				}
