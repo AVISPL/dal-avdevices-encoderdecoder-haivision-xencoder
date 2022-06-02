@@ -25,6 +25,7 @@ public enum EncoderMonitoringMetric {
 	STREAM_CONFIG("StreamConfig", true),
 	STILL_IMAGE("StillImage", true),
 	TALKBACK("TalkBack", true),
+	SESSION("Session", true),
 	SERVICE("Service", true);
 
 	private final String name;

@@ -59,6 +59,7 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropd
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ResolutionEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.SampleRateEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.SourceType;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.StreamActionEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.TimeCodeSource;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.VideoActionEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.VideoStateEnum;
@@ -258,6 +259,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private List<StreamConfig> streamConfigList = new ArrayList<>();
 
 	/**
+	 * List of Services and its statuses
+	 */
+	private final Map<String, Integer> serviceMap = new HashMap<>();
+
+	/**
+	 * Map of talkback
+	 */
+	private final Map<String, String> talkbackMap = new HashMap<>();
+
+	/**
 	 * List of StillImage
 	 */
 	private final List<String> stillImageList = new ArrayList<>();
@@ -288,6 +299,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private final Map<String, InputResponse> mapOfNameAndInputResponse = new HashMap<>();
 
 	/**
+	 * Map of Stream SAP with key is the id of Stream SAP, value is Stream SAP
+	 */
+	private final Map<String, StreamSAP> mapOfIdAndStreamSAP = new HashMap<>();
+
+	/**
 	 * Map of Audio with key is the name AudioConfig, value is Audio
 	 */
 	private final Map<String, Audio> mapOfNameAndSourceAudio = new HashMap<>();
@@ -300,7 +316,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	/**
 	 * Map of StreamStatistics with key is the name of StreamStatistics, value is StreamStatistics
 	 */
-	private final Map<String, StreamStatistics> mapOfNameAndStreamStatistics = new HashMap<>();
+	private final Map<String, StreamStatistics> mapOfIdAndStreamStatistics = new HashMap<>();
+
+	/**
+	 * Map of name and id with key is the name of StreamConfig, value is id of StreamConfig
+	 */
+	Map<String, String> mapOfNameAndIdForStreamConfig = new HashMap<>();
 
 	/**
 	 * ReentrantLock to prevent null pointer exception to localExtendedStatistics when controlProperty method is called before GetMultipleStatistics method.
@@ -312,8 +333,22 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	public HaivisionXEncoderCommunicator() {
 		this.setCommandErrorList(Collections.singletonList("~"));
-		this.setCommandSuccessList(Collections.singletonList("~$ "));
+		this.setCommandSuccessList(Arrays.asList("(y,N): ", "~$ "));
 		this.setLoginSuccessList(Collections.singletonList("~$ "));
+	}
+
+	@Override
+	protected void internalDestroy() {
+		isCreateStreamCalled = false;
+		isEmergencyDelivery = false;
+		stillImageList.clear();
+		localStatsStreamOutput.clear();
+		localCreateOutputStream = new ExtendedStatistics();
+		localExtendedStatistics = new ExtendedStatistics();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Clear internalDestroy success: ");
+		}
+		super.internalDestroy();
 	}
 
 	/**
@@ -398,15 +433,21 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			List<AdvancedControllableProperty> advancedControllableCreateOutputProperties = localCreateOutputStream.getControllableProperties();
 			String[] streamProperty = property.split(EncoderConstant.HASH);
 			String propertyName = streamProperty[0];
+			String propertyValue = streamProperty[1];
 			if (propertyName.contains(EncoderConstant.CREATE_STREAM)) {
 				controlCreateStreamProperty(property, value, updateCreateOutputStream, advancedControllableCreateOutputProperties);
 				if (!updateCreateOutputStream.isEmpty()) {
 					localStatsStreamOutput.putAll(updateCreateOutputStream);
 				}
+			} else if (EncoderMonitoringMetric.SERVICE.getName().equals(propertyName)) {
+				controlServiceProperty(property, propertyValue, value);
 			} else {
 				String propertiesAudio = property.substring(0, EncoderConstant.AUDIO.length());
+				String propertiesStream = property.substring(0, EncoderConstant.STREAM.length());
 				if (EncoderConstant.AUDIO.equals(propertiesAudio)) {
 					controlAudioProperty(property, value, extendedStatistics, advancedControllableProperties);
+				} else if (EncoderConstant.STREAM.equals(propertiesStream)) {
+					controlStreamProperty(property, value, extendedStatistics, advancedControllableProperties);
 				} else {
 					controlVideoProperty(property, value, extendedStatistics, advancedControllableProperties);
 				}
@@ -450,8 +491,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		//clear data before fetching data
 		clearBeforeFetchingData();
 		retrieveStillImageList();
+		// retrieve list of services and its statues
+		retrieveServiceList();
+		// retrieve talkback udp port
+		retrieveTalkbackUdpPort();
 		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
-			if (EncoderMonitoringMetric.ACCOUNT.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.STILL_IMAGE.equals(encoderMonitoringMetric)) {
+			if (EncoderMonitoringMetric.ACCOUNT.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.STILL_IMAGE.equals(encoderMonitoringMetric)
+					|| EncoderMonitoringMetric.SERVICE.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.TALKBACK.equals(encoderMonitoringMetric)) {
 				continue;
 			}
 			retrieveDataByMetric(stats, encoderMonitoringMetric);
@@ -494,6 +540,82 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
+	 * Retrieve list of services name and its status 5
+	 */
+	private void retrieveServiceList() {
+		try {
+			String response = send(EncoderUtil.getMonitorCommand(EncoderMonitoringMetric.SERVICE));
+			if (response != null) {
+				// Example response format: service all status \r\nems service is currently disabled
+				// \r\nems service is disabled at system startup\r\nhttp service is currently enabled ...
+				String[] serviceList = response.split(EncoderConstant.REGEX_DATA);
+				for (String rawService : serviceList) {
+					// Only take string that contains 'currently' not 'at system startup'
+					// Not support Onvif service.
+					if (rawService.contains(EncoderConstant.CURRENTLY) && !rawService.contains(EncoderConstant.ONVIF)) {
+						// Example rawService format: 'ems service is currently disabled' => Take 'ems' as serviceName, 'disabled' as its status.
+						String[] arrayOfRawServices = rawService.split(EncoderConstant.SPACE);
+						String serviceName = arrayOfRawServices[0].trim();
+						String serviceStatus = arrayOfRawServices[arrayOfRawServices.length - 1].trim().toLowerCase();
+						int serviceStatusInInteger = EncoderConstant.ENABLED.equals(serviceStatus) ? 1 : 0;
+						serviceMap.put(serviceName, serviceStatusInInteger);
+					}
+				}
+			}
+		} catch (Exception e) {
+			failedMonitor.put(EncoderMonitoringMetric.SERVICE.getName(), e.getMessage());
+		}
+	}
+
+	/**
+	 * Retrieve talkback udp port encoder
+	 */
+	private void retrieveTalkbackUdpPort() {
+		// 0 indicates that talkback is Off
+		if (!serviceMap.isEmpty() && serviceMap.get(EncoderConstant.TALKBACK).equals(0)) {
+			return;
+		}
+		try {
+			String request = String.valueOf(EncoderUtil.getMonitorCommand(EncoderMonitoringMetric.TALKBACK));
+			String responseData = send(request);
+			String udpPort = EncoderConstant.EMPTY_STRING;
+			String state = EncoderConstant.EMPTY_STRING;
+			if (responseData != null) {
+				String[] arrayOfRawResponseData = responseData.split(EncoderConstant.REGEX_DATA);
+				for (String rawResponse : arrayOfRawResponseData) {
+					if (rawResponse.contains("UDP Port")) {
+						// Example format of rawResponse: '  UDP Port\t\t: 9178'
+						String[] arrayOfRawUdpPort = rawResponse.split("\t\t:");
+						udpPort = arrayOfRawUdpPort[arrayOfRawUdpPort.length - 1].trim();
+					} else if (rawResponse.contains("State")) {
+						String[] arrayOfRawState = rawResponse.split("\t\t\t:");
+						// DISABLED/LISTENING
+						state = arrayOfRawState[arrayOfRawState.length - 1].trim();
+					}
+					if (!StringUtils.isNullOrEmpty(udpPort) && !StringUtils.isNullOrEmpty(state)) {
+						break;
+					}
+				}
+				// check if udpPort string is a valid number
+				if (udpPort.matches(EncoderConstant.REGEX_CHECK_STRING_IS_NUMBER)) {
+					talkbackMap.put(EncoderConstant.PORT, udpPort);
+				}
+				// If State is LISTENING then talkback is on, state is DISABLED then talkback is off
+				if (state.contains(EncoderConstant.LISTENING) || state.contains(EncoderConstant.DISABLED)) {
+					String intState = state.equals(EncoderConstant.LISTENING) ? String.valueOf(EncoderConstant.NUMBER_ONE) : String.valueOf(EncoderConstant.ZERO);
+					talkbackMap.put(EncoderConstant.ACTIVE, intState);
+					talkbackMap.put(EncoderConstant.LISTENING_STATE, state);
+				}
+				if (talkbackMap.size() != 3) {
+					throw new ResourceNotReachableException("Fail to get talkback");
+				}
+			}
+		} catch (Exception e) {
+			failedMonitor.put(EncoderMonitoringMetric.TALKBACK.getName(), e.getMessage());
+		}
+	}
+
+	/**
 	 * Clear data before fetching data
 	 */
 	private void clearBeforeFetchingData() {
@@ -516,10 +638,20 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		//stream
 		streamConfigList.clear();
 		streamStatisticsList.clear();
-		mapOfNameAndStreamStatistics.clear();
+		mapOfIdAndStreamStatistics.clear();
+		mapOfNameAndIdForStreamConfig.clear();
+
+		//session SAP
+		mapOfIdAndStreamSAP.clear();
 
 		//Still Image
 		stillImageList.clear();
+
+		// Service Map
+		serviceMap.clear();
+
+		// Talkback
+		talkbackMap.clear();
 	}
 
 	/**
@@ -549,6 +681,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			case ACCOUNT:
 			case SYSTEM_INFORMATION:
 			case ROLE_BASED:
+				break;
+			case SERVICE:
+				populateServiceConfigData(stats, advancedControllableProperties);
+				break;
+			case TALKBACK:
+				populateTalkbackConfigData(stats, advancedControllableProperties);
 				break;
 			default:
 				if (logger.isDebugEnabled()) {
@@ -580,10 +718,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					}
 					break;
 				case STREAM_CONFIG:
-//					for (StreamConfig streamConfig : streamConfigList) {
-//						addControlStreamConfig(stats, advancedControllableProperties, streamConfig);
-//					}
-//					break;
+					for (StreamConfig streamConfig : streamConfigList) {
+						addControlStreamConfig(stats, advancedControllableProperties, streamConfig);
+					}
+					break;
 				case ACCOUNT:
 				case ROLE_BASED:
 				case TEMPERATURE:
@@ -600,7 +738,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 	private void convertSourceAudioList(StreamConfig streamConfig) {
 		String[] sourceList = streamConfig.getContents().split(EncoderConstant.COMMA);
-		Audio audio = new Audio();
+
 		List<Audio> audioList = new ArrayList<>();
 		String video = null;
 		for (String name : sourceList) {
@@ -608,6 +746,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String[] listName = name.split(EncoderConstant.COLON);
 			if (name.contains(EncoderConstant.AUDIO)) {
 				String[] audioId = listName[1].split(":");
+				Audio audio = new Audio();
 				audio.setAudioId(audioId[0]);
 				audio.setAudioName(mapOfIdAndNameAudioConfig.get(audioId[0]));
 				audioList.add(audio);
@@ -640,8 +779,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			property = streamKey + streamMetric.getName();
 			switch (streamMetric) {
 				case STATE:
-					String stateStream = mapOfNameAndStreamStatistics.get(streamName).getState();
+					String stateStream = mapOfIdAndStreamStatistics.get(streamConfig.getId()).getState();
 					stats.put(property, stateStream);
+					break;
+				case ACTION:
+					stateStream = mapOfIdAndStreamStatistics.get(streamConfig.getId()).getState();
+					String[] actionDropdown = StreamActionEnum.getArrayOfEnumByAction(stateStream);
+					AdvancedControllableProperty actionProperty = controlDropdownAcceptNoneValue(stats, actionDropdown, property, EncoderConstant.NONE);
+					addOrUpdateAdvanceControlProperties(advancedControllableProperties, actionProperty);
+					isEmergencyDelivery = false;
 					break;
 				case NAME:
 					String name = streamConfig.getName();
@@ -664,25 +810,42 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					}
 					break;
 				case STILL_IMAGE:
-					stats.put(property, streamConfig.getStillImageFile());
+					String stillImage = getNoneValueIfPresent(streamConfig.getStillImageFile());
+					stats.put(property, stillImage);
 					break;
 				case PARAMETER_TOS:
-					stats.put(property, streamConfig.getTos());
+					stats.put(property, convertValueByIndexOfSpace(streamConfig.getTos()));
 					break;
 				case PARAMETER_TTL:
 					stats.put(property, streamConfig.getTtl());
 					break;
 				case STREAMING_PROTOCOL:
-					String protocol = streamConfig.getEncapsulation();
+					String protocol = ProtocolEnum.getNameOfProtocolEnumByValue(streamConfig.getEncapsulation());
 					stats.put(property, protocol);
 
-					if (ProtocolEnum.TS_SRT.getName().equals(protocol)) {
+					if (ProtocolEnum.TS_SRT.getName().equalsIgnoreCase(protocol)) {
 						String networkAdapter = streamKey + StreamControllingMetric.STREAM_NETWORK_ADAPTIVE.getName();
 						stats.put(networkAdapter, streamConfig.getNetworkAdaptive());
+
+						String latency = streamKey + StreamControllingMetric.STREAM_LATENCY.getName();
+						stats.put(latency, convertValueByIndexOfSpace(streamConfig.getAddedLatency()));
+
+						String encryption = streamKey + StreamControllingMetric.STREAM_ENCRYPTION.getName();
+						String passPhrase = streamKey + StreamControllingMetric.STREAM_PASSPHRASE.getName();
+						String encryptionValue = streamConfig.getAesEncryption();
+						if (EncoderConstant.OFF.equals(encryptionValue)) {
+							encryptionValue = EncoderConstant.NONE;
+						} else {
+							Map<String, String> encryptionMap = EnumTypeHandler.getMapOfEnumNames(EncryptionEnum.class, false);
+							encryptionValue = encryptionMap.get(streamConfig.getKeyLength());
+							stats.put(passPhrase, EncoderConstant.PASSPHRASE);
+						}
+						stats.put(encryption, encryptionValue);
 					}
+					break;
 				case STREAM_CONNECTION_MODE:
-					protocol = streamConfig.getEncapsulation();
-					if (ProtocolEnum.TS_SRT.getName().equals(protocol)) {
+					protocol = ProtocolEnum.getNameOfProtocolEnumByValue(streamConfig.getEncapsulation());
+					if (ProtocolEnum.TS_SRT.getName().equalsIgnoreCase(protocol)) {
 						String connectionMode = streamKey + StreamControllingMetric.STREAM_CONNECTION_MODE.getName();
 						String connectionModeValue = streamConfig.getSrtMode();
 						stats.put(connectionMode, connectionModeValue);
@@ -701,11 +864,178 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 							stats.put(connectionPort, streamConfig.getPort());
 						}
 					}
+					String destinationAddress = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+					String port = streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+					if (ProtocolEnum.RTMP.getName().equalsIgnoreCase(protocol)) {
+						stats.put(destinationAddress, streamConfig.getAddress());
+					}
+					if (!ProtocolEnum.TS_SRT.getName().equalsIgnoreCase(protocol) && !ProtocolEnum.RTMP.getName().equalsIgnoreCase(protocol)) {
+						stats.put(destinationAddress, streamConfig.getAddress());
+						stats.put(port, convertValueByIndexOfSpace(streamConfig.getPort()));
+					}
 					break;
-
+				case PARAMETER_AVERAGE_BANDWIDTH:
+					stats.put(property, convertValueByIndexOfSpace(replaceCommaByEmptyString(streamConfig.getAverageBandwidth())));
+					break;
+				case PARAMETER_TRAFFIC_SHAPING:
+					stats.put(property, streamConfig.getShaping());
+					break;
+				case PARAMETER_BANDWIDTH_OVERHEAD:
+					protocol = streamConfig.getEncapsulation();
+					String bandWidthValue = streamConfig.getBandwidthOverhead() == null ? streamConfig.getMaxTrafficOverhead() : streamConfig.getBandwidthOverhead();
+					if (bandWidthValue != null) {
+						int len = bandWidthValue.indexOf("%");
+						if (len > -1) {
+							bandWidthValue = bandWidthValue.substring(0, len);
+						}
+						if (ProtocolEnum.TS_SRT.getValue().equalsIgnoreCase(protocol)) {
+							stats.put(property, bandWidthValue);
+						} else {
+							String trafficShapingValue = streamConfig.getShaping();
+							if (EncoderConstant.ON.equals(trafficShapingValue)) {
+								stats.put(property, bandWidthValue);
+							}
+						}
+					}
+					break;
+				case PARAMETER_MTU:
+					protocol = streamConfig.getEncapsulation();
+					if (!ProtocolEnum.RTMP.getName().equals(protocol)) {
+						stats.put(property, streamConfig.getMtu());
+					}
+					break;
+				case PARAMETER_IDLE_CELLS:
+					protocol = streamConfig.getEncapsulation();
+					if (ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_SRT.getValue().equalsIgnoreCase(protocol)) {
+						stats.put(property, streamConfig.getIdleCells());
+					}
+					break;
+				case PARAMETER_DELAYED_AUDIO:
+					protocol = streamConfig.getEncapsulation();
+					if (ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_SRT.getValue().equalsIgnoreCase(protocol)) {
+						stats.put(property, streamConfig.getDelayAudio());
+					}
+					break;
+				case PARAMETER_FEC:
+					protocol = streamConfig.getEncapsulation();
+					if (ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol)) {
+						String fec = streamConfig.getFec();
+						String fecValue = EncoderConstant.NONE;
+						if (!StringUtils.isNullOrEmpty(fec) && fec.contains(FecEnum.VF.getValue())) {
+							fecValue = FecEnum.VF.getName();
+						}
+						stats.put(property, fecValue);
+					}
+					break;
+				case SAP_TRANSMIT:
+					StreamSAP sap = streamConfig.getSap();
+					String transmit = EncoderConstant.OFF;
+					if (sap != null) {
+						transmit = sap.getAdvertise();
+					}
+					if (EncoderConstant.YES.equals(transmit)) {
+						transmit = EncoderConstant.ON;
+					}
+					stats.put(property, transmit);
+					if (EncoderConstant.ON.equals(transmit)) {
+						String sapName = streamKey + StreamControllingMetric.SAP_NAME.getName();
+						String sapDesc = streamKey + StreamControllingMetric.SAP_DESCRIPTION.getName();
+						String sapKeywords = streamKey + StreamControllingMetric.SAP_KEYWORDS.getName();
+						String sapAuthor = streamKey + StreamControllingMetric.SAP_AUTHOR.getName();
+						String sapCopyright = streamKey + StreamControllingMetric.SAP_COPYRIGHT.getName();
+						String sapAddress = streamKey + StreamControllingMetric.SAP_ADDRESS.getName();
+						String sapPort = streamKey + StreamControllingMetric.SAP_PORT.getName();
+						stats.put(sapName, getNoneValueIfPresent(sap.getName()));
+						stats.put(sapDesc, getNoneValueIfPresent(sap.getDesc()));
+						stats.put(sapKeywords, getNoneValueIfPresent(sap.getKeywords()));
+						stats.put(sapAuthor, getNoneValueIfPresent(sap.getAuthor()));
+						stats.put(sapCopyright, getNoneValueIfPresent(sap.getCopyright()));
+						stats.put(sapAddress, getNoneValueIfPresent(sap.getAddress()));
+						stats.put(sapPort, getNoneValueIfPresent(sap.getPort()));
+					}
+					break;
+				case RTMP_PUBLISH_NAME:
+					stats.put(property, getEmptyValueForNullData(streamConfig.getPublishName()));
+					break;
+				case RTMP_USERNAME:
+					stats.put(property, getEmptyValueForNullData(streamConfig.getUsername()));
+					break;
+				case RTMP_PASSWORD:
+				case RTMP_CONFIRMATION_PASSWORD:
+					stats.put(property, getEmptyValueForNullData(streamConfig.getPassword()));
+					break;
+				case CANCEL:
+				case APPLY_CHANGE:
+					break;
 				default:
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format("Controlling Stream group config %s is not supported.", streamMetric.getName()));
+					}
 					break;
 			}
+			stats.put(streamKey + EncoderConstant.EDITED, EncoderConstant.FALSE);
+		}
+	}
+
+	/**
+	 * Get None value if Value is (None)
+	 *
+	 * @param value the value is String value
+	 * @return None if value is (None) else return value
+	 */
+	private String getNoneValueIfPresent(String value) {
+		String defaultValue = value;
+		if (!StringUtils.isNullOrEmpty(value) && value.contains(EncoderConstant.NONE) && EncoderConstant.NONE.equals(value.substring(1, value.length() - 1))) {
+			defaultValue = EncoderConstant.NONE;
+		}
+		return defaultValue;
+	}
+
+	/**
+	 * Populate service statistics and controls
+	 *
+	 * @param stats map statistics property
+	 * @param advancedControllableProperties list controls property
+	 */
+	private void populateServiceConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
+		Objects.requireNonNull(stats);
+		Objects.requireNonNull(advancedControllableProperties);
+		if (isOperatorOrAdministratorRole && isConfigManagement) {
+			for (Entry<String, Integer> serviceSet : serviceMap.entrySet()) {
+				if (serviceSet.getKey().contains(EncoderConstant.PASS_THROUGH)) {
+					continue;
+				}
+				String serviceName = serviceSet.getKey();
+				String capitalizeFirstLetterServiceName = serviceName.substring(0, 1).toUpperCase() + serviceName.substring(1);
+				String property = EncoderMonitoringMetric.SERVICE.getName() + EncoderConstant.HASH + capitalizeFirstLetterServiceName;
+				stats.put(property, EncoderConstant.EMPTY_STRING);
+				advancedControllableProperties.add(createSwitch(property, serviceMap.get(serviceName), EncoderConstant.DISABLE, EncoderConstant.ENABLE));
+			}
+		}
+	}
+
+	/**
+	 * Populate talkback statistics and controls
+	 *
+	 * @param stats map statistics property
+	 * @param advancedControllableProperties list controls property
+	 */
+	private void populateTalkbackConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
+		if (!serviceMap.isEmpty() && serviceMap.get(EncoderConstant.TALKBACK).equals(0)) {
+			return;
+		}
+		Objects.requireNonNull(stats);
+		Objects.requireNonNull(advancedControllableProperties);
+		if (isOperatorOrAdministratorRole && isConfigManagement && talkbackMap.size() == 3) {
+			String groupName = EncoderMonitoringMetric.SERVICE.getName() + EncoderConstant.HASH;
+			String portProperty = groupName + EncoderConstant.TALKBACK_PORT;
+			String port = talkbackMap.get(EncoderConstant.PORT);
+			stats.put(portProperty, port);
+			advancedControllableProperties.add(createNumeric(portProperty, port));
+
+			String statePortProperty = groupName + EncoderConstant.LISTENING_STATE;
+			String state = talkbackMap.get(EncoderConstant.LISTENING_STATE);
+			stats.put(statePortProperty, state);
 		}
 	}
 
@@ -1009,6 +1339,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			case VIDEO_CONFIG:
 			case STREAM_STATISTICS:
 			case STREAM_CONFIG:
+			case SESSION:
 				populateRetrieveDataByMetric(metric);
 				break;
 			case ACCOUNT:
@@ -1115,16 +1446,30 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				break;
 			case STREAM_STATISTICS:
 				StreamStatistics streamStatistics = objectMapper.convertValue(mappingData, StreamStatistics.class);
-				mapOfNameAndStreamStatistics.put(streamStatistics.getName(), streamStatistics);
+				mapOfIdAndStreamStatistics.put(streamStatistics.getId(), streamStatistics);
 				streamStatisticsList.add(streamStatistics);
 				break;
 			case STREAM_CONFIG:
 				StreamConfig streamConfig = objectMapper.convertValue(mappingData, StreamConfig.class);
 				streamConfigList.add(streamConfig);
+				String streamName = streamConfig.getName();
+				if (EncoderConstant.NONE_STREAM_NAME.equals(streamName)) {
+					streamName = handleStreamNameIsEmpty(streamConfig.getId());
+				}
+				mapOfNameAndIdForStreamConfig.put(EncoderConstant.STREAM + EncoderConstant.SPACE + streamName, streamConfig.getId());
 				break;
 			case INPUT:
 				InputResponse inputResponse = objectMapper.convertValue(mappingData, InputResponse.class);
 				mapOfNameAndInputResponse.put(inputResponse.getName(), inputResponse);
+				break;
+			case SESSION:
+				StreamSAP streamSAP = objectMapper.convertValue(mappingData, StreamSAP.class);
+				mapOfIdAndStreamSAP.put(streamSAP.getStreamId(), streamSAP);
+				for (StreamConfig streamConfigItem : streamConfigList) {
+					if (streamConfigItem.getId().equals(streamSAP.getStreamId())) {
+						streamConfigItem.setSap(streamSAP);
+					}
+				}
 				break;
 			default:
 				throw new IllegalArgumentException("Do not support encoderStatisticsMetric: " + metric.name());
@@ -1258,9 +1603,23 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		for (StreamConfig streamConfigItem : streamConfigList) {
 			if (streamConfigItem.getId().equals(streamId)) {
 				String protocol = streamConfigItem.getEncapsulation();
-				String address = streamConfigItem.getAddress();
-				String port = streamConfigItem.getPort();
-				streamName = String.format("%s://@%s(%s)", protocol, address, port);
+				String address = getEmptyValueForNullData(streamConfigItem.getAddress());
+				String port = convertValueByIndexOfSpace(streamConfigItem.getPort());
+				String protocolValue = ProtocolEnum.getNameOfProtocolEnumByValue(protocol);
+				if (ProtocolEnum.TS_SRT.getName().equals(protocolValue)) {
+					port = convertValueByIndexOfSpace(streamConfigItem.getDestinationPort());
+					if (StringUtils.isNullOrEmpty(port)) {
+						port = convertValueByIndexOfSpace(streamConfigItem.getPort());
+					}
+				}
+				streamName = String.format("%s://@%s:%s", protocol, address, port);
+				if (ProtocolEnum.RTMP.getName().equals(protocol)) {
+					port = streamConfigItem.getTcpPort();
+					streamName = String.format("%s:%s", address, port);
+					if (address.contains(port)) {
+						streamName = String.format("%s", address);
+					}
+				}
 				break;
 			}
 		}
@@ -1514,6 +1873,61 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			stats.put(propertyName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.TRUE);
 			stats.put(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.EMPTY_STRING);
 			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.CANCEL, EncoderConstant.CANCELING, 0));
+		}
+	}
+
+	/**
+	 * Control Service Property
+	 *
+	 * @param property the property of the metric (contains group name, hash, property value)
+	 * @param propertyValue the propertyValue is the filed name of controlling metric
+	 * @param value the value is value of metric
+	 */
+	private void controlServiceProperty(String property, String propertyValue, String value) {
+		String[] serviceNameProperty = property.split(EncoderConstant.HASH);
+		String propertyName = serviceNameProperty[1];
+		if (EncoderConstant.TALKBACK_PORT.equals(propertyName)) {
+			sendCommandToSavePortTalkbackProperties(value);
+		} else {
+			String serviceName = propertyValue.toLowerCase();
+			String action = String.valueOf(EncoderConstant.NUMBER_ONE).equals(value) ? EncoderCommand.START.getName() : EncoderCommand.STOP.getName();
+			String request = EncoderCommand.ADMIN_SERVICE.getName() + serviceName + EncoderConstant.SPACE + action;
+			try {
+				String responseData = send(request);
+				String failErrorMessage = String.format("Change action %s failed", action);
+				if (EncoderCommand.STOP.getName().equals(action)) {
+					responseData = send(EncoderConstant.CONFIRM_STOP_SERVICE);
+					if (!responseData.contains(EncoderConstant.SUCCESS_STOP_SERVICE_RESPONSE)) {
+						throw new ResourceNotReachableException(failErrorMessage);
+					}
+				}
+				action = EncoderCommand.STOP.getName().equals(action) ? action.trim().concat("ped") : action.trim().concat("ed");
+				if (StringUtils.isNullOrEmpty(responseData) || !responseData.contains(action)) {
+					throw new ResourceNotReachableException(failErrorMessage);
+				}
+			} catch (Exception e) {
+				throw new ResourceNotReachableException("Error while setting action service config: " + e.getMessage(), e);
+			}
+		}
+	}
+
+	/**
+	 * Send command to set new udp port for talkback and start/stop talkback
+	 *
+	 * @param udpPort new udp port to be set
+	 * @throws ResourceNotReachableException if set port talkback failed
+	 */
+	private void sendCommandToSavePortTalkbackProperties(String udpPort) {
+		String setUdpPortRequest = EncoderCommand.OPERATION_TALKBACK.getName() + EncoderConstant.SPACE + EncoderCommand.SET + " port=" + udpPort;
+		try {
+			String responseData = send(setUdpPortRequest);
+			if (responseData.contains(EncoderConstant.ERROR_TALKBACK_PORT)) {
+				throw new ResourceNotReachableException(String.format("Invalid input value, the adapter doesn't support for port: %s", udpPort));
+			} else if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
+				throw new ResourceNotReachableException(responseData);
+			}
+		} catch (Exception e) {
+			throw new ResourceNotReachableException("Error while setting port: " + e.getMessage(), e);
 		}
 	}
 
@@ -2167,6 +2581,70 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
+	 * Control Stream property
+	 *
+	 * @param property the property is the filed name of controlling metric
+	 * @param value the value is value of metric
+	 * @param extendedStatistics list extendedStatistics
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 */
+	private void controlStreamProperty(String property, String value, Map<String, String> extendedStatistics, List<AdvancedControllableProperty> advancedControllableProperties) {
+		isEmergencyDelivery = true;
+		String[] streamProperty = property.split(EncoderConstant.HASH);
+		String streamName = streamProperty[0];
+		String propertyName = streamProperty[1];
+		StreamControllingMetric streamControllingMetric = EnumTypeHandler.getMetricOfEnumByName(StreamControllingMetric.class, propertyName);
+		switch (streamControllingMetric) {
+			case CANCEL:
+				isEmergencyDelivery = false;
+				break;
+			case ACTION:
+				updateValueForTheControllableProperty(property, value, extendedStatistics, advancedControllableProperties);
+				break;
+			case APPLY_CHANGE:
+				String streamId = mapOfNameAndIdForStreamConfig.get(streamName);
+				String action = extendedStatistics.get(streamName + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName());
+				sendCommandToSetStreamAction(streamId, action);
+				isEmergencyDelivery = false;
+				break;
+			default:
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Controlling stream create output group %s is not supported.", streamControllingMetric.getName()));
+				}
+				break;
+		}
+		if (isEmergencyDelivery) {
+			propertyName = streamName;
+			extendedStatistics.put(propertyName + EncoderConstant.HASH + StreamControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.EMPTY_STRING);
+			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + StreamControllingMetric.APPLY_CHANGE.getName(), EncoderConstant.APPLY, EncoderConstant.APPLYING, 0));
+
+			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.EDITED, EncoderConstant.TRUE);
+			extendedStatistics.put(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.EMPTY_STRING);
+			advancedControllableProperties.add(createButton(propertyName + EncoderConstant.HASH + EncoderConstant.CANCEL, EncoderConstant.CANCEL, EncoderConstant.CANCELING, 0));
+		}
+	}
+
+	/**
+	 * Send command to set stream action
+	 *
+	 * @param streamID the streamID is ID of stream
+	 * @param action the action is action state of stream
+	 */
+	private void sendCommandToSetStreamAction(String streamID, String action) {
+		String request = EncoderCommand.OPERATION_STREAM.getName() + streamID + EncoderConstant.SPACE + action.toLowerCase();
+		if (!EncoderConstant.NONE.equals(action)) {
+			try {
+				String responseData = send(request);
+				if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
+					throw new ResourceNotReachableException(String.format("Change stream %s failed", action));
+				}
+			} catch (Exception e) {
+				throw new ResourceNotReachableException("Error while setting action stream config: " + e.getMessage(), e);
+			}
+		}
+	}
+
+	/**
 	 * Control create a stream property
 	 *
 	 * @param property the property is the filed name of controlling metric
@@ -2214,6 +2692,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				case SAP_ADDRESS:
 				case STREAM_PASSPHRASE:
 				case STREAM_NETWORK_ADAPTIVE:
+				case RTMP_PUBLISH_NAME:
+				case RTMP_USERNAME:
+				case RTMP_PASSWORD:
+				case RTMP_CONFIRMATION_PASSWORD:
 					updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
 					break;
 				case STREAM_ENCRYPTION:
@@ -2401,7 +2883,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		stats.remove(streamKey + StreamControllingMetric.RTMP_PUBLISH_NAME.getName());
 		stats.remove(streamKey + StreamControllingMetric.RTMP_PASSWORD.getName());
 		stats.remove(streamKey + StreamControllingMetric.RTMP_CONFIRMATION_PASSWORD.getName());
-		stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName());
 		stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
 		stats.remove(streamKey + StreamControllingMetric.STREAM_PASSPHRASE.getName());
 	}
@@ -2469,18 +2950,19 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				fecDropdown = FecEnum.getArrayOfNameByUDPOrRTPMode(false);
 				fecValue = FecEnum.getNameOfFecEnumByMode(getEmptyValueForNullData(localStatsStreamOutput.get(fecName)));
 
-				destinationAddressProperty = controlDropdownAcceptNoneValue(stats, fecDropdown, fecName, fecValue);
-				addOrUpdateAdvanceControlProperties(advancedControllableProperties, destinationAddressProperty);
+				fecControlProperty = controlDropdownAcceptNoneValue(stats, fecDropdown, fecName, fecValue);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, fecControlProperty);
 
 				addButtonSourceAudio(stats, advancedControllableProperties);
 				addNewAudioAndVideoSource(stats, advancedControllableProperties);
 
 				stats.remove(streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName());
 				stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
-				populateStreamCreateWithSAPMode(null, sapTransmitName, stats, advancedControllableProperties, EncoderConstant.CREATE_STREAM);
+				populateStreamCreateWithSAPMode(null, sapTransmitName, stats, advancedControllableProperties, streamName);
 				removeControlWithModeDifferentSRT(stats);
 				break;
 			case DIRECT_RTP:
+				removeControlWithModeDifferentSRT(stats);
 				String sourceTypeName = streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName();
 				String[] sourceTypeDropdown = EnumTypeHandler.getEnumNames(SourceType.class);
 				AdvancedControllableProperty sourceTypeProperty = controlDropdownAcceptNoneValue(stats, sourceTypeDropdown, sourceTypeName, SourceType.VIDEO.getName());
@@ -2492,6 +2974,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					mapOfNameAndSourceAudio.replace(key, null);
 				}
 
+				destinationAddress = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+				destinationAddressValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationAddress));
+				AdvancedControllableProperty addressProperty = controlTextOrNumeric(stats, destinationAddress, destinationAddressValue, false);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, addressProperty);
+
+				destinationPort = streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+				destinationPortValue = getEmptyValueForNullData(localStatsStreamOutput.get(destinationPort));
+				AdvancedControllableProperty portProperty = controlTextOrNumeric(stats, destinationPort, destinationPortValue, false);
+				addOrUpdateAdvanceControlProperties(advancedControllableProperties, portProperty);
+
 				// remove Fec, VF Encryption, idleCells, delayedAudio, Transmit SAP
 				stats.remove(streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName());
 				stats.remove(streamKey + StreamControllingMetric.PARAMETER_FEC.getName());
@@ -2499,7 +2991,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				stats.remove(streamKey + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName());
 				stats.remove(streamKey + StreamControllingMetric.SAP_TRANSMIT.getName());
 				stats.remove(streamKey + StreamControllingMetric.ADD_SOURCE_AUDIO.getName());
-				removeControlWithModeDifferentSRT(stats);
 				break;
 			case RTMP:
 				//Name Property
@@ -2509,6 +3000,20 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				String rtmpConfirmationPassword = streamKey + StreamControllingMetric.RTMP_CONFIRMATION_PASSWORD.getName();
 				String contentName = streamKey + StreamControllingMetric.NAME.getName();
 				String destinationAddressName = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+
+				//remove portAudio destinationPort mtuName
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_MTU.getName());
+				stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName());
+
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_FEC.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName());
+				stats.remove(streamKey + StreamControllingMetric.SAP_TRANSMIT.getName());
+				stats.remove(streamKey + StreamControllingMetric.ADD_SOURCE_AUDIO.getName());
+				stats.remove(streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName());
+				stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
+				removeControlForSAPMode(stats);
+				removeControlWithModeDifferentSRT(stats);
 
 				//Value Property
 				String contentNameValue = getEmptyValueForNullData(localStatsStreamOutput.get(contentName));
@@ -2549,18 +3054,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				clearSourceAudioBeforeAddNew(stats);
 				addAndUpdateSourceAudio(stats, advancedControllableProperties);
 
-				//remove portAudio destinationPort mtuName
-				stats.remove(streamKey + StreamControllingMetric.PARAMETER_MTU.getName());
-				stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName());
-
-				stats.remove(streamKey + StreamControllingMetric.PARAMETER_FEC.getName());
-				stats.remove(streamKey + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName());
-				stats.remove(streamKey + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName());
-				stats.remove(streamKey + StreamControllingMetric.SAP_TRANSMIT.getName());
-				stats.remove(streamKey + StreamControllingMetric.ADD_SOURCE_AUDIO.getName());
-				stats.remove(streamKey + StreamControllingMetric.PARAMETER_VF_ENCRYPTION.getName());
-				stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
-				removeControlWithModeDifferentSRT(stats);
 				break;
 			case TS_SRT:
 				//Name Property
@@ -2611,7 +3104,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					AdvancedControllableProperty idleCellsControlProperty = controlSwitch(stats, idleCellsName, idleCellsValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, idleCellsControlProperty);
 				}
-
+				populateBandwidthOverheadWithTrafficShaping(stats, advancedControllableProperties, false, connectionModeValue);
 				populatePropertyForSRTMode(stats, advancedControllableProperties);
 				stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName());
 				stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName());
@@ -2623,7 +3116,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				stats.remove(streamKey + StreamControllingMetric.RTMP_PASSWORD.getName());
 				stats.remove(streamKey + StreamControllingMetric.RTMP_CONFIRMATION_PASSWORD.getName());
 				stats.remove(streamKey + StreamControllingMetric.STREAM_SOURCE_TYPE.getName());
-				stats.remove(streamKey + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName());
 				removeControlForSAPMode(stats);
 				break;
 			default:
@@ -2926,11 +3418,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		stats.remove(delayedAudioName);
 		stats.remove(bandwidthOverheadName);
 
+		String protocolMode = getEmptyValueForNullData(localStatsStreamOutput.get(streamName + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName()));
 		if (value.equals(String.valueOf(EncoderConstant.NUMBER_ONE))) {
 			String idleCellsValue = localStatsStreamOutput.get(idleCellsName);
 			String delayedAudioValue = localStatsStreamOutput.get(delayedAudioName);
 
-			String protocolMode = getEmptyValueForNullData(localStatsStreamOutput.get(streamName + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName()));
 			if (!ProtocolEnum.DIRECT_RTP.getName().equals(protocolMode) && !ProtocolEnum.RTMP.getName().equals(protocolMode)) {
 				//add idleCells
 				if (idleCellsValue == null) {
@@ -2968,15 +3460,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (ProtocolEnum.TS_SRT.getName().equals(protocolMode)) {
 			defaultBandwidth = String.valueOf(EncoderConstant.DEFAULT_BANDWIDTH_OVERHEAD_SRT);
 		}
-		AdvancedControllableProperty refreshRateControlProperty = controlTextOrNumeric(stats, bandwidthOverheadName, defaultBandwidth, true);
-		addOrUpdateAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
+		AdvancedControllableProperty bandwidthOverheadProperty = controlTextOrNumeric(stats, bandwidthOverheadName, defaultBandwidth, true);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, bandwidthOverheadProperty);
 		if (isTrafficShaping) {
 			//add bandwidth overhead
 			if (bandwidthOverheadValue == null) {
 				bandwidthOverheadValue = defaultBandwidth;
 			}
-			refreshRateControlProperty = controlTextOrNumeric(stats, bandwidthOverheadName, bandwidthOverheadValue, true);
-			addOrUpdateAdvanceControlProperties(advancedControllableProperties, refreshRateControlProperty);
+			bandwidthOverheadProperty = controlTextOrNumeric(stats, bandwidthOverheadName, bandwidthOverheadValue, true);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, bandwidthOverheadProperty);
 		}
 	}
 
@@ -3018,7 +3510,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		try {
 			String responseData = send(request.replace("\r", ""));
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
-				throw new ResourceNotReachableException(responseData);
+				throw new ResourceNotReachableException(String.format("Create stream successfully with stream ID: %s. But can't create Transmit SAP session for stream", idStream) + responseData);
 			}
 		} catch (Exception e) {
 			throw new ResourceNotReachableException("Error while creating new SAP: " + e.getMessage(), e);
@@ -3077,6 +3569,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String sourcePortValue = stats.get(streamName + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName());
 		String encryptionValue = getEmptyValueForNullData(stats.get(streamName + StreamControllingMetric.STREAM_ENCRYPTION.getName()));
 		String passPhrase = getEmptyValueForNullData(stats.get(streamName + StreamControllingMetric.STREAM_PASSPHRASE.getName()));
+		String publishName = getEmptyValueForNullData(stats.get(streamName + StreamControllingMetric.RTMP_PUBLISH_NAME.getName()));
+		String userName = getEmptyValueForNullData(stats.get(streamName + StreamControllingMetric.RTMP_USERNAME.getName()));
+		String password = getEmptyValueForNullData(stats.get(streamName + StreamControllingMetric.RTMP_PASSWORD.getName()));
+		String comfirmPassword = getEmptyValueForNullData(stats.get(streamName + StreamControllingMetric.RTMP_CONFIRMATION_PASSWORD.getName()));
 		VideoConfig videoConfig = mapOfNameAndVideoConfig.get(sourceVideoValue);
 		String videoId = EncoderConstant.EMPTY_STRING;
 		if (videoConfig != null) {
@@ -3109,6 +3605,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			if (StringUtils.isNullOrEmpty(contentValue)) {
 				throw new ResourceNotReachableException("Error while creating new stream, stream name can't empty");
 			}
+			if (!password.equals(comfirmPassword)) {
+				throw new ResourceNotReachableException("Password and Confirmation Password do not match");
+			}
 		}
 		if ((!ProtocolEnum.TS_SRT.getValue().equals(protocolValue) || !ConnectionModeEnum.LISTENER.getName().equals(connectionValue)) && StringUtils.isNullOrEmpty(addressValue)) {
 			throw new ResourceNotReachableException("Address can't null or empty. Address length must be between 1 and 511 characters.");
@@ -3117,8 +3616,20 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				|| passPhrase.length() <= EncoderConstant.MIN_PASSPHRASE)) {
 			throw new ResourceNotReachableException("PassPhrase can't null or empty. Passphrase length must be between 10 and 79 characters.");
 		}
-		if (StringUtils.isNullOrEmpty(portValue)) {
+		if (StringUtils.isNullOrEmpty(portValue) && !ProtocolEnum.RTMP.getValue().equals(protocolValue)) {
 			throw new ResourceNotReachableException("Port can't null or empty. Please re-enter the port.");
+		}
+		if (ProtocolEnum.DIRECT_RTP.getValue().equals(protocolValue) || ProtocolEnum.TS_RTP.getValue().equals(protocolValue)) {
+			int port = Integer.parseInt(portValue);
+			if (port % 2 != 0) {
+				throw new ResourceNotReachableException("Even numbered UDP port required");
+			}
+		}
+
+		if (ProtocolEnum.RTMP.getValue().equals(protocolValue)) {
+			streamConfig.setPublishName(publishName);
+			streamConfig.setUsername(userName);
+			streamConfig.setPassword(password);
 		}
 		streamConfig.setPassphrase(passPhrase);
 		streamConfig.setAesEncryption(encryptionValue);
@@ -3158,16 +3669,14 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			}
 			int lenIpFormat = EncoderConstant.ADDRESS_FORMAT.length();
 			int lenIpAddress = addressValue.length() - 1;
-			String endCharacter = addressValue.substring(lenIpAddress);
-			if (addressValue.length() < lenIpFormat || !endCharacter.equals("/")) {
-				throw new ResourceNotReachableException("Invalid IP Address, IP Address must begin rtmp://ipAddress/");
+			if (addressValue.length() < lenIpFormat) {
+				throw new ResourceNotReachableException("Invalid IP Address, IP Address must begin rtmp://IpAddress:port/uri");
 			}
 			String formatAddress = addressValue.substring(0, lenIpFormat);
 			String ipAddress = addressValue.substring(lenIpFormat, lenIpAddress);
-			if (!EncoderConstant.ADDRESS_FORMAT.equals(formatAddress) || StringUtils.isNullOrEmpty(ipAddress) || EncoderConstant.SPACE.equals(ipAddress)) {
-				throw new ResourceNotReachableException("Invalid stream address contains invalid characters. IP Address format rtmp://ipAddress/");
+			if (!EncoderConstant.ADDRESS_FORMAT.equals(formatAddress) || StringUtils.isNullOrEmpty(ipAddress)) {
+				throw new ResourceNotReachableException("Invalid stream address contains invalid characters. IP Address format rtmp://IpAddress:port/uri");
 			}
-
 		} catch (Exception e) {
 			throw new ResourceNotReachableException("Error while creating IP Address " + e.getMessage(), e);
 		}
