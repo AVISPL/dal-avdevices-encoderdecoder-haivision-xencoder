@@ -38,10 +38,9 @@ public enum EncoderCommand {
 
 	//input command
 	OPERATION_VIDIN("vidin "),
-	OPERATION_STILL("still "),
 
 	// still image command
-
+	OPERATION_STILL("still "),
 
 	//temperatures command
 	OPERATION_TEMPERATURE("temperature "),
@@ -54,7 +53,10 @@ public enum EncoderCommand {
 
 	//service command
 	ADMIN_SERVICE("service "),
-	ADMIN_STATUS("status ");
+	ADMIN_STATUS("status "),
+
+	// talkback command
+	OPERATION_TALKBACK("talkback ");
 
 	private final String name;
 

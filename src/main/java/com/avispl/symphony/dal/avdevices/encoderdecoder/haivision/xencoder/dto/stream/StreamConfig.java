@@ -44,6 +44,9 @@ public class StreamConfig {
 	private String port;
 
 	@JsonAlias("Destination Port")
+	private String destinationPort;
+
+	@JsonAlias("Source Port")
 	private String sourcePort;
 
 	@JsonAlias("Encapsulation")
@@ -81,6 +84,9 @@ public class StreamConfig {
 
 	@JsonAlias("AES Encryption")
 	private String aesEncryption;
+
+	@JsonAlias("Key Length")
+	private String keyLength;
 
 	@JsonAlias("Network Adaptive")
 	private String networkAdaptive;
@@ -733,6 +739,42 @@ public class StreamConfig {
 	}
 
 	/**
+	 * Retrieves {@code {@link #destinationPort}}
+	 *
+	 * @return value of {@link #destinationPort}
+	 */
+	public String getDestinationPort() {
+		return destinationPort;
+	}
+
+	/**
+	 * Sets {@code destinationPort}
+	 *
+	 * @param destinationPort the {@code java.lang.String} field
+	 */
+	public void setDestinationPort(String destinationPort) {
+		this.destinationPort = destinationPort;
+	}
+
+	/**
+	 * Retrieves {@code {@link #keyLength}}
+	 *
+	 * @return value of {@link #keyLength}
+	 */
+	public String getKeyLength() {
+		return keyLength;
+	}
+
+	/**
+	 * Sets {@code keyLength}
+	 *
+	 * @param keyLength the {@code java.lang.String} field
+	 */
+	public void setKeyLength(String keyLength) {
+		this.keyLength = keyLength;
+	}
+
+	/**
 	 /**
 	 * Get To String of stream configs
 	 *
@@ -765,7 +807,7 @@ public class StreamConfig {
 		String networkAdaptiveValue = getFormatNameByValue(networkAdaptive, "adaptive");
 		String latencyValue = getFormatNameByValue(networkAdaptive, "latency");
 		String encryptionValue = getFormatNameByValue(aesEncryption, "encryption");
-		String passphraseValue = getFormatNameByValue(password, "passphrase");
+		String passphraseValue = getFormatNameByValue(passphrase, "passphrase");
 
 		if (ProtocolEnum.TS_UDP.getValue().equals(encapsulation) || ProtocolEnum.TS_RTP.getValue().equals(encapsulation)) {
 			paramRequest = String.format(" %s %s %s %s %s %s %s %s ", fecValue, trafficShapingValue, idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, bandwidthOverHeadValue);
@@ -780,10 +822,10 @@ public class StreamConfig {
 			paramRequest = String.format(" %s %s %s %s %s %s %s %s %s %s %s", ttlValue, tosValue, bandwidthOverHeadValue, idleCellsValue, srtModeValue, networkAdaptiveValue, latencyValue, encryptionValue,
 					passphraseValue, mtuValue, trafficShapingValue);
 			if (ConnectionModeEnum.CALLER.getName().equals(srtMode)) {
-				paramRequest = paramRequest + String.format(" %s %s ", sourcePortValue, sourcePortValue);
+				paramRequest = paramRequest + String.format(" %s ", sourcePortValue);
 			}
 			if (ConnectionModeEnum.LISTENER.getName().equals(srtMode)) {
-				paramRequest = paramRequest + String.format(" %s %s ", mtuValue, bandwidthOverHeadValue);
+				paramRequest = paramRequest + String.format(" %s", bandwidthOverHeadValue);
 			}
 		}
 		paramRequest = paramRequest + String.format(" %s %s %s %s %s %s %s ", nameValue, videoSrcValue, audioSrcValue, protocolValue, addressValue, stillImageValue, portValue);

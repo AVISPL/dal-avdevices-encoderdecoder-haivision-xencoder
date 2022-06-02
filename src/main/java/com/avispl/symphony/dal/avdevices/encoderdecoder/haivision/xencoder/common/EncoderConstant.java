@@ -55,6 +55,8 @@ public class EncoderConstant {
 	public static final String STOPPED = "STOPPED";
 	public static final String MUTED = "MUTED";
 	public static final String ERROR_INPUT = "Unable to set property \"input\"";
+	public static final String ERROR_TALKBACK_PORT = "Unable to set property \"port\"";
+	public static final String ERROR_TALKBACK_ACTION_START = "Unable to start talkback: \"Talkback already started\"";
 	public static final String DISABLE = "Disable";
 	public static final String ENABLE = "Enable";
 	public static final String CROP = "Crop";
@@ -108,5 +110,21 @@ public class EncoderConstant {
 	public static final String STREAM_CREATE_RESPONSE = "Stream created successfully";
 	public static final String ADDRESS_FORMAT = "rtmp://";
 	public static final String SOURCE_AUDIO = "SourceAudio";
-
+	public static final String PASSPHRASE = "**********";
+	public static final String CURRENTLY = "currently";
+	public static final String ENABLED = "enabled";
+	public static final String STRING_ONE = "1";
+	public static final String CONFIRM_STOP_SERVICE = "y";
+	public static final String SUCCESS_STOP_SERVICE_RESPONSE = "stopped";
+	public static final String ONVIF = "onvif";
+	public static final String TALKBACK = "talkback";
+	public static final String TALKBACK_PORT = "TalkbackPort";
+	public static final String PORT = "Port";
+	public static final String LISTENING = "LISTENING";
+	public static final String LISTENING_STATE = "ListeningState";
+	public static final String DISABLED = "DISABLED";
+	public static final String ACTIVE = "Active";
+	public static final String STRING_ZERO = "0";
+	public static final String REGEX_CHECK_STRING_IS_NUMBER = "-?\\d+(\\.\\d+)?";
+	public static final String PASS_THROUGH = "passthrough";
 }

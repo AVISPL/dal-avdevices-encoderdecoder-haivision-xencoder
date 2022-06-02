@@ -41,6 +41,7 @@ public enum StreamControllingMetric {
 	PARAMETER_IDLE_CELLS("ParameterIdleCells"),
 	PARAMETER_DELAYED_AUDIO("ParameterDelayedAudio"),
 	PARAMETER_BANDWIDTH_OVERHEAD("ParameterBandwidthOverhead (%)"),
+	PARAMETER_AVERAGE_BANDWIDTH("ParameterAverageBandwidth (kbps)"),
 	//RTMP protocol
 	RTMP_PUBLISH_NAME("RTMPPublishName"),
 	RTMP_USERNAME("RTMPUsername"),
@@ -60,6 +61,7 @@ public enum StreamControllingMetric {
 	//Listener Mode
 	STREAM_CONNECTION_PORT("StreamingConnectionPort"),
 	ACTION("Action"),
+	APPLY_CHANGE("ApplyChange"),
 	CANCEL("Cancel");
 
 	private String name;

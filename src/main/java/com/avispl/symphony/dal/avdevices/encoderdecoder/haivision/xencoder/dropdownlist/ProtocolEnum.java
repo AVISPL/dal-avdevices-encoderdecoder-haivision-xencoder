@@ -15,7 +15,7 @@ public enum ProtocolEnum {
 	TS_UDP("TS over UDP", "ts-udp"),
 	TS_RTP("TS over RTP", "ts-rtp"),
 	TS_SRT("TS over SRT", "ts-srt"),
-	DIRECT_RTP("DIRECT RTP", "direct-rtp"),
+	DIRECT_RTP("Direct-RTP", "direct-rtp"),
 	RTMP("RTMP", "rtmp");
 
 	private final String name;
@@ -61,6 +61,23 @@ public enum ProtocolEnum {
 		for (ProtocolEnum protocolEnum : ProtocolEnum.values()) {
 			if (protocolEnum.getName().equals(name)) {
 				defaultValue = protocolEnum.getValue();
+				break;
+			}
+		}
+		return defaultValue;
+	}
+
+	/**
+	 * Get name of Protocol by value
+	 *
+	 * @param value the value is value of ProtocolEnum
+	 * @return String is protocol value
+	 */
+	public static String getNameOfProtocolEnumByValue(String value) {
+		String defaultValue = value;
+		for (ProtocolEnum protocolEnum : ProtocolEnum.values()) {
+			if (protocolEnum.getValue().equalsIgnoreCase(value)) {
+				defaultValue = protocolEnum.getName();
 				break;
 			}
 		}
