@@ -127,4 +127,6 @@ public class EncoderConstant {
 	public static final String STRING_ZERO = "0";
 	public static final String REGEX_CHECK_STRING_IS_NUMBER = "-?\\d+(\\.\\d+)?";
 	public static final String PASS_THROUGH = "passthrough";
+	public static final String STATE = "State";
+	public static final String UDP_PORT = "UDP Port";
 }

@@ -11,6 +11,7 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.drop
  * @since 1.0.0
  */
 public enum EncryptionEnum {
+
 	NONE("None", ""),
 	AES_128("AES-128", "128 bits"),
 	AES_256("AES-256", "256 bits");

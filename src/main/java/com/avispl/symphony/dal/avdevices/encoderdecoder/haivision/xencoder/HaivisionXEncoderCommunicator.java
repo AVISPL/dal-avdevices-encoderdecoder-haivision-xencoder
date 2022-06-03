@@ -113,8 +113,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private final Map<String, String> failedMonitor = new HashMap<>();
 	private final Map<String, String> localStatsStreamOutput = new HashMap<>();
 	private final String uuidDay = UUID.randomUUID().toString().replace(EncoderConstant.DASH, EncoderConstant.EMPTY_STRING);
-	private final List<Integer> portNumberList = new ArrayList<>();
-	private final List<String> portNumberRangeList = new ArrayList<>();
 
 	//The properties adapter
 	private String streamNameFilter;
@@ -338,6 +336,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private final Set<StreamConfig> streamConfigNameFilterList = new HashSet<>();
 
 	/**
+	 * List port extracted from port filter
+	 */
+	private final List<Integer> portNumberList = new ArrayList<>();
+
+	/**
+	 * List port range extracted from filter
+	 */
+	private final List<String> portNumberRangeList = new ArrayList<>();
+
+	/**
 	 * ReentrantLock to prevent null pointer exception to localExtendedStatistics when controlProperty method is called before GetMultipleStatistics method.
 	 */
 	private final ReentrantLock reentrantLock = new ReentrantLock();
@@ -433,6 +441,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				localAdvancedControl.removeIf(item -> nameList.contains(item.getName()));
 				localAdvancedControl.addAll(localStreamAdvancedControl);
 			}
+			updateDropdownListForTheControllingMetric();
 		} finally {
 			reentrantLock.unlock();
 		}
@@ -611,11 +620,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			if (responseData != null) {
 				String[] arrayOfRawResponseData = responseData.split(EncoderConstant.REGEX_DATA);
 				for (String rawResponse : arrayOfRawResponseData) {
-					if (rawResponse.contains("UDP Port")) {
+					if (rawResponse.contains(EncoderConstant.UDP_PORT)) {
 						// Example format of rawResponse: '  UDP Port\t\t: 9178'
 						String[] arrayOfRawUdpPort = rawResponse.split("\t\t:");
 						udpPort = arrayOfRawUdpPort[arrayOfRawUdpPort.length - 1].trim();
-					} else if (rawResponse.contains("State")) {
+					} else if (rawResponse.contains(EncoderConstant.STATE)) {
 						String[] arrayOfRawState = rawResponse.split("\t\t\t:");
 						// DISABLED/LISTENING
 						state = arrayOfRawState[arrayOfRawState.length - 1].trim();
@@ -775,7 +784,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		List<Audio> audioList = new ArrayList<>();
 		String video = null;
 		for (String name : sourceList) {
-			name = name.replace("\"", EncoderConstant.EMPTY_STRING).replace(")", "").replace("(", EncoderConstant.EMPTY_STRING);
+			//Example format: Video ("HD Video Encoder 0":0), Audio ("Audio Encoder 0":0)
+			name = name.replace("\"", EncoderConstant.EMPTY_STRING).replace(")", EncoderConstant.EMPTY_STRING).replace("(", EncoderConstant.EMPTY_STRING);
 			String[] listName = name.split(EncoderConstant.COLON);
 			if (name.contains(EncoderConstant.AUDIO)) {
 				String[] audioId = listName[1].split(EncoderConstant.COLON);
@@ -2567,7 +2577,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String cropping = stats.get(propertyName + VideoControllingMetric.CROPPING.getName());
 		String intraRefresh = convertByState(stats.get(propertyName + VideoControllingMetric.INTRA_REFRESH.getName()), false);
 		String closedCaption = convertByState(stats.get(propertyName + VideoControllingMetric.CLOSED_CAPTION.getName()), false);
-		String inputInterface = stats.get(propertyName + VideoControllingMetric.INPUT.getName()).replace(EncoderConstant.DASH, "");
+		String inputInterface = stats.get(propertyName + VideoControllingMetric.INPUT.getName()).replace(EncoderConstant.DASH, EncoderConstant.EMPTY_STRING);
 		String picturePartitioning = convertByState(stats.get(propertyName + VideoControllingMetric.PARTITIONING.getName()), false);
 		String partialFrameSkip = convertByState(stats.get(propertyName + VideoControllingMetric.PARTIAL_IMAGE_SKIP.getName()), false);
 
@@ -2735,6 +2745,21 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		advancedControllableProperties.add(controlDropdownAcceptNoneValue(stats, stillImageDropdown, stillImageName, EncoderConstant.NONE));
 		// add edited = false
 		stats.put(editedName, EncoderConstant.FALSE);
+	}
+
+	/**
+	 * Update dropdown list for the control
+	 */
+	private void updateDropdownListForTheControllingMetric() {
+		List<AdvancedControllableProperty> advancedControllableProperties = localExtendedStatistics.getControllableProperties();
+		Map<String, String> stats = localExtendedStatistics.getStatistics();
+
+		//update still Image
+		String stillImageName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STILL_IMAGE.getName();
+		String stillImageValue = getEmptyValueForNullData(stats.get(stillImageName));
+		String[] stillImageDropdown = stillImageList.toArray(new String[0]);
+		AdvancedControllableProperty stillImageProperty = controlDropdownAcceptNoneValue(stats, stillImageDropdown, stillImageName, stillImageValue);
+		addOrUpdateAdvanceControlProperties(advancedControllableProperties, stillImageProperty);
 	}
 
 	/**
@@ -3687,7 +3712,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String data = streamConfig.toString();
 		String request = EncoderCommand.OPERATION_STREAM.getName() + EncoderCommand.OPERATION_CREATE.getName() + data;
 		try {
-			String responseData = send(request.replace("\r", ""));
+			String responseData = send(request.replace("\r", EncoderConstant.EMPTY_STRING));
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new ResourceNotReachableException(responseData);
 			}
@@ -3713,7 +3738,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String request =
 				EncoderCommand.OPERATION_SESSION.getName() + EncoderCommand.OPERATION_CREATE.getName() + EncoderCommand.OPERATION_STREAM.getName().trim() + EncoderConstant.EQUAL + idStream + dataRequest;
 		try {
-			String responseData = send(request.replace("\r", ""));
+			String responseData = send(request.replace("\r", EncoderConstant.EMPTY_STRING));
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new ResourceNotReachableException(String.format("Create stream successfully with stream ID: %s. But can't create Transmit SAP session for stream", idStream) + responseData);
 			}
@@ -3934,7 +3959,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		try {
 			int copyValue;
 			if (value.startsWith(EncoderConstant.HEX_PREFIX)) {
-				copyValue = Integer.parseInt(value.replace(EncoderConstant.HEX_PREFIX, ""), 16);
+				copyValue = Integer.parseInt(value.replace(EncoderConstant.HEX_PREFIX, EncoderConstant.EMPTY_STRING), 16);
 			} else {
 				copyValue = (int) Float.parseFloat(value);
 			}
@@ -4124,7 +4149,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		button.setLabel(label);
 		button.setLabelPressed(labelPressed);
 		button.setGracePeriod(gracePeriod);
-		return new AdvancedControllableProperty(name, new Date(), button, "");
+		return new AdvancedControllableProperty(name, new Date(), button, EncoderConstant.EMPTY_STRING);
 	}
 	//--------------------------------------------------------------------------------------------------------------------------------
 	//endregion

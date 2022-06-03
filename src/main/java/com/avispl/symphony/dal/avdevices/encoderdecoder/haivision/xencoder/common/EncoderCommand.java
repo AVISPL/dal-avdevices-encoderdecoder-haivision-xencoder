@@ -22,7 +22,7 @@ public enum EncoderCommand {
 	CONFIG("config "),
 	PAUSE("pause "),
 	RESUME("resume "),
-	LIST(" list "),
+	LIST("list "),
 
 	//stream command
 	OPERATION_STREAM("stream "),

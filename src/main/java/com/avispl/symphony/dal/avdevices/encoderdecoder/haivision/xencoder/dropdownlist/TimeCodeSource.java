@@ -12,9 +12,9 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.drop
  */
 public enum TimeCodeSource {
 
-	None("None","None"),
-	VIDEO("Video","VIDEO"),
-	SYSTEM("System","SYSTEM");
+	NONE("None", "None"),
+	VIDEO("Video", "VIDEO"),
+	SYSTEM("System", "SYSTEM");
 
 	private final String name;
 	private final String value;

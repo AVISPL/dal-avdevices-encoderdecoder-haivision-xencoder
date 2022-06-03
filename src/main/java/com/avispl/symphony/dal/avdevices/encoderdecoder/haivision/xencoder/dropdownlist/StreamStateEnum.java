@@ -13,9 +13,9 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.drop
 public enum StreamStateEnum {
 
 	STREAMING("STREAMING"),
-	PAUSED( "PAUSED"),
-	RESOLVING( "RESOLVING"),
-	CONNECTING( "CONNECTING"),
+	PAUSED("PAUSED"),
+	RESOLVING("RESOLVING"),
+	CONNECTING("CONNECTING"),
 	STOPPED("STOPPED");
 
 	private final String name;
