@@ -278,62 +278,62 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	/**
 	 * Map of Audio statistics with key name of AudioStatistics, value is AudioStatistics
 	 */
-	private final Map<String, AudioStatistics> mapOfNameAndAudioStatistics = new HashMap<>();
+	private final Map<String, AudioStatistics> nameAndAudioStatisticsMap = new HashMap<>();
 
 	/**
 	 * Map of Video statistics with key name of VideoStatistics, value is VideoStatistics
 	 */
-	private final Map<String, VideoStatistics> mapOfNameAndVideoStatistics = new HashMap<>();
+	private final Map<String, VideoStatistics> nameAndVideoStatisticsMap = new HashMap<>();
 
 	/**
 	 * Map of Audio Config with key is the name of AudioConfig, value is AudioConfig
 	 */
-	private final Map<String, AudioConfig> mapOfNameAndAudioConfig = new HashMap<>();
+	private final Map<String, AudioConfig> nameAndAudioConfigMap = new HashMap<>();
 
 	/**
 	 * Map of Video Config with key is the name of VideoConfig, value is VideoConfig
 	 */
-	private final Map<String, VideoConfig> mapOfNameAndVideoConfig = new HashMap<>();
+	private final Map<String, VideoConfig> nameAndVideoConfigMap = new HashMap<>();
 
 	/**
 	 * Map of Input Response with key is the name of InputResponse, value is InputResponse
 	 */
-	private final Map<String, InputResponse> mapOfNameAndInputResponse = new HashMap<>();
+	private final Map<String, InputResponse> nameAndInputResponseMap = new HashMap<>();
 
 	/**
 	 * Map of Stream SAP with key is the id of Stream SAP, value is Stream SAP
 	 */
-	private final Map<String, StreamSAP> mapOfIdAndStreamSAP = new HashMap<>();
+	private final Map<String, StreamSAP> idAndStreamSAPMap = new HashMap<>();
 
 	/**
 	 * Map of Audio with key is the name AudioConfig, value is Audio
 	 */
-	private final Map<String, Audio> mapOfNameAndSourceAudio = new HashMap<>();
+	private final Map<String, Audio> nameAndSourceAudioMap = new HashMap<>();
 
 	/**
 	 * Map of id and Name with key is the id of AudioConfig, value is name of AudioConfig
 	 */
-	private final Map<String, String> mapOfIdAndNameAudioConfig = new HashMap<>();
+	private final Map<String, String> idAndNameAudioConfigMap = new HashMap<>();
 
 	/**
 	 * Map of StreamStatistics with key is the id of StreamStatistics, value is StreamStatistics
 	 */
-	private final Map<String, StreamStatistics> mapOfIdAndStreamStatistics = new HashMap<>();
+	private final Map<String, StreamStatistics> idAndStreamStatisticsMap = new HashMap<>();
 
 	/**
 	 * Map of name and id with key is the name of StreamConfig, value is id of StreamConfig
 	 */
-	Map<String, String> mapOfNameAndIdForStreamConfig = new HashMap<>();
+	Map<String, String> nameAndIdForStreamConfigMap = new HashMap<>();
 
 	/**
-	 * List of output statistics for the adapter filter
+	 * HashSet of output statistics for the adapter filter
 	 */
-	private final Set<StreamConfig> streamConfigPortAndStatusList = new HashSet<>();
+	private final Set<StreamConfig> streamConfigPortAndStatusSet = new HashSet<>();
 
 	/**
-	 * List of output statistics for the adapter filter
+	 * HashSet of output statistics for the adapter filter
 	 */
-	private final Set<StreamConfig> streamConfigNameFilterList = new HashSet<>();
+	private final Set<StreamConfig> streamConfigNameFilterSet = new HashSet<>();
 
 	/**
 	 * List port extracted from port filter
@@ -374,16 +374,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	protected void internalDestroy() {
 		isCreateStreamCalled = false;
 		isEmergencyDelivery = false;
-		stillImageList.clear();
 		localStatsStreamOutput.clear();
 		localExtendedStatistics.getControllableProperties().clear();
 		localExtendedStatistics.getStatistics().clear();
-		portNumberList.clear();
-		portNumberRangeList.clear();
 		clearBeforeFetchingData();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Clear internalDestroy successfully");
-		}
 		super.internalDestroy();
 	}
 
@@ -409,7 +403,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			failedMonitor.clear();
 
 			if (!isEmergencyDelivery) {
-				isOperatorOrAdministratorRole = isControllingByRoleBased(retrieveUserRole());
+				isOperatorOrAdministratorRole = isOperatorOrAdministratorRole(retrieveUserRole());
 				isConfigManagement = isConfigManagementProperties();
 				populateInformationFromDevice(stats, advancedControllableProperties);
 				if (isOperatorOrAdministratorRole && isConfigManagement) {
@@ -517,7 +511,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param roleBased the role is String
 	 * @return boolean type, returns true if roleBased is operator or administrator and vice versa
 	 */
-	private boolean isControllingByRoleBased(String roleBased) {
+	private boolean isOperatorOrAdministratorRole(String roleBased) {
 		return EncoderConstant.OPERATOR.equals(roleBased) || EncoderConstant.ADMIN.equals(roleBased);
 	}
 
@@ -654,28 +648,28 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		//audio
 		audioStatisticsList.clear();
 		audioConfigList.clear();
-		mapOfNameAndAudioConfig.clear();
-		mapOfNameAndAudioStatistics.clear();
-		mapOfIdAndNameAudioConfig.clear();
+		nameAndAudioConfigMap.clear();
+		nameAndAudioStatisticsMap.clear();
+		idAndNameAudioConfigMap.clear();
 
 		//video
 		videoStatisticsList.clear();
 		videoConfigList.clear();
-		mapOfNameAndVideoConfig.clear();
-		mapOfNameAndVideoStatistics.clear();
+		nameAndVideoConfigMap.clear();
+		nameAndVideoStatisticsMap.clear();
 
 		//input
-		mapOfNameAndInputResponse.clear();
+		nameAndInputResponseMap.clear();
 
 		//stream
 		streamConfigList.clear();
 		streamStatisticsList.clear();
-		mapOfIdAndStreamStatistics.clear();
-		mapOfNameAndIdForStreamConfig.clear();
-		mapOfIdAndStreamSAP.clear();
+		idAndStreamStatisticsMap.clear();
+		nameAndIdForStreamConfigMap.clear();
+		idAndStreamSAPMap.clear();
 
 		//session SAP
-		mapOfIdAndStreamSAP.clear();
+		idAndStreamSAPMap.clear();
 
 		//Still Image
 		stillImageList.clear();
@@ -687,8 +681,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		talkbackMap.clear();
 
 		//Filter
-		streamConfigPortAndStatusList.clear();
-		streamConfigNameFilterList.clear();
+		streamConfigPortAndStatusSet.clear();
+		streamConfigNameFilterSet.clear();
+
+		//Port filter
+		portNumberList.clear();
+		portNumberRangeList.clear();
+		streamConfigNameFilterSet.clear();
 	}
 
 	/**
@@ -791,7 +790,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				String[] audioId = listName[1].split(EncoderConstant.COLON);
 				Audio audio = new Audio();
 				audio.setAudioId(audioId[0]);
-				audio.setAudioName(mapOfIdAndNameAudioConfig.get(audioId[0]));
+				audio.setAudioName(idAndNameAudioConfigMap.get(audioId[0]));
 				audioList.add(audio);
 			}
 			if (name.contains(EncoderConstant.VIDEO)) {
@@ -822,12 +821,12 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			property = streamKey + streamMetric.getName();
 			switch (streamMetric) {
 				case STATE:
-					String stateStream = mapOfIdAndStreamStatistics.get(streamConfig.getId()).getState();
+					String stateStream = idAndStreamStatisticsMap.get(streamConfig.getId()).getState();
 					stats.put(property, stateStream);
 					break;
 				case ACTION:
-					stateStream = mapOfIdAndStreamStatistics.get(streamConfig.getId()).getState();
-					String[] actionDropdown = StreamActionEnum.getArrayOfEnumByAction(stateStream);
+					stateStream = idAndStreamStatisticsMap.get(streamConfig.getId()).getState();
+					String[] actionDropdown = StreamActionEnum.getAllStreamActionByState(stateStream);
 					AdvancedControllableProperty actionProperty = controlDropdownAcceptNoneValue(stats, actionDropdown, property, EncoderConstant.NONE);
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, actionProperty);
 					isEmergencyDelivery = false;
@@ -868,11 +867,14 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 					if (ProtocolEnum.TS_SRT.getName().equalsIgnoreCase(protocol)) {
 						String networkAdapter = streamKey + StreamControllingMetric.STREAM_NETWORK_ADAPTIVE.getName();
-						stats.put(networkAdapter, streamConfig.getNetworkAdaptive());
+						String networkAdaptive = EncoderConstant.DISABLE;
+						if (EncoderConstant.ON.equals(streamConfig.getNetworkAdaptive())) {
+							networkAdaptive = EncoderConstant.ENABLE;
+						}
+						stats.put(networkAdapter, networkAdaptive);
 
 						String latency = streamKey + StreamControllingMetric.STREAM_LATENCY.getName();
 						stats.put(latency, convertValueByIndexOfSpace(streamConfig.getAddedLatency()));
-
 						String encryption = streamKey + StreamControllingMetric.STREAM_ENCRYPTION.getName();
 						String passPhrase = streamKey + StreamControllingMetric.STREAM_PASSPHRASE.getName();
 						String encryptionValue = streamConfig.getAesEncryption();
@@ -950,13 +952,21 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				case PARAMETER_IDLE_CELLS:
 					protocol = streamConfig.getEncapsulation();
 					if (ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_SRT.getValue().equalsIgnoreCase(protocol)) {
-						stats.put(property, streamConfig.getIdleCells());
+						String idleCellsValue = EncoderConstant.DISABLE;
+						if (EncoderConstant.ON.equals(streamConfig.getIdleCells())) {
+							idleCellsValue = EncoderConstant.ENABLE;
+						}
+						stats.put(property, idleCellsValue);
 					}
 					break;
 				case PARAMETER_DELAYED_AUDIO:
 					protocol = streamConfig.getEncapsulation();
 					if (ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_SRT.getValue().equalsIgnoreCase(protocol)) {
-						stats.put(property, streamConfig.getDelayAudio());
+						String delayAudio = EncoderConstant.DISABLE;
+						if (EncoderConstant.ON.equals(streamConfig.getDelayAudio())) {
+							delayAudio = EncoderConstant.ENABLE;
+						}
+						stats.put(property, delayAudio);
 					}
 					break;
 				case PARAMETER_FEC:
@@ -972,29 +982,22 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					break;
 				case SAP_TRANSMIT:
 					StreamSAP sap = streamConfig.getSap();
-					String transmit = EncoderConstant.OFF;
+					String transmit = EncoderConstant.DISABLE;
 					if (sap != null) {
 						transmit = sap.getAdvertise();
 					}
 					if (EncoderConstant.YES.equals(transmit)) {
-						transmit = EncoderConstant.ON;
+						transmit = EncoderConstant.ENABLE;
 					}
 					stats.put(property, transmit);
-					if (EncoderConstant.ON.equals(transmit)) {
-						String sapName = streamKey + StreamControllingMetric.SAP_NAME.getName();
-						String sapDesc = streamKey + StreamControllingMetric.SAP_DESCRIPTION.getName();
-						String sapKeywords = streamKey + StreamControllingMetric.SAP_KEYWORDS.getName();
-						String sapAuthor = streamKey + StreamControllingMetric.SAP_AUTHOR.getName();
-						String sapCopyright = streamKey + StreamControllingMetric.SAP_COPYRIGHT.getName();
-						String sapAddress = streamKey + StreamControllingMetric.SAP_ADDRESS.getName();
-						String sapPort = streamKey + StreamControllingMetric.SAP_PORT.getName();
-						stats.put(sapName, getNoneValueIfPresent(sap.getName()));
-						stats.put(sapDesc, getNoneValueIfPresent(sap.getDesc()));
-						stats.put(sapKeywords, getNoneValueIfPresent(sap.getKeywords()));
-						stats.put(sapAuthor, getNoneValueIfPresent(sap.getAuthor()));
-						stats.put(sapCopyright, getNoneValueIfPresent(sap.getCopyright()));
-						stats.put(sapAddress, getNoneValueIfPresent(sap.getAddress()));
-						stats.put(sapPort, getNoneValueIfPresent(sap.getPort()));
+					if (EncoderConstant.ENABLE.equals(transmit)) {
+						stats.put(streamKey + StreamControllingMetric.SAP_NAME.getName(), getNoneValueIfPresent(sap.getName()));
+						stats.put(streamKey + StreamControllingMetric.SAP_DESCRIPTION.getName(), getNoneValueIfPresent(sap.getDesc()));
+						stats.put(streamKey + StreamControllingMetric.SAP_KEYWORDS.getName(), getNoneValueIfPresent(sap.getKeywords()));
+						stats.put(streamKey + StreamControllingMetric.SAP_AUTHOR.getName(), getNoneValueIfPresent(sap.getAuthor()));
+						stats.put(streamKey + StreamControllingMetric.SAP_COPYRIGHT.getName(), getNoneValueIfPresent(sap.getCopyright()));
+						stats.put(streamKey + StreamControllingMetric.SAP_ADDRESS.getName(), getNoneValueIfPresent(sap.getAddress()));
+						stats.put(streamKey + StreamControllingMetric.SAP_PORT.getName(), getNoneValueIfPresent(sap.getPort()));
 					}
 					break;
 				case RTMP_PUBLISH_NAME:
@@ -1076,6 +1079,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void populateTalkbackConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 		Objects.requireNonNull(stats);
 		Objects.requireNonNull(advancedControllableProperties);
+		// talkbackMap should contain udp port and talkback state, or else this if is not reachable
 		if (isOperatorOrAdministratorRole && isConfigManagement && talkbackMap.size() == 2) {
 			String groupName = EncoderMonitoringMetric.SERVICE.getName() + EncoderConstant.HASH;
 			String portProperty = groupName + EncoderConstant.TALKBACK_PORT;
@@ -1221,7 +1225,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 						break;
 					case RESOLUTION:
 						if (EncoderConstant.NONE.equals(videoValue)) {
-							videoValue = mapOfNameAndVideoConfig.get(videoName).getResolution();
+							videoValue = nameAndVideoConfigMap.get(videoName).getResolution();
 						}
 						stats.put(videoKeyName, videoValue);
 						break;
@@ -1273,7 +1277,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		filterStreamName();
 		filterPortNumber();
 		filterStreamStatus();
-		if (isAdapterFiltering()) {
+		if (isAdapterFilteringExisting()) {
 			filterAudioAndVideoStatisticsList();
 			List<String> idList = streamConfigList.stream().map(StreamConfig::getId).collect(Collectors.toList());
 			streamStatisticsList.removeIf(item -> !idList.contains(item.getId()));
@@ -1302,7 +1306,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 *
 	 * @return boolean type is adapter filtering
 	 */
-	private boolean isAdapterFiltering() {
+	private boolean isAdapterFilteringExisting() {
 		return !StringUtils.isNullOrEmpty(streamStatusFilter) || !StringUtils.isNullOrEmpty(portNumberFilter) || !StringUtils.isNullOrEmpty(streamNameFilter);
 	}
 
@@ -1355,7 +1359,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					streamConfigFilter.add(streamConfigItem);
 				}
 			}
-			streamConfigNameFilterList.addAll(streamConfigFilter);
+			streamConfigNameFilterSet.addAll(streamConfigFilter);
 		}
 	}
 
@@ -1374,7 +1378,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					}
 				}
 				if (!portFilterSet.isEmpty()) {
-					streamConfigPortAndStatusList.addAll(portFilterSet);
+					streamConfigPortAndStatusSet.addAll(portFilterSet);
 				}
 			}
 		}
@@ -1393,15 +1397,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			for (String streamStatus : streamStatusList) {
 				if (StringUtils.isNullOrEmpty(portNumberFilter)) {
 					for (StreamConfig streamConfig : streamConfigList) {
-						String stateStream = mapOfIdAndStreamStatistics.get(streamConfig.getId()).getState();
+						String stateStream = idAndStreamStatisticsMap.get(streamConfig.getId()).getState();
 						if (streamStatus.equalsIgnoreCase(stateStream)) {
 							streamStatusFilterList.add(streamConfig);
 						}
 					}
 				} else {
 					//And port number or port range with stream status
-					for (StreamConfig streamConfig : streamConfigPortAndStatusList) {
-						String stateStream = mapOfIdAndStreamStatistics.get(streamConfig.getId()).getState();
+					for (StreamConfig streamConfig : streamConfigPortAndStatusSet) {
+						String stateStream = idAndStreamStatisticsMap.get(streamConfig.getId()).getState();
 						if (streamStatus.equalsIgnoreCase(stateStream)) {
 							streamStatusFilterList.add(streamConfig);
 						}
@@ -1412,16 +1416,16 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			if (!streamStatusFilterList.isEmpty()) {
 				streamConfigList.addAll(streamStatusFilterList);
 			}
-			streamConfigList.addAll(streamConfigNameFilterList);
+			streamConfigList.addAll(streamConfigNameFilterSet);
 		}
 		if (streamStatusList.isEmpty() && !StringUtils.isNullOrEmpty(this.portNumberFilter)) {
 			streamConfigList.clear();
-			streamConfigList.addAll(streamConfigPortAndStatusList);
-			streamConfigList.addAll(streamConfigNameFilterList);
+			streamConfigList.addAll(streamConfigPortAndStatusSet);
+			streamConfigList.addAll(streamConfigNameFilterSet);
 		}
 		if (!StringUtils.isNullOrEmpty(this.streamNameFilter) && StringUtils.isNullOrEmpty(this.portNumberFilter) && StringUtils.isNullOrEmpty(this.streamStatusFilter)) {
 			streamConfigList.clear();
-			streamConfigList.addAll(streamConfigNameFilterList);
+			streamConfigList.addAll(streamConfigNameFilterSet);
 		}
 	}
 
@@ -1429,6 +1433,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * Filter the port number range of Stream
 	 */
 	private void filterPortNumberRange() {
+		List<StreamConfig> portRangeFilterStreamSet = new ArrayList<>();
 		for (String portNumberRange : portNumberRangeList) {
 			String[] rangeList = portNumberRange.split(EncoderConstant.DASH);
 			int mixPort = Integer.parseInt(rangeList[0].trim());
@@ -1437,16 +1442,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				mixPort = Integer.parseInt(rangeList[1].trim());
 				maxPort = Integer.parseInt(rangeList[0].trim());
 			}
-			List<StreamConfig> portRangeFilterStreamSet = new ArrayList<>();
 			for (StreamConfig streamConfig : streamConfigList) {
 				int port = Integer.parseInt(getPortToStreamConfig(streamConfig));
 				if (mixPort <= port && port <= maxPort) {
 					portRangeFilterStreamSet.add(streamConfig);
 				}
 			}
-			if (!portRangeFilterStreamSet.isEmpty()) {
-				streamConfigPortAndStatusList.addAll(portRangeFilterStreamSet);
-			}
+		}
+		if (!portRangeFilterStreamSet.isEmpty()) {
+			streamConfigPortAndStatusSet.addAll(portRangeFilterStreamSet);
 		}
 	}
 
@@ -1485,6 +1489,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 						Integer.parseInt(portNumberItem.substring(index + 1).trim());
 						portNumberRangeList.add(portNumberItem);
 					} catch (Exception ex) {
+						//Case failed example: port = 12abc, abc, abc123
 						if (logger.isDebugEnabled()) {
 							logger.debug("The port range not correct format" + portNumberItem);
 						}
@@ -1629,7 +1634,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		switch (metric) {
 			case AUDIO_STATISTICS:
 				AudioStatistics audioStatistics = objectMapper.convertValue(mappingData, AudioStatistics.class);
-				mapOfNameAndAudioStatistics.put(audioStatistics.getName(), audioStatistics);
+				nameAndAudioStatisticsMap.put(audioStatistics.getName(), audioStatistics);
 				audioStatisticsList.add(audioStatistics);
 				break;
 			case AUDIO_CONFIG:
@@ -1641,23 +1646,23 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					audioName = String.format("%s %s", audioName, language);
 				}
 				audioConfig.setName(audioName);
-				mapOfNameAndAudioConfig.put(audioName, audioConfig);
-				mapOfIdAndNameAudioConfig.put(audioConfig.getId(), audioName);
+				nameAndAudioConfigMap.put(audioName, audioConfig);
+				idAndNameAudioConfigMap.put(audioConfig.getId(), audioName);
 				audioConfigList.add(audioConfig);
 				break;
 			case VIDEO_STATISTICS:
 				VideoStatistics videoStatistics = objectMapper.convertValue(mappingData, VideoStatistics.class);
-				mapOfNameAndVideoStatistics.put(videoStatistics.getName(), videoStatistics);
+				nameAndVideoStatisticsMap.put(videoStatistics.getName(), videoStatistics);
 				videoStatisticsList.add(videoStatistics);
 				break;
 			case VIDEO_CONFIG:
 				VideoConfig videoConfigResponse = objectMapper.convertValue(mappingData, VideoConfig.class);
-				mapOfNameAndVideoConfig.put(videoConfigResponse.getName(), videoConfigResponse);
+				nameAndVideoConfigMap.put(videoConfigResponse.getName(), videoConfigResponse);
 				videoConfigList.add(videoConfigResponse);
 				break;
 			case STREAM_STATISTICS:
 				StreamStatistics streamStatistics = objectMapper.convertValue(mappingData, StreamStatistics.class);
-				mapOfIdAndStreamStatistics.put(streamStatistics.getId(), streamStatistics);
+				idAndStreamStatisticsMap.put(streamStatistics.getId(), streamStatistics);
 				streamStatisticsList.add(streamStatistics);
 				break;
 			case STREAM_CONFIG:
@@ -1667,15 +1672,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				if (EncoderConstant.NONE_STREAM_NAME.equals(streamName)) {
 					streamName = handleStreamNameIsEmpty(streamConfig.getId());
 				}
-				mapOfNameAndIdForStreamConfig.put(EncoderConstant.STREAM + EncoderConstant.SPACE + streamName, streamConfig.getId());
+				nameAndIdForStreamConfigMap.put(EncoderConstant.STREAM + EncoderConstant.SPACE + streamName, streamConfig.getId());
 				break;
 			case INPUT:
 				InputResponse inputResponse = objectMapper.convertValue(mappingData, InputResponse.class);
-				mapOfNameAndInputResponse.put(inputResponse.getName(), inputResponse);
+				nameAndInputResponseMap.put(inputResponse.getName(), inputResponse);
 				break;
 			case SESSION:
 				StreamSAP streamSAP = objectMapper.convertValue(mappingData, StreamSAP.class);
-				mapOfIdAndStreamSAP.put(streamSAP.getStreamId(), streamSAP);
+				idAndStreamSAPMap.put(streamSAP.getStreamId(), streamSAP);
 				for (StreamConfig streamConfigItem : streamConfigList) {
 					if (streamConfigItem.getId().equals(streamSAP.getStreamId())) {
 						streamConfigItem.setSap(streamSAP);
@@ -1916,7 +1921,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String audioKeyName = audioName + EncoderConstant.HASH + audioMetric.getName();
 			switch (audioMetric) {
 				case STATE:
-					String stateAudio = mapOfNameAndAudioStatistics.get(audioName).getState();
+					String stateAudio = nameAndAudioStatisticsMap.get(audioName).getState();
 					stats.put(audioKeyName, stateAudio);
 					break;
 				case INPUT:
@@ -1958,7 +1963,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, languageControlProperty);
 					break;
 				case ACTION:
-					stateAudio = mapOfNameAndAudioStatistics.get(audioName).getState();
+					stateAudio = nameAndAudioStatisticsMap.get(audioName).getState();
 					String[] dropdownAction = AudioActionEnum.getArrayOfEnumByAction(stateAudio);
 					value = stateDropdown.get(stateAudio);
 					AdvancedControllableProperty actionDropdownControlProperty = controlDropdownAcceptNoneValue(stats, dropdownAction, audioKeyName, value);
@@ -2007,7 +2012,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		isEmergencyDelivery = true;
 		switch (audioControllingMetric) {
 			case LEVEL:
-				mapOfNameAndAudioConfig.get(audioName).setLevel(value);
+				nameAndAudioConfigMap.get(audioName).setLevel(value);
 				updateValueForTheControllableProperty(property, value, stats, advancedControllableProperties);
 				break;
 			case ACTION:
@@ -2023,9 +2028,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				AdvancedControllableProperty inputDropdownControlProperty = controlDropdown(stats, inputDropdown, property, value);
 				addOrUpdateAdvanceControlProperties(advancedControllableProperties, inputDropdownControlProperty);
 				String level = EncoderConstant.EMPTY_STRING;
-				for (Entry<String, AudioConfig> audioNameConfig : mapOfNameAndAudioConfig.entrySet()) {
+				for (Entry<String, AudioConfig> audioNameConfig : nameAndAudioConfigMap.entrySet()) {
 					if (audioNameConfig.getKey().contains(audioName)) {
-						level = mapOfNameAndAudioConfig.get(audioNameConfig.getKey()).getLevel();
+						level = nameAndAudioConfigMap.get(audioNameConfig.getKey()).getLevel();
 						break;
 					}
 				}
@@ -2201,11 +2206,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		Map<String, String> bitRateMap = EnumTypeHandler.getMapOfEnumNames(BitRateEnum.class, true);
 		Map<String, String> algorithmParamMap = AlgorithmEnum.getMapOfAlgorithmDropdown(false);
 		String id = EncoderConstant.EMPTY_STRING;
-		AudioConfig audio = mapOfNameAndAudioConfig.get(audioName);
+		AudioConfig audio = nameAndAudioConfigMap.get(audioName);
 		if (audio == null) {
-			for (Map.Entry<String, AudioConfig> audioKey : mapOfNameAndAudioConfig.entrySet()) {
+			for (Map.Entry<String, AudioConfig> audioKey : nameAndAudioConfigMap.entrySet()) {
 				if (audioKey.getKey().contains(audioName)) {
-					audio = mapOfNameAndAudioConfig.get(audioKey.getKey());
+					audio = nameAndAudioConfigMap.get(audioKey.getKey());
 					break;
 				}
 			}
@@ -2240,7 +2245,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		Objects.requireNonNull(advancedControllableProperties);
 		Objects.requireNonNull(videoConfig);
 
-		String[] dropdownInput = mapOfNameAndInputResponse.keySet().toArray(new String[0]);
+		String[] dropdownInput = nameAndInputResponseMap.keySet().toArray(new String[0]);
 		String[] dropdownResolution = EnumTypeHandler.getEnumNames(ResolutionEnum.class);
 		String[] dropdownFrameRate = EnumTypeHandler.getEnumNames(FrameRateEnum.class);
 		String[] dropdownFraming = EnumTypeHandler.getEnumNames(FramingEnum.class);
@@ -2259,11 +2264,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String videoKeyName = videoName + EncoderConstant.HASH + videoMetric.getName();
 			switch (videoMetric) {
 				case STATE:
-					String stateVideo = mapOfNameAndVideoStatistics.get(videoConfig.getName()).getState();
+					String stateVideo = nameAndVideoStatisticsMap.get(videoConfig.getName()).getState();
 					stats.put(videoKeyName, stateVideo);
 					break;
 				case INPUT_FORMAT:
-					String videoValue = getDefaultValueForNullOrNoneData(mapOfNameAndVideoStatistics.get(videoName).getInputFormat(), true);
+					String videoValue = getDefaultValueForNullOrNoneData(nameAndVideoStatisticsMap.get(videoName).getInputFormat(), true);
 					boolean isValidValue = videoValue.equals(EncoderConstant.NONE) || videoValue.equals(EncoderConstant.UNKNOWN);
 					if (isValidValue) {
 						videoValue = EncoderConstant.NO_INPUT;
@@ -2355,7 +2360,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, imageSkipControlProperty);
 					break;
 				case ACTION:
-					stateVideo = mapOfNameAndVideoStatistics.get(videoConfig.getName()).getState();
+					stateVideo = nameAndVideoStatisticsMap.get(videoConfig.getName()).getState();
 					value = videoStateDropdown.get(stateVideo);
 					if (VideoStateEnum.STOPPED.getName().equals(value)) {
 						dropdownAction = VideoActionEnum.getVideoAction(false);
@@ -2409,7 +2414,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					advancedControllableProperties.removeIf(item -> item.getName().equals(cropping));
 				} else {
 					String croppingMode = extendedStatistics.get(cropping);
-					VideoConfig videoConfig = mapOfNameAndVideoConfig.get(videoName);
+					VideoConfig videoConfig = nameAndVideoConfigMap.get(videoName);
 					if (croppingMode == null) {
 						handleControlCroppingMetric(extendedStatistics, advancedControllableProperties, cropping, videoConfig);
 					}
@@ -2420,7 +2425,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 				//update cropping
 				String crop = EncoderConstant.ZERO == Integer.parseInt(value) ? EncoderConstant.SCALE : EncoderConstant.CROP;
-				VideoConfig videoConfig = mapOfNameAndVideoConfig.get(videoName);
+				VideoConfig videoConfig = nameAndVideoConfigMap.get(videoName);
 				videoConfig.setCropping(crop);
 				break;
 			case INTRA_REFRESH:
@@ -2430,7 +2435,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					extendedStatistics.put(intraRefreshRateName, EncoderConstant.EMPTY_STRING);
 					advancedControllableProperties.removeIf(item -> item.getName().equals(intraRefreshRateName));
 				} else {
-					videoConfig = mapOfNameAndVideoConfig.get(videoName);
+					videoConfig = nameAndVideoConfigMap.get(videoName);
 					String intraRefreshRateValue = videoConfig.getIntraRefreshRate();
 					if (StringUtils.isNullOrEmpty(intraRefreshRateValue)) {
 						intraRefreshRateValue = String.valueOf(EncoderConstant.DEFAULT_REFRESH_RATE);
@@ -2444,7 +2449,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				updateValueForTheControllableProperty(videoKeyName, String.valueOf(intraRefreshRate), extendedStatistics, advancedControllableProperties);
 
 				//update intra refresh rate
-				videoConfig = mapOfNameAndVideoConfig.get(videoName);
+				videoConfig = nameAndVideoConfigMap.get(videoName);
 				videoConfig.setIntraRefreshRate(String.valueOf(intraRefreshRate));
 				break;
 			//dropdown control
@@ -2563,7 +2568,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		VideoConfig videoConfig = new VideoConfig();
 
 		String propertyName = videoName + EncoderConstant.HASH;
-		String id = mapOfNameAndVideoConfig.get(videoName).getId();
+		String id = nameAndVideoConfigMap.get(videoName).getId();
 		String bitrate = stats.get(propertyName + VideoControllingMetric.BITRATE.getName());
 		String action = stats.get(propertyName + VideoControllingMetric.ACTION.getName());
 		String gopSize = stats.get(propertyName + VideoControllingMetric.GOP_SIZE.getName());
@@ -2687,8 +2692,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void createOutputStream(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 		String streamKey = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
-		mapOfNameAndVideoConfig.put(EncoderConstant.NONE, new VideoConfig());
-		String[] videoNames = mapOfNameAndVideoConfig.keySet().toArray(new String[0]);
+		nameAndVideoConfigMap.put(EncoderConstant.NONE, new VideoConfig());
+		String[] videoNames = nameAndVideoConfigMap.keySet().toArray(new String[0]);
 		Arrays.sort(videoNames);
 		String[] protocolDropdown = EnumTypeHandler.getEnumNames(ProtocolEnum.class);
 		String[] fecDropdown = FecEnum.getArrayOfNameByUDPOrRTPMode(true);
@@ -2716,7 +2721,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		advancedControllableProperties.add(controlDropdown(stats, videoNames, sourceVideoName, videoNames[0]));
 		//add audio source. Initialize source audio list
 		for (int index = 0; index < EncoderConstant.MAX_SOURCE_AUDIO_DROPDOWN; index++) {
-			mapOfNameAndSourceAudio.put(StreamControllingMetric.SOURCE_AUDIO.getName() + EncoderConstant.SPACE + index, null);
+			nameAndSourceAudioMap.put(StreamControllingMetric.SOURCE_AUDIO.getName() + EncoderConstant.SPACE + index, null);
 		}
 		addSourceAudioForOutputStream(stats, advancedControllableProperties);
 		//AddSourceAudio
@@ -2758,8 +2763,27 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String stillImageName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STILL_IMAGE.getName();
 		String stillImageValue = getEmptyValueForNullData(stats.get(stillImageName));
 		String[] stillImageDropdown = stillImageList.toArray(new String[0]);
+		if (!stillImageList.contains(stillImageValue)) {
+			stillImageValue = EncoderConstant.NONE;
+		}
 		AdvancedControllableProperty stillImageProperty = controlDropdownAcceptNoneValue(stats, stillImageDropdown, stillImageName, stillImageValue);
 		addOrUpdateAdvanceControlProperties(advancedControllableProperties, stillImageProperty);
+
+		String audioSourceName;
+		for (int i = 0; i <= 7; i++) {
+			audioSourceName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SOURCE_AUDIO.getName() + EncoderConstant.SPACE + i;
+			String propertyName = StreamControllingMetric.SOURCE_AUDIO.getName() + EncoderConstant.SPACE + i;
+			String value = stats.get(audioSourceName);
+			if (!StringUtils.isNullOrEmpty(value)) {
+				for (String key : nameAndAudioConfigMap.keySet()) {
+					if (key.contains(value) || value.contains(key)) {
+						value = key;
+						break;
+					}
+				}
+				updateSourceAudioDropdownList(audioSourceName, value, stats, advancedControllableProperties, propertyName);
+			}
+		}
 	}
 
 	/**
@@ -2770,15 +2794,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @throws ResourceNotReachableException if assign more than 7 source audio
 	 */
 	private void addSourceAudioForOutputStream(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllablePropertyList) {
-		mapOfNameAndAudioConfig.put(EncoderConstant.NONE, new AudioConfig());
+		nameAndAudioConfigMap.put(EncoderConstant.NONE, new AudioConfig());
 		String prefixName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
-		String[] audioNames = mapOfNameAndAudioConfig.keySet().toArray(new String[0]);
+		String[] audioNames = nameAndAudioConfigMap.keySet().toArray(new String[0]);
 		Arrays.sort(audioNames);
 		Map<Integer, String> audioIdList = new HashMap<>();
 		int countSource = 0;
 
 		//Check list source audio assigned in stream
-		for (Map.Entry<String, Audio> audioKey : mapOfNameAndSourceAudio.entrySet()) {
+		for (Map.Entry<String, Audio> audioKey : nameAndSourceAudioMap.entrySet()) {
 			if (audioKey.getValue() != null && audioKey.getValue().getAudioId() != null) {
 				audioIdList.put(Integer.valueOf(audioKey.getValue().getAudioId()), audioKey.getValue().getAudioName());
 				countSource++;
@@ -2788,18 +2812,18 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (countSource == EncoderConstant.MAX_SOURCE_AUDIO_DROPDOWN) {
 			throw new ResourceNotReachableException("The audio source just assign max audio source is 8.");
 		}
-		for (Map.Entry<String, Audio> audioEntry : mapOfNameAndSourceAudio.entrySet()) {
+		for (Map.Entry<String, Audio> audioEntry : nameAndSourceAudioMap.entrySet()) {
 			String defaultName = audioNames[0];
 			for (int i = 0; i < EncoderConstant.MAX_SOURCE_AUDIO_DROPDOWN; i++) {
 				if (!audioIdList.containsKey(i)) {
-					defaultName = mapOfIdAndNameAudioConfig.get(String.valueOf(i));
+					defaultName = idAndNameAudioConfigMap.get(String.valueOf(i));
 					break;
 				}
 			}
 			if (audioEntry.getValue() == null) {
 				advancedControllablePropertyList.add(controlDropdown(stats, audioNames, prefixName + audioEntry.getKey(), defaultName));
 				Audio audio = new Audio();
-				audio.setAudioId(mapOfNameAndAudioConfig.get(defaultName).getId());
+				audio.setAudioId(nameAndAudioConfigMap.get(defaultName).getId());
 				audioEntry.setValue(audio);
 				break;
 			}
@@ -2828,7 +2852,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				updateValueForTheControllableProperty(property, value, extendedStatistics, advancedControllableProperties);
 				break;
 			case APPLY_CHANGE:
-				String streamId = mapOfNameAndIdForStreamConfig.get(streamName);
+				String streamId = nameAndIdForStreamConfigMap.get(streamName);
 				String action = extendedStatistics.get(streamName + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName());
 				sendCommandToSetStreamAction(streamId, action);
 				isEmergencyDelivery = false;
@@ -2885,19 +2909,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String streamName = streamProperty[0];
 		String propertyName = streamProperty[1];
 		if (propertyName.contains(StreamControllingMetric.SOURCE_AUDIO.getName())) {
-			if (EncoderConstant.NONE.equals(value) && !EncoderConstant.SOURCE_AUDIO_0.equals(propertyName)) {
-				stats.remove(property);
-				mapOfNameAndSourceAudio.replace(propertyName, null);
-			} else {
-				mapOfNameAndAudioConfig.put(EncoderConstant.NONE, new AudioConfig());
-				String[] audioNames = mapOfNameAndAudioConfig.keySet().toArray(new String[0]);
-				Arrays.sort(audioNames);
-				AdvancedControllableProperty sourceAudioControlProperty = controlDropdownAcceptNoneValue(stats, audioNames, property, value);
-				addOrUpdateAdvanceControlProperties(advancedControllableProperties, sourceAudioControlProperty);
-				Audio audio = new Audio();
-				audio.setAudioId(mapOfNameAndAudioConfig.get(value).getId());
-				mapOfNameAndSourceAudio.put(propertyName, audio);
-			}
+			updateSourceAudioDropdownList(property, value, stats, advancedControllableProperties, propertyName);
 		} else {
 			StreamControllingMetric streamControllingMetric = EnumTypeHandler.getMetricOfEnumByName(StreamControllingMetric.class, propertyName);
 			String streamKey = streamName + EncoderConstant.HASH;
@@ -3048,8 +3060,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 						break;
 					}
 					if (SourceType.VIDEO.getName().equals(value)) {
-						mapOfNameAndVideoConfig.put(EncoderConstant.NONE, new VideoConfig());
-						String[] videoNames = mapOfNameAndVideoConfig.keySet().toArray(new String[0]);
+						nameAndVideoConfigMap.put(EncoderConstant.NONE, new VideoConfig());
+						String[] videoNames = nameAndVideoConfigMap.keySet().toArray(new String[0]);
 						Arrays.sort(videoNames);
 						String videoName = streamKey + StreamControllingMetric.SOURCE_VIDEO.getName();
 						//add video source
@@ -3092,6 +3104,31 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			isEmergencyDelivery = false;
 			localStatsStreamOutput.clear();
 			localCreateOutputStream = new ExtendedStatistics();
+		}
+	}
+
+	/**
+	 * Update value and dropdown list of source audio
+	 *
+	 * @param property the property is the filed name of controlling metric
+	 * @param stats list stats
+	 * @param advancedControllableProperties the advancedControllableProperties is advancedControllableProperties instance
+	 * @param value the value is value of metric
+	 * @param sourceName the sourceName is name of source audio
+	 */
+	private void updateSourceAudioDropdownList(String property, String value, Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, String sourceName) {
+		if (EncoderConstant.NONE.equals(value) && !EncoderConstant.SOURCE_AUDIO_0.equals(sourceName)) {
+			stats.remove(property);
+			nameAndSourceAudioMap.replace(sourceName, null);
+		} else {
+			nameAndAudioConfigMap.put(EncoderConstant.NONE, new AudioConfig());
+			String[] audioNames = nameAndAudioConfigMap.keySet().toArray(new String[0]);
+			Arrays.sort(audioNames);
+			AdvancedControllableProperty sourceAudioControlProperty = controlDropdownAcceptNoneValue(stats, audioNames, property, value);
+			addOrUpdateAdvanceControlProperties(advancedControllableProperties, sourceAudioControlProperty);
+			Audio audio = new Audio();
+			audio.setAudioId(nameAndAudioConfigMap.get(value).getId());
+			nameAndSourceAudioMap.put(sourceName, audio);
 		}
 	}
 
@@ -3198,10 +3235,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				AdvancedControllableProperty sourceTypeProperty = controlDropdownAcceptNoneValue(stats, sourceTypeDropdown, sourceTypeName, SourceType.VIDEO.getName());
 				addOrUpdateAdvanceControlProperties(advancedControllableProperties, sourceTypeProperty);
 
-				for (Map.Entry<String, Audio> audioKey : mapOfNameAndSourceAudio.entrySet()) {
+				for (Map.Entry<String, Audio> audioKey : nameAndSourceAudioMap.entrySet()) {
 					String key = audioKey.getKey();
 					stats.remove(streamKey + key);
-					mapOfNameAndSourceAudio.replace(key, null);
+					nameAndSourceAudioMap.replace(key, null);
 				}
 
 				destinationAddress = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
@@ -3360,11 +3397,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private void clearSourceAudioBeforeAddNew(Map<String, String> stats) {
 		String streamKey = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH;
-		for (Entry<String, Audio> audioKey : mapOfNameAndSourceAudio.entrySet()) {
+		for (Entry<String, Audio> audioKey : nameAndSourceAudioMap.entrySet()) {
 			String key = audioKey.getKey();
 			if (!EncoderConstant.SOURCE_AUDIO_0.equals(key)) {
 				stats.remove(streamKey + key);
-				mapOfNameAndSourceAudio.replace(key, null);
+				nameAndSourceAudioMap.replace(key, null);
 			}
 		}
 	}
@@ -3409,8 +3446,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String sourceVideo = getEmptyValueForNullData(stats.get(sourceVideoName));
 		if (StringUtils.isNullOrEmpty(sourceVideo)) {
 			if (StringUtils.isNullOrEmpty(sourceVideoValue)) {
-				mapOfNameAndVideoConfig.put(EncoderConstant.NONE, new VideoConfig());
-				String[] videoNames = mapOfNameAndVideoConfig.keySet().toArray(new String[0]);
+				nameAndVideoConfigMap.put(EncoderConstant.NONE, new VideoConfig());
+				String[] videoNames = nameAndVideoConfigMap.keySet().toArray(new String[0]);
 				Arrays.sort(videoNames);
 				//add video source
 				AdvancedControllableProperty videoSourceProperty = controlDropdown(stats, videoNames, sourceVideoName, videoNames[0]);
@@ -3438,8 +3475,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			} else {
 				updateValueForTheControllableProperty(sourceAudioName, sourceAudioValue, stats, advancedControllableProperties);
 				Audio audio = new Audio();
-				audio.setAudioId(mapOfNameAndAudioConfig.get(sourceAudioValue).getId());
-				mapOfNameAndSourceAudio.put(EncoderConstant.SOURCE_AUDIO_0, audio);
+				audio.setAudioId(nameAndAudioConfigMap.get(sourceAudioValue).getId());
+				nameAndSourceAudioMap.put(EncoderConstant.SOURCE_AUDIO_0, audio);
 			}
 		}
 	}
@@ -3764,7 +3801,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					return idList[idList.length - 1].replace(EncoderConstant.DOT, EncoderConstant.EMPTY_STRING).trim();
 				}
 			}
-			throw new ResourceNotReachableException("Can't create Transmit SAP for the stream");
+			throw new ResourceNotReachableException("Error while getting id stream to response");
 		} catch (Exception e) {
 			throw new ResourceNotReachableException(e.getMessage(), e);
 		}
@@ -3803,7 +3840,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String userName = getEmptyValueForNullData(stats.get(streamName + StreamControllingMetric.RTMP_USERNAME.getName()));
 		String password = getEmptyValueForNullData(stats.get(streamName + StreamControllingMetric.RTMP_PASSWORD.getName()));
 		String comfirmPassword = getEmptyValueForNullData(stats.get(streamName + StreamControllingMetric.RTMP_CONFIRMATION_PASSWORD.getName()));
-		VideoConfig videoConfig = mapOfNameAndVideoConfig.get(sourceVideoValue);
+		VideoConfig videoConfig = nameAndVideoConfigMap.get(sourceVideoValue);
 		String videoId = EncoderConstant.EMPTY_STRING;
 		if (videoConfig != null) {
 			videoId = videoConfig.getId();
@@ -3812,10 +3849,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		idleCellsValue = convertByState(idleCellsValue, false);
 		delayedAudioValue = convertByState(delayedAudioValue, false);
 		stillImageValue = getDefaultValueForNullOrNoneData(stillImageValue, false);
-		protocolValue = ProtocolEnum.getValueOfProtocolEnumByName(protocolValue);
+		protocolValue = ProtocolEnum.getProtocolEnumByName(protocolValue);
 		String fecMode = EncoderConstant.EMPTY_STRING;
 		List<Audio> audioList = new ArrayList<>();
-		for (Audio audioName : mapOfNameAndSourceAudio.values()) {
+		for (Audio audioName : nameAndSourceAudioMap.values()) {
 			if (audioName != null && audioName.getAudioId() != null) {
 				audioList.add(audioName);
 			}
@@ -3831,7 +3868,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			addressValue = EncoderConstant.EMPTY_STRING;
 		}
 		if (ProtocolEnum.RTMP.getValue().equals(protocolValue)) {
-			checkFormatForAddressIsModeRTMP(addressValue);
+			validateRTMPAddress(addressValue);
 			if (StringUtils.isNullOrEmpty(contentValue)) {
 				throw new ResourceNotReachableException("Error while creating new stream, stream name can't empty");
 			}
@@ -3892,7 +3929,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @param addressValue the addressValue is an address
 	 * @throws ResourceNotReachableException if Ip address invalid value
 	 */
-	private void checkFormatForAddressIsModeRTMP(String addressValue) {
+	private void validateRTMPAddress(String addressValue) {
 		try {
 			if (StringUtils.isNullOrEmpty(addressValue)) {
 				throw new ResourceNotReachableException("Invalid IP Address, IP address can't empty.");
@@ -3957,20 +3994,20 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 */
 	private String getTOSValueByRange(String value) {
 		try {
-			int copyValue;
+			int defaultValue = 0;
 			if (value.startsWith(EncoderConstant.HEX_PREFIX)) {
-				copyValue = Integer.parseInt(value.replace(EncoderConstant.HEX_PREFIX, EncoderConstant.EMPTY_STRING), 16);
+				defaultValue = Integer.parseInt(value.replace(EncoderConstant.HEX_PREFIX, EncoderConstant.EMPTY_STRING), 16);
 			} else {
-				copyValue = (int) Float.parseFloat(value);
+				defaultValue = (int) Float.parseFloat(value);
 			}
-			String copyHexValue = EncoderConstant.HEX_PREFIX + String.format("%02X", 0xFF & copyValue);
-			if (copyValue < Integer.parseInt(EncoderConstant.MIN_TOS, 16)) {
-				copyHexValue = EncoderConstant.HEX_PREFIX + EncoderConstant.MIN_TOS;
+			String defaultHexValue = EncoderConstant.HEX_PREFIX + String.format("%02X", 0xFF & defaultValue);
+			if (defaultValue < Integer.parseInt(EncoderConstant.MIN_TOS, 16)) {
+				defaultHexValue = EncoderConstant.HEX_PREFIX + EncoderConstant.MIN_TOS;
 			}
-			if (copyValue > Integer.parseInt(EncoderConstant.MAX_TOS, 16)) {
-				copyHexValue = EncoderConstant.HEX_PREFIX + EncoderConstant.MAX_TOS;
+			if (defaultValue > Integer.parseInt(EncoderConstant.MAX_TOS, 16)) {
+				defaultHexValue = EncoderConstant.HEX_PREFIX + EncoderConstant.MAX_TOS;
 			}
-			return copyHexValue;
+			return defaultHexValue;
 		} catch (Exception var60) {
 			throw new NumberFormatException("Value of ParameterToS is invalid. TOS must be hex value range to 00-FF");
 		}

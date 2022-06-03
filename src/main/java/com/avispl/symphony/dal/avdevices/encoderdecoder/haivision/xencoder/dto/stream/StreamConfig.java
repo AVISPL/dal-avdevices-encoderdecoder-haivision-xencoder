@@ -4,7 +4,6 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream;
 
 import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler.replaceSpecialCharacter;
-import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler.replaceSpecialCharacterToEmptyString;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,6 +11,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ConnectionModeEnum;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ProtocolEnum;
 import com.avispl.symphony.dal.util.StringUtils;
@@ -775,7 +775,7 @@ public class StreamConfig {
 	}
 
 	/**
-	 /**
+	 * /**
 	 * Get To String of stream configs
 	 *
 	 * @return String is full param of stream config
@@ -783,7 +783,8 @@ public class StreamConfig {
 	@Override
 	public String toString() {
 		String paramRequest = "";
-		String audioSource = replaceSpecialCharacterToEmptyString(audioList.stream().map(Audio::getAudioId).collect(Collectors.toList()).toString());
+		String audioSource = audioList.stream().map(Audio::getAudioId).collect(Collectors.toList()).toString();
+		audioSource = audioSource.replace("[", EncoderConstant.EMPTY_STRING).replace("]", EncoderConstant.EMPTY_STRING);
 		String nameValue = getFormatNameByValue(name, "name");
 		String videoSrcValue = getFormatNameByValue(video, "videoSrc");
 		String audioSrcValue = getFormatNameByValue(audioSource, "audioSrc");

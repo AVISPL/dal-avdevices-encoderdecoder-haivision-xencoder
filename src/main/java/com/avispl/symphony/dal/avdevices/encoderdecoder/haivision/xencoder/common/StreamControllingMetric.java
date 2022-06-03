@@ -12,7 +12,7 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.comm
  */
 public enum StreamControllingMetric {
 
-	// create default stream
+	// create default stream metrics section
 	STATE("State"),
 	NAME("Name"),
 	SOURCE_VIDEO("SourceVideo"),
@@ -37,7 +37,8 @@ public enum StreamControllingMetric {
 	SAP_COPYRIGHT("SAPCopyright"),
 	SAP_ADDRESS("SAPAddress"),
 	SAP_PORT("SAPPort"),
-	// end create default stream
+	// end create default stream metrics section
+
 	PARAMETER_IDLE_CELLS("ParameterIdleCells"),
 	PARAMETER_DELAYED_AUDIO("ParameterDelayedAudio"),
 	PARAMETER_BANDWIDTH_OVERHEAD("ParameterBandwidthOverhead (%)"),

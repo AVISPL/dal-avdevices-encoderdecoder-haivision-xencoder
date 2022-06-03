@@ -116,13 +116,12 @@ public enum FecEnum {
 	 * @return String is name of FecEnum
 	 */
 	public static String getNameOfFecEnumByMode(String value) {
-		String defaultValue = FecEnum.NONE.getName();
 		if (FecEnum.VF.getName().equals(value)) {
-			defaultValue = FecEnum.PRO_MPEG.getName();
+			return FecEnum.PRO_MPEG.getName();
 		}
 		if (FecEnum.PRO_MPEG.getName().equals(value)) {
-			defaultValue = FecEnum.VF.getName();
+			return FecEnum.VF.getName();
 		}
-		return defaultValue;
+		return FecEnum.NONE.getName();
 	}
 }
