@@ -82,7 +82,7 @@ public class EncoderConstant {
 	public static final String MIN_TOS = "00";
 	public static final int MAX_SOURCE_AUDIO_DROPDOWN = 8;
 	public static final int DEFAULT_MTU = 1496;
-	public static final int MIN_MTU = 228;
+	public static final int MIN_MTU = 232;
 	public static final int MAX_MTU = 1500;
 	public static final int DEFAULT_TTL = 64;
 	public static final int MIN_TTL = 1;
@@ -121,7 +121,7 @@ public class EncoderConstant {
 	public static final String TALKBACK_PORT = "TalkbackPort";
 	public static final String PORT = "Port";
 	public static final String LISTENING = "LISTENING";
-	public static final String LISTENING_STATE = "ListeningState";
+	public static final String LISTENING_STATE = "TalkbackListeningState";
 	public static final String DISABLED = "DISABLED";
 	public static final String ACTIVE = "Active";
 	public static final String STRING_ZERO = "0";

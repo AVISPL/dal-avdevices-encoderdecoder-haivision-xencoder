@@ -4,7 +4,6 @@
 
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
@@ -280,7 +279,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testControlApplyChange() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "HD Video Encoder 0#BitRate";
 		String propValue = "2";
@@ -371,7 +370,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		controllableProperty.setProperty(gOPSize);
 		controllableProperty.setValue(gOPSizeValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
@@ -1108,7 +1107,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		String propIdleName = EncoderConstant.CREATE_STREAM + "#" + StreamControllingMetric.PARAMETER_IDLE_CELLS.getName();
 		String propDelayedName = EncoderConstant.CREATE_STREAM + "#" + StreamControllingMetric.PARAMETER_DELAYED_AUDIO.getName();
 		String propValue = "1";
-		Assertions.assertEquals("0", stats.get(propName));
+		Assertions.assertEquals("1", stats.get(propName));
 
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
@@ -1327,7 +1326,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	 */
 	@Test
 	void testEnableSAPForTheCreateOutputStream() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1347,7 +1346,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	 */
 	@Test
 	void testDisableSAPForTheCreateOutputStream() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "0";
@@ -1366,7 +1365,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	 */
 	@Test
 	void testEditSapNameSuccess() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1391,7 +1390,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	 */
 	@Test
 	void testEditSapKeywordsSuccess() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1416,7 +1415,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	 */
 	@Test
 	void testEditSapDescriptionSuccess() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1441,7 +1440,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	 */
 	@Test
 	void testEditSapAuthorSuccess() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1466,7 +1465,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	 */
 	@Test
 	void testEditSapCopyrightSuccess() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1491,7 +1490,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	 */
 	@Test
 	void testEditSapAddressSuccess() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1517,7 +1516,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testCreateStreamWithSAPPortInRange() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1543,7 +1542,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testCreateStreamWithSAPPortOutOfMinRange() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1569,7 +1568,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testCreateStreamWithSAPPortOutOfMaxRange() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1595,7 +1594,7 @@ public class HaivisionXEncoderCommunicatorTest {
 	@Test
 	@Tag("RealDevice")
 	void testCreateStreamWithSAPPort() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
 		String propValue = "1";
@@ -1637,72 +1636,1165 @@ public class HaivisionXEncoderCommunicatorTest {
 
 
 	/**
-	 * Test stream control: with SAP Port out of max range > 65535
+	 * Test stream control: with MTU in range 232-1500
 	 *
 	 * @throws Exception When fail to controlProperty
 	 */
 	@Test
 	@Tag("RealDevice")
-	void testCreatesss() throws Exception {
-		haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+	void testCreateStreamWithMTUInRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
-		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH +StreamControllingMetric.PARAMETER_MTU.getName();
-		String propValue = "123";
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_MTU.getName();
+		String propValue = "232";
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-//
-//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TRAFFIC_SHAPING.getName();
-//		propValue = "1";
-//		controllableProperty.setProperty(propName);
-//		controllableProperty.setValue(propValue);
-//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-//
-//		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
-//		Map<String, String> stats = extendedStatistics.getStatistics();
-//
-//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
-//		propValue =  ProtocolEnum.TS_SRT.getName();
-//		controllableProperty.setProperty(propName);
-//		controllableProperty.setValue(propValue);
-//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-//
-//
-//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
-//		propValue = EncryptionEnum.AES_128.getName();
-//		controllableProperty.setProperty(propName);
-//		controllableProperty.setValue(propValue);
-//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-//
-//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
-//		propValue = EncryptionEnum.NONE.getName();
-//		controllableProperty.setProperty(propName);
-//		controllableProperty.setValue(propValue);
-//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-//
-//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
-//		propValue = "44444";
-//		controllableProperty.setProperty(propName);
-//		controllableProperty.setValue(propValue);
-//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-//
-//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_PORT.getName();
-//		propValue = "4444";
-//		controllableProperty.setProperty(propName);
-//		controllableProperty.setValue(propValue);
-//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-//
-//
-//		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName();
-//		propValue = "1";
-//		controllableProperty.setProperty(propName);
-//		controllableProperty.setValue(propValue);
-// 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
-//
-//		 propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName();
-//		 propValue = "1";
-//		controllableProperty.setProperty(propName);
-//		controllableProperty.setValue(propValue);
-//		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("232", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with MTU out of min range < 232
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithMTUOutOfMinRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_MTU.getName();
+		String propValue = "231";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("232", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with MTU out of min range 1500
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithMTUOutOfMaxRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_MTU.getName();
+		String propValue = "1501";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("1500", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with TTL in range 1-255
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithTTLInRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TTL.getName();
+		String propValue = "5";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("5", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with TTL out of min range < 1
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithTTLOutOfMinRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TTL.getName();
+		String propValue = "0";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("1", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with TTL out of max range 1500
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithTTLOutOfMaxRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TTL.getName();
+		String propValue = "256";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("255", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with ToS in range 0-255
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithToSInRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TOS.getName();
+		String propValue = "0";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("0x00", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with ToS out of min range < 0x00
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithToSOutOfMinRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TOS.getName();
+		String propValue = "1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("0x01", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with ToS out of max range 0xFF
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithToSOutOfMaxRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.PARAMETER_TOS.getName();
+		String propValue = "256";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("0xFF", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with SourceAddAudio
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithAddSourceAddAudio() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.ADD_SOURCE_AUDIO.getName();
+		String propName1 = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + "SourceAudio 1";
+
+		String propValue = "1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("Audio Encoder 1", stats.get(propName1));
+	}
+
+	/**
+	 * Test stream control: with change source audio 0
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithChangeSourceAudio() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + EncoderConstant.SOURCE_AUDIO_0;
+		String propValue = "Audio Encoder 5";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("Audio Encoder 5", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with change HD Video Encoder
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithSourceVideo() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SOURCE_VIDEO.getName();
+		String propValue = "HD Video Encoder 4";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("HD Video Encoder 4", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Protocol Direct RTP test sourceType is Audio
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithSourceTypeIsAudio() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.DIRECT_RTP.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_SOURCE_TYPE.getName();
+		propValue = EncoderConstant.AUDIO;
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Protocol Direct RTP test sourceType is Audio
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithSourceTypeIsVideo() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.DIRECT_RTP.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		String propName2 = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_SOURCE_TYPE.getName();
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("Video", stats.get(propName2));
+	}
+
+	/**
+	 * Test stream control: with Protocol RTMP test publishName
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithPublishName() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.RTMP.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.RTMP_PUBLISH_NAME.getName();
+		propValue = "ABC";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Encryption with AES-256
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamTestEncrytion() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
+		String pasPhraseName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_PASSPHRASE.getName();
+		propValue = EncryptionEnum.AES_256.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+		Assertions.assertNotNull(stats.get(pasPhraseName));
+	}
+
+	/**
+	 * Test stream control: with Encryption with Value is None
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamTestEncrytionIsNone() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_ENCRYPTION.getName();
+		String pasPhraseName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_PASSPHRASE.getName();
+		propValue = EncryptionEnum.NONE.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+		Assertions.assertNull(stats.get(pasPhraseName));
+	}
+
+	/**
+	 * Test stream control: with Latency in range 20-8000
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithLatencyInRnange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_LATENCY.getName();
+		propValue = "21";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Latency out of min range <20
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithLatencyOutOfMinRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_LATENCY.getName();
+		propValue = "19";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("20", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Latency out of max range 8000
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithLatencyOutOfMaxRange() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_LATENCY.getName();
+		propValue = "8001";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals("8000", stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Connection Address
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithConnectionAddress() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_ADDRESS.getName();
+		propValue = "127.0.0.1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Connection Source Port, Destination Port with SRT mode
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithConnectionSourcePort() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
+		propValue = "4444";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Connection Destination Port with SRT mode
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithConnectionDestinationPort() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+		propValue = "4444";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Connection Destination Port with SRT mode
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithConnectionPort() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+		propValue = "4444";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with ConnectionMode is Caller
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithConnectionModeCaller() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_MODE.getName();
+		propValue = ConnectionModeEnum.CALLER.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with ConnectionMode is Rendezvous
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithConnectionModeRendezvous() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_MODE.getName();
+		propValue = ConnectionModeEnum.RENDEZVOUS.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with ConnectionMode is Listener
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithConnectionModeListener() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAM_CONNECTION_MODE.getName();
+		propValue = ConnectionModeEnum.LISTENER.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Protocol SRT
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithProtocolSRT() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_SRT.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Protocol UDP
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithProtocolUDP() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_UDP.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Protocol RTP
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithProtocolRTP() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.TS_RTP.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test stream control: with Protocol Direct-RTP
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithProtocolDirectRTP() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.DIRECT_RTP.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+
+	/**
+	 * Test stream control: with Protocol RTMP
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithProtocolRTMP() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName();
+		String propValue = ProtocolEnum.RTMP.getName();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	//filter----------------------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Test filter: with audio id 1,2
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByAudioId() throws Exception {
+		haivisionXEncoderCommunicator.setAudioFilter("1,2");
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		String propName1 = "Audio Encoder 1#State";
+		String propName2 = "Audio Encoder 2#State";
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNotNull(stats.get(propName1));
+		Assertions.assertNotNull(stats.get(propName2));
+	}
+
+	/**
+	 * Test filter: with audio id not exits
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByAudioIdNotExits() throws Exception {
+		haivisionXEncoderCommunicator.setAudioFilter("8,9,10");
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+
+		String propName = "Audio Encoder 0#State";
+		String propName1 = "Audio Encoder 1State";
+		String propName2 = "Audio Encoder 2#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNull(stats.get(propName));
+		Assertions.assertNull(stats.get(propName1));
+		Assertions.assertNull(stats.get(propName2));
+	}
+
+	/**
+	 * Test filter: with video id 0,1
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByVideoId() throws Exception {
+		haivisionXEncoderCommunicator.setVideoFilter("0,1");
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+
+		String propName = "HD Video Encoder 0#State";
+		String propName1 = "HD Video Encoder 1#State";
+		String propName2 = "HD Video Encoder 2#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNotNull(stats.get(propName));
+		Assertions.assertNotNull(stats.get(propName1));
+		//Expect null because filter only video id are 0,1
+		Assertions.assertNull(stats.get(propName2));
+	}
+
+	/**
+	 * Test filter: with video id not exits
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByVideoIdNotExits() throws Exception {
+		haivisionXEncoderCommunicator.setVideoFilter("5,6,7");
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+
+		String propName = "HD Video Encoder 0#State";
+		String propName1 = "HD Video Encoder 1#State";
+		String propName2 = "HD Video Encoder 2#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		//Expect null because filter video id are 5,6,7
+		Assertions.assertNull(stats.get(propName));
+		Assertions.assertNull(stats.get(propName1));
+		Assertions.assertNull(stats.get(propName2));
+	}
+
+
+	/**
+	 * Test filter: with Stream name filter
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByStreamName() throws Exception {
+		haivisionXEncoderCommunicator.setStreamNameFilter("TEST000s2");
+		String propName = "Stream TEST000s2#State";
+		String propName1 = "Stream talkback#State";
+		String propName2 = "Stream RTP1#State";
+		String audioName = "Audio Encoder 0 Statistics#State";
+		String audioName1 = "Audio Encoder 1 Statistics#State";
+		String audioName2 = "Audio Encoder 2 Statistics#State";
+		String audioName3 = "Audio Encoder 3 Statistics#State";
+		String audioName4 = "Audio Encoder 4 Statistics#State";
+		String audioName5 = "Audio Encoder 5 Statistics#State";
+		String audioName6 = "Audio Encoder 6 Statistics#State";
+		String audioName7 = "Audio Encoder 7 Statistics#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNotNull(stats.get(propName));
+		//Expect not null because stream asign 6 audio are 0,1,2,3,4,5,6
+		Assertions.assertNotNull(stats.get(audioName));
+		Assertions.assertNotNull(stats.get(audioName1));
+		Assertions.assertNotNull(stats.get(audioName2));
+		Assertions.assertNotNull(stats.get(audioName3));
+		Assertions.assertNotNull(stats.get(audioName4));
+		Assertions.assertNotNull(stats.get(audioName5));
+		Assertions.assertNotNull(stats.get(audioName6));
+		//Expect null because filter only stream TEST000s2
+		Assertions.assertNull(stats.get(propName1));
+		Assertions.assertNull(stats.get(propName2));
+		Assertions.assertNull(stats.get(audioName7));
+	}
+
+	/**
+	 * Test filter: with Stream name filter not exits
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByStreamNameNotExits() throws Exception {
+		haivisionXEncoderCommunicator.setStreamNameFilter("TEST000s2000");
+		String propName = "Stream TEST000s2000#State";
+		String audioName = "Audio Encoder 0 Statistics#State";
+		String audioName1 = "Audio Encoder 1 Statistics#State";
+		String audioName2 = "Audio Encoder 2 Statistics#State";
+		String audioName3 = "Audio Encoder 3 Statistics#State";
+		String audioName4 = "Audio Encoder 4 Statistics#State";
+		String audioName5 = "Audio Encoder 5 Statistics#State";
+		String audioName6 = "Audio Encoder 6 Statistics#State";
+		String audioName7 = "Audio Encoder 7 Statistics#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		//Expect  null because stream name not exits
+		Assertions.assertNull(stats.get(audioName));
+		Assertions.assertNull(stats.get(audioName1));
+		Assertions.assertNull(stats.get(audioName2));
+		Assertions.assertNull(stats.get(audioName3));
+		Assertions.assertNull(stats.get(audioName4));
+		Assertions.assertNull(stats.get(audioName5));
+		Assertions.assertNull(stats.get(audioName6));
+		Assertions.assertNull(stats.get(audioName7));
+		//Expect null because stream name not exits
+		Assertions.assertNull(stats.get(propName));
+	}
+
+	/**
+	 * Test filter: with port filter
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByPort() throws Exception {
+		haivisionXEncoderCommunicator.setPortNumberFilter("12611");
+		String propName = "Stream TEST000s2#State";
+		String propName1 = "Stream talkback#State";
+		String propName2 = "Stream RTP1#State";
+		String audioName = "Audio Encoder 0 Statistics#State";
+		String audioName1 = "Audio Encoder 1 Statistics#State";
+		String audioName2 = "Audio Encoder 2 Statistics#State";
+		String audioName3 = "Audio Encoder 3 Statistics#State";
+		String audioName4 = "Audio Encoder 4 Statistics#State";
+		String audioName5 = "Audio Encoder 5 Statistics#State";
+		String audioName6 = "Audio Encoder 6 Statistics#State";
+		String audioName7 = "Audio Encoder 7 Statistics#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNotNull(stats.get(propName));
+		//Expect not null because stream asign 6 audio are 0,1,2,3,4,5,6
+		Assertions.assertNotNull(stats.get(audioName));
+		Assertions.assertNotNull(stats.get(audioName1));
+		Assertions.assertNotNull(stats.get(audioName2));
+		Assertions.assertNotNull(stats.get(audioName3));
+		Assertions.assertNotNull(stats.get(audioName4));
+		Assertions.assertNotNull(stats.get(audioName5));
+		Assertions.assertNotNull(stats.get(audioName6));
+		//Expect null because filter only stream TEST000s2
+		Assertions.assertNull(stats.get(propName1));
+		Assertions.assertNull(stats.get(propName2));
+		Assertions.assertNull(stats.get(audioName7));
+	}
+
+	/**
+	 * Test filter: with port filter and port range
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByPortRange() throws Exception {
+		haivisionXEncoderCommunicator.setPortNumberFilter("1234,112610-12611");
+		String propName = "Stream TEST000s2#State";
+		String propName1 = "Stream talkback#State";
+		String propName2 = "Stream RTP1#State";
+		String audioName = "Audio Encoder 0 Statistics#State";
+		String audioName1 = "Audio Encoder 1 Statistics#State";
+		String audioName2 = "Audio Encoder 2 Statistics#State";
+		String audioName3 = "Audio Encoder 3 Statistics#State";
+		String audioName4 = "Audio Encoder 4 Statistics#State";
+		String audioName5 = "Audio Encoder 5 Statistics#State";
+		String audioName6 = "Audio Encoder 6 Statistics#State";
+		String audioName7 = "Audio Encoder 7 Statistics#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNotNull(stats.get(propName));
+		Assertions.assertNotNull(stats.get(propName2));
+		//Expect not null because stream asign 6 audio are 0,1,2,3,4,5,6
+		Assertions.assertNotNull(stats.get(audioName));
+		Assertions.assertNotNull(stats.get(audioName1));
+		Assertions.assertNotNull(stats.get(audioName2));
+		Assertions.assertNotNull(stats.get(audioName3));
+		Assertions.assertNotNull(stats.get(audioName4));
+		Assertions.assertNotNull(stats.get(audioName5));
+		Assertions.assertNotNull(stats.get(audioName6));
+		//Expect null because filter only stream TEST000s2
+		Assertions.assertNull(stats.get(propName1));
+		Assertions.assertNull(stats.get(audioName7));
+	}
+
+	/**
+	 * Test filter: with port filter not exits
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByPortFilterNotExits() throws Exception {
+		haivisionXEncoderCommunicator.setPortNumberFilter("222222,444444-666666");
+		String propName = "Stream TEST000s2#State";
+		String propName1 = "Stream talkback#State";
+		String propName2 = "Stream RTP1#State";
+		String audioName = "Audio Encoder 0 Statistics#State";
+		String audioName1 = "Audio Encoder 1 Statistics#State";
+		String audioName2 = "Audio Encoder 2 Statistics#State";
+		String audioName3 = "Audio Encoder 3 Statistics#State";
+		String audioName4 = "Audio Encoder 4 Statistics#State";
+		String audioName5 = "Audio Encoder 5 Statistics#State";
+		String audioName6 = "Audio Encoder 6 Statistics#State";
+		String audioName7 = "Audio Encoder 7 Statistics#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNull(stats.get(propName));
+		//Expect not null because stream asign 6 audio are 0,1,2,3,4,5,6
+		Assertions.assertNull(stats.get(audioName));
+		Assertions.assertNull(stats.get(audioName1));
+		Assertions.assertNull(stats.get(audioName2));
+		Assertions.assertNull(stats.get(audioName3));
+		Assertions.assertNull(stats.get(audioName4));
+		Assertions.assertNull(stats.get(audioName5));
+		Assertions.assertNull(stats.get(audioName6));
+		//Expect null because filter only stream TEST000s2
+		Assertions.assertNull(stats.get(propName1));
+		Assertions.assertNull(stats.get(propName2));
+		Assertions.assertNull(stats.get(audioName7));
+	}
+
+	/**
+	 * Test filter: with stream status
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByStreamStatus() throws Exception {
+		haivisionXEncoderCommunicator.setStreamStatusFilter("STREAMING");
+		String propName = "Stream TEST000s2#State";
+		String propName1 = "Stream talkback#State";
+		String propName2 = "Stream RTP1#State";
+		String audioName = "Audio Encoder 0 Statistics#State";
+		String audioName1 = "Audio Encoder 1 Statistics#State";
+		String audioName2 = "Audio Encoder 2 Statistics#State";
+		String audioName3 = "Audio Encoder 3 Statistics#State";
+		String audioName4 = "Audio Encoder 4 Statistics#State";
+		String audioName5 = "Audio Encoder 5 Statistics#State";
+		String audioName6 = "Audio Encoder 6 Statistics#State";
+		String audioName7 = "Audio Encoder 7 Statistics#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNotNull(stats.get(propName));
+		Assertions.assertNotNull(stats.get(propName1));
+		//Expect not null because stream asign 6 audio are 0,1,2,3,4,5,6
+		Assertions.assertNotNull(stats.get(audioName));
+		Assertions.assertNotNull(stats.get(audioName1));
+		Assertions.assertNotNull(stats.get(audioName2));
+		Assertions.assertNotNull(stats.get(audioName3));
+		Assertions.assertNotNull(stats.get(audioName4));
+		Assertions.assertNotNull(stats.get(audioName5));
+		Assertions.assertNotNull(stats.get(audioName6));
+		//Expect null because state Streaming just TEST000s2 and talkback
+		Assertions.assertNull(stats.get(audioName7));
+		Assertions.assertNull(stats.get(propName2));
+	}
+
+	/**
+	 * Test filter: with stream status not exits
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByStreamStatusNotExits() throws Exception {
+		haivisionXEncoderCommunicator.setStreamStatusFilter("STREAMING01");
+		String propName = "Stream TEST000s2#State";
+		String propName1 = "Stream talkback#State";
+		String propName2 = "Stream RTP1#State";
+		String audioName = "Audio Encoder 0 Statistics#State";
+		String audioName1 = "Audio Encoder 1 Statistics#State";
+		String audioName2 = "Audio Encoder 2 Statistics#State";
+		String audioName3 = "Audio Encoder 3 Statistics#State";
+		String audioName4 = "Audio Encoder 4 Statistics#State";
+		String audioName5 = "Audio Encoder 5 Statistics#State";
+		String audioName6 = "Audio Encoder 6 Statistics#State";
+		String audioName7 = "Audio Encoder 7 Statistics#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNull(stats.get(propName));
+		Assertions.assertNull(stats.get(propName1));
+		Assertions.assertNull(stats.get(audioName));
+		Assertions.assertNull(stats.get(audioName1));
+		Assertions.assertNull(stats.get(audioName2));
+		Assertions.assertNull(stats.get(audioName3));
+		Assertions.assertNull(stats.get(audioName4));
+		Assertions.assertNull(stats.get(audioName5));
+		Assertions.assertNull(stats.get(audioName6));
+		Assertions.assertNull(stats.get(audioName7));
+		Assertions.assertNull(stats.get(propName2));
+	}
+
+	/**
+	 * Test filter: with port and status
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByPortAndStatus() throws Exception {
+		haivisionXEncoderCommunicator.setStreamStatusFilter("STREAMING");
+		haivisionXEncoderCommunicator.setPortNumberFilter("1780");
+		String propName = "Stream TEST000s2#State";
+		String propName1 = "Stream talkback#State";
+		String propName2 = "Stream RTP1#State";
+		String audioName = "Audio Encoder 0 Statistics#State";
+		String audioName1 = "Audio Encoder 1 Statistics#State";
+		String audioName2 = "Audio Encoder 2 Statistics#State";
+		String audioName3 = "Audio Encoder 3 Statistics#State";
+		String audioName4 = "Audio Encoder 4 Statistics#State";
+		String audioName5 = "Audio Encoder 5 Statistics#State";
+		String audioName6 = "Audio Encoder 6 Statistics#State";
+		String audioName7 = "Audio Encoder 7 Statistics#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNotNull(stats.get(propName1));
+		Assertions.assertNotNull(stats.get(audioName));
+
+		Assertions.assertNull(stats.get(propName));
+		Assertions.assertNull(stats.get(audioName1));
+		Assertions.assertNull(stats.get(audioName2));
+		Assertions.assertNull(stats.get(audioName3));
+		Assertions.assertNull(stats.get(audioName4));
+		Assertions.assertNull(stats.get(audioName5));
+		Assertions.assertNull(stats.get(audioName6));
+		Assertions.assertNull(stats.get(audioName7));
+		Assertions.assertNull(stats.get(propName2));
+	}
+
+	/**
+	 * Test filter: with stream Or port and status
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testFilterByStreamNameOrPortAndStatus() throws Exception {
+		haivisionXEncoderCommunicator.setStreamNameFilter("RTP1");
+		haivisionXEncoderCommunicator.setStreamStatusFilter("STREAMING");
+		haivisionXEncoderCommunicator.setPortNumberFilter("1780");
+		String propName = "Stream TEST000s2#State";
+		String propName1 = "Stream talkback#State";
+		String propName2 = "Stream RTP1#State";
+		String audioName = "Audio Encoder 0 Statistics#State";
+		String audioName1 = "Audio Encoder 1 Statistics#State";
+		String audioName2 = "Audio Encoder 2 Statistics#State";
+		String audioName3 = "Audio Encoder 3 Statistics#State";
+		String audioName4 = "Audio Encoder 4 Statistics#State";
+		String audioName5 = "Audio Encoder 5 Statistics#State";
+		String audioName6 = "Audio Encoder 6 Statistics#State";
+		String audioName7 = "Audio Encoder 7 Statistics#State";
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertNotNull(stats.get(propName1));
+		Assertions.assertNotNull(stats.get(audioName));
+		Assertions.assertNotNull(stats.get(propName2));
+
+		Assertions.assertNull(stats.get(propName));
+		Assertions.assertNull(stats.get(audioName1));
+		Assertions.assertNull(stats.get(audioName2));
+		Assertions.assertNull(stats.get(audioName3));
+		Assertions.assertNull(stats.get(audioName4));
+		Assertions.assertNull(stats.get(audioName5));
+		Assertions.assertNull(stats.get(audioName6));
+		Assertions.assertNull(stats.get(audioName7));
 	}
 }
