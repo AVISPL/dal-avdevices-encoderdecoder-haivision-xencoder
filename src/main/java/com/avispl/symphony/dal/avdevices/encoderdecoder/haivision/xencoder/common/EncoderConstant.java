@@ -129,4 +129,8 @@ public class EncoderConstant {
 	public static final String PASS_THROUGH = "passthrough";
 	public static final String STATE = "State";
 	public static final String UDP_PORT = "UDP Port";
+	public static final String EIGHTH_STRING_FORMAT = " %s %s %s %s %s %s %s %s ";
+	public static final String ELEVEN_STRING_FORMAT = " %s %s %s %s %s %s %s %s %s %s %s";
+	public static final String SEVEN_STRING_FORMAT = " %s %s %s %s %s %s %s ";
+	public static final String THREE_STRING_FORMAT = " %s %s %s ";
 }
