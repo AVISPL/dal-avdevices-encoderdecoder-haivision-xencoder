@@ -19,6 +19,9 @@ import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.commo
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VideoStatistics {
 
+	@JsonAlias("Encoder ID")
+	private String id;
+
 	@JsonAlias("Name")
 	private String name;
 
@@ -521,6 +524,24 @@ public class VideoStatistics {
 	 */
 	public void setOutputResolution(String outputResolution) {
 		this.outputResolution = outputResolution;
+	}
+
+	/**
+	 * Retrieves {@code {@link #id}}
+	 *
+	 * @return value of {@link #id}
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * Sets {@code id}
+	 *
+	 * @param id the {@code java.lang.String} field
+	 */
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	/**
