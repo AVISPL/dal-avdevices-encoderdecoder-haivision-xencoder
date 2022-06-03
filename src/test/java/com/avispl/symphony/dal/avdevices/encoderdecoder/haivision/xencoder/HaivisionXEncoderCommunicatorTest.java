@@ -4,7 +4,6 @@
 
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
