@@ -79,12 +79,12 @@ public enum StreamActionEnum {
 	}
 
 	/**
-	 * Retrieves all names of StreamActionEnum by action. Default return all names of isStopAction
+	 * Retrieves all names of StreamActionEnum by state. Default return all names of isStopAction
 	 *
 	 * @param streamState the streamState is String name instance in StreamStateEnum
 	 * @return list name of StreamActionEnum
 	 */
-	public static String[] getArrayOfEnumByAction(String streamState) {
+	public static String[] getAllStreamActionByState(String streamState) {
 		List<String> streamActionList = new LinkedList<>();
 		StreamStateEnum streamStateEnum = EnumTypeHandler.getMetricOfEnumByName(StreamStateEnum.class, streamState);
 		for (StreamActionEnum streamAction : StreamActionEnum.values()) {
