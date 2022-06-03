@@ -3,12 +3,13 @@
  */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream;
 
-import com.avispl.symphony.dal.util.StringUtils;
+import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler.replaceSpecialCharacter;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler.replaceSpecialCharacter;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
+import com.avispl.symphony.dal.util.StringUtils;
 
 /**
  * StreamSAP DTO class
@@ -18,7 +19,7 @@ import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencode
  * @since 1.0.0
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class 	StreamSAP {
+public class StreamSAP {
 
 	@JsonAlias("Session ID")
 	private String id;
@@ -251,6 +252,6 @@ public class 	StreamSAP {
 	 * @return String is format name or empty string
 	 */
 	private String getFormatNameByValue(String value, String name) {
-		return StringUtils.isNullOrEmpty(value) ? "" : String.format("%s=%s", name, replaceSpecialCharacter(value));
+		return StringUtils.isNullOrEmpty(value) ? EncoderConstant.EMPTY_STRING : String.format("%s=%s", name, replaceSpecialCharacter(value));
 	}
 }

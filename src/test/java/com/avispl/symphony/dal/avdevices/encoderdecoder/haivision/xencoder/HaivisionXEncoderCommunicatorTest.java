@@ -4,6 +4,7 @@
 
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
@@ -55,9 +56,6 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.setPort(22);
 		haivisionXEncoderCommunicator.setLogin("admin");
 		haivisionXEncoderCommunicator.setPassword("AVIadm1n");
-		haivisionXEncoderCommunicator.setCommandErrorList(Collections.singletonList("~"));
-		haivisionXEncoderCommunicator.setCommandSuccessList(Collections.singletonList("~$ "));
-		haivisionXEncoderCommunicator.setLoginSuccessList(Collections.singletonList("~$ "));
 		haivisionXEncoderCommunicator.init();
 		haivisionXEncoderCommunicator.connect();
 	}
@@ -655,7 +653,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.getMultipleStatistics();
 		ControllableProperty controllableProperty = new ControllableProperty();
 		String propName = "HD Video Encoder 0#" + VideoControllingMetric.TIME_CODE_SOURCE.getName();
-		String propValue = TimeCodeSource.None.getValue();
+		String propValue = TimeCodeSource.NONE.getValue();
 		controllableProperty.setProperty(propName);
 		controllableProperty.setValue(propValue);
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);

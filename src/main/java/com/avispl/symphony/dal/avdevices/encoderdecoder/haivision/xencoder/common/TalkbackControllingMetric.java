@@ -50,6 +50,6 @@ public enum TalkbackControllingMetric {
 				return metric;
 			}
 		}
-		throw new IllegalArgumentException("Can not find the enum with name: " + name);
+		throw new IllegalArgumentException("Could not find the talkback controlling metric group with name: " + name);
 	}
 }
