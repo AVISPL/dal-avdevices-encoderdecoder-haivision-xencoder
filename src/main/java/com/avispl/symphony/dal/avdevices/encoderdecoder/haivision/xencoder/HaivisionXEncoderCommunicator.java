@@ -372,12 +372,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 	@Override
 	protected void internalDestroy() {
-		isCreateStreamCalled = false;
 		isEmergencyDelivery = false;
-		localStatsStreamOutput.clear();
-		localExtendedStatistics.getControllableProperties().clear();
-		localExtendedStatistics.getStatistics().clear();
-		clearBeforeFetchingData();
+		localExtendedStatistics = new ExtendedStatistics();
+
+		//Filter
+		streamConfigPortAndStatusSet.clear();
+		streamConfigNameFilterSet.clear();
+		portNumberList.clear();
+		portNumberRangeList.clear();
+		streamConfigNameFilterSet.clear();
 		super.internalDestroy();
 	}
 
@@ -679,15 +682,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 		// Talkback
 		talkbackMap.clear();
-
-		//Filter
-		streamConfigPortAndStatusSet.clear();
-		streamConfigNameFilterSet.clear();
-
-		//Port filter
-		portNumberList.clear();
-		portNumberRangeList.clear();
-		streamConfigNameFilterSet.clear();
 	}
 
 	/**
