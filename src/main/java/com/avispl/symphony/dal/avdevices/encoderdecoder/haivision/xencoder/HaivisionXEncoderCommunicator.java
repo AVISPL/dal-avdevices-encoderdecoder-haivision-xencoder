@@ -373,8 +373,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	@Override
 	protected void internalDestroy() {
 		isEmergencyDelivery = false;
-		localExtendedStatistics = new ExtendedStatistics();
-
+		if (localExtendedStatistics != null && localExtendedStatistics.getStatistics() != null && localExtendedStatistics.getControllableProperties() != null) {
+			localExtendedStatistics.getStatistics().clear();
+			localExtendedStatistics.getControllableProperties().clear();
+		}
 		//Filter
 		streamConfigPortAndStatusSet.clear();
 		streamConfigNameFilterSet.clear();
