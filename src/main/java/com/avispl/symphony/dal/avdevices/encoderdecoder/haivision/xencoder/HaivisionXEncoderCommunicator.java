@@ -423,6 +423,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					localStatsStreamOutput.putAll(statsCreateOutputStream);
 					isCreateStreamCalled = true;
 				}
+				updateDropdownListForTheControllingMetric();
 				// add all stats of create output stream into local stats
 				Map<String, String> localStats = localExtendedStatistics.getStatistics();
 				Map<String, String> localStreamStats = localCreateOutputStream.getStatistics();
@@ -435,7 +436,6 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				localAdvancedControl.removeIf(item -> nameList.contains(item.getName()));
 				localAdvancedControl.addAll(localStreamAdvancedControl);
 			}
-			updateDropdownListForTheControllingMetric();
 		} finally {
 			reentrantLock.unlock();
 		}
@@ -923,7 +923,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					stats.put(property, convertValueByIndexOfSpace(replaceCommaByEmptyString(streamConfig.getAverageBandwidth())));
 					break;
 				case PARAMETER_TRAFFIC_SHAPING:
-					stats.put(property, streamConfig.getShaping());
+					String shaping = EncoderConstant.DISABLE;
+					if (EncoderConstant.ON.equals(streamConfig.getShaping())) {
+						shaping = EncoderConstant.ENABLE;
+					}
+					stats.put(property, shaping);
 					break;
 				case PARAMETER_BANDWIDTH_OVERHEAD:
 					protocol = streamConfig.getEncapsulation();
@@ -951,7 +955,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					break;
 				case PARAMETER_IDLE_CELLS:
 					protocol = streamConfig.getEncapsulation();
-					if (ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_SRT.getValue().equalsIgnoreCase(protocol)) {
+					if ((ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol)
+							|| ProtocolEnum.TS_SRT.getValue().equalsIgnoreCase(protocol)) && EncoderConstant.ON.equals(streamConfig.getShaping())) {
 						String idleCellsValue = EncoderConstant.DISABLE;
 						if (EncoderConstant.ON.equals(streamConfig.getIdleCells())) {
 							idleCellsValue = EncoderConstant.ENABLE;
@@ -961,7 +966,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					break;
 				case PARAMETER_DELAYED_AUDIO:
 					protocol = streamConfig.getEncapsulation();
-					if (ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_SRT.getValue().equalsIgnoreCase(protocol)) {
+					if ((ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol)
+							|| ProtocolEnum.TS_SRT.getValue().equalsIgnoreCase(protocol)) && EncoderConstant.ON.equals(streamConfig.getShaping())) {
 						String delayAudio = EncoderConstant.DISABLE;
 						if (EncoderConstant.ON.equals(streamConfig.getDelayAudio())) {
 							delayAudio = EncoderConstant.ENABLE;
@@ -2756,9 +2762,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * Update dropdown list for the control
 	 */
 	private void updateDropdownListForTheControllingMetric() {
-		List<AdvancedControllableProperty> advancedControllableProperties = localExtendedStatistics.getControllableProperties();
-		Map<String, String> stats = localExtendedStatistics.getStatistics();
-
+		Map<String, String> stats = localCreateOutputStream.getStatistics();
+		List<AdvancedControllableProperty> advancedControllableProperties = localCreateOutputStream.getControllableProperties();
 		//update still Image
 		String stillImageName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STILL_IMAGE.getName();
 		String stillImageValue = getEmptyValueForNullData(stats.get(stillImageName));
@@ -2937,6 +2942,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					break;
 				case STILL_IMAGE:
 					String[] stillImageDropdown = stillImageList.toArray(new String[0]);
+					if (!stillImageList.contains(value)) {
+						value = EncoderConstant.NONE;
+					}
 					AdvancedControllableProperty stillImageProperty = controlDropdownAcceptNoneValue(stats, stillImageDropdown, property, value);
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, stillImageProperty);
 					break;

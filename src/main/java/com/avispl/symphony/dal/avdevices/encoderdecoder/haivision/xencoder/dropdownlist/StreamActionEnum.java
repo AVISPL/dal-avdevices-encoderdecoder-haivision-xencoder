@@ -86,12 +86,23 @@ public enum StreamActionEnum {
 	 */
 	public static String[] getAllStreamActionByState(String streamState) {
 		List<String> streamActionList = new LinkedList<>();
-		StreamStateEnum streamStateEnum = EnumTypeHandler.getMetricOfEnumByName(StreamStateEnum.class, streamState);
+		StreamStateEnum streamStateEnum;
+		try {
+			streamStateEnum = EnumTypeHandler.getMetricOfEnumByName(StreamStateEnum.class, streamState);
+		} catch (Exception e) {
+			//Exception occurs when no state is found. State default will BE STREAMING
+			streamStateEnum = StreamStateEnum.STREAMING;
+		}
 		for (StreamActionEnum streamAction : StreamActionEnum.values()) {
 			switch (streamStateEnum) {
 				case STREAMING:
 				case RESOLVING:
 				case CONNECTING:
+				case LISTENING:
+				case FAILED:
+				case SECURING:
+				case SCRAMBLED:
+				case PUBLISHING:
 					if (streamAction.isStartAction()) {
 						streamActionList.add(streamAction.getName());
 					}
