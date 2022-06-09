@@ -462,6 +462,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		try {
 			this.timeout = controlSSHTimeout;
 			if (localExtendedStatistics == null || localCreateOutputStream == null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Error while controlling %s metric", property));
+				}
 				return;
 			}
 			Map<String, String> extendedStatistics = localExtendedStatistics.getStatistics();
@@ -983,23 +986,26 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					}
 					break;
 				case SAP_TRANSMIT:
-					StreamSAP sap = streamConfig.getSap();
-					String transmit = EncoderConstant.DISABLE;
-					if (sap != null) {
-						transmit = sap.getAdvertise();
-					}
-					if (EncoderConstant.YES.equals(transmit)) {
-						transmit = EncoderConstant.ENABLE;
-					}
-					stats.put(property, transmit);
-					if (EncoderConstant.ENABLE.equals(transmit)) {
-						stats.put(streamKey + StreamControllingMetric.SAP_NAME.getName(), getNoneValueIfPresent(sap.getName()));
-						stats.put(streamKey + StreamControllingMetric.SAP_DESCRIPTION.getName(), getNoneValueIfPresent(sap.getDesc()));
-						stats.put(streamKey + StreamControllingMetric.SAP_KEYWORDS.getName(), getNoneValueIfPresent(sap.getKeywords()));
-						stats.put(streamKey + StreamControllingMetric.SAP_AUTHOR.getName(), getNoneValueIfPresent(sap.getAuthor()));
-						stats.put(streamKey + StreamControllingMetric.SAP_COPYRIGHT.getName(), getNoneValueIfPresent(sap.getCopyright()));
-						stats.put(streamKey + StreamControllingMetric.SAP_ADDRESS.getName(), getNoneValueIfPresent(sap.getAddress()));
-						stats.put(streamKey + StreamControllingMetric.SAP_PORT.getName(), getNoneValueIfPresent(sap.getPort()));
+					protocol = streamConfig.getEncapsulation();
+					if (ProtocolEnum.TS_UDP.getValue().equalsIgnoreCase(protocol) || ProtocolEnum.TS_RTP.getValue().equalsIgnoreCase(protocol)) {
+						StreamSAP sap = streamConfig.getSap();
+						String transmit = EncoderConstant.DISABLE;
+						if (sap != null) {
+							transmit = sap.getAdvertise();
+						}
+						if (EncoderConstant.YES.equals(transmit)) {
+							transmit = EncoderConstant.ENABLE;
+						}
+						stats.put(property, transmit);
+						if (EncoderConstant.ENABLE.equals(transmit)) {
+							stats.put(streamKey + StreamControllingMetric.SAP_NAME.getName(), getNoneValueIfPresent(sap.getName()));
+							stats.put(streamKey + StreamControllingMetric.SAP_DESCRIPTION.getName(), getNoneValueIfPresent(sap.getDesc()));
+							stats.put(streamKey + StreamControllingMetric.SAP_KEYWORDS.getName(), getNoneValueIfPresent(sap.getKeywords()));
+							stats.put(streamKey + StreamControllingMetric.SAP_AUTHOR.getName(), getNoneValueIfPresent(sap.getAuthor()));
+							stats.put(streamKey + StreamControllingMetric.SAP_COPYRIGHT.getName(), getNoneValueIfPresent(sap.getCopyright()));
+							stats.put(streamKey + StreamControllingMetric.SAP_ADDRESS.getName(), getNoneValueIfPresent(sap.getAddress()));
+							stats.put(streamKey + StreamControllingMetric.SAP_PORT.getName(), getNoneValueIfPresent(sap.getPort()));
+						}
 					}
 					break;
 				case RTMP_PUBLISH_NAME:
@@ -1018,7 +1024,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				case RTMP_CONFIRMATION_PASSWORD:
 					protocol = streamConfig.getEncapsulation();
 					if (ProtocolEnum.RTMP.getValue().equalsIgnoreCase(protocol)) {
-						stats.put(property, getEmptyValueForNullData(streamConfig.getPassword()));
+						String password = getEmptyValueForNullData(streamConfig.getPassword());
+						if (!StringUtils.isNullOrEmpty(password)) {
+							password = EncoderConstant.PASSPHRASE;
+						}
+						stats.put(property, password);
 					}
 					break;
 				case CANCEL:
@@ -2804,14 +2814,20 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 		//Check list source audio assigned in stream
 		for (Map.Entry<String, Audio> audioKey : nameAndSourceAudioMap.entrySet()) {
-			if (audioKey.getValue() != null && audioKey.getValue().getAudioId() != null) {
-				audioIdList.put(Integer.valueOf(audioKey.getValue().getAudioId()), audioKey.getValue().getAudioName());
+			//This is a special case, when the source sound is None. Audio source 0 always visible and assigned in stream
+			if (audioKey.getValue() != null) {
+				//count the number of sources assigned in stream
 				countSource++;
 			}
+			if (audioKey.getValue() != null && audioKey.getValue().getAudioId() != null) {
+				audioIdList.put(Integer.valueOf(audioKey.getValue().getAudioId()), audioKey.getValue().getAudioName());
+			}
 		}
-		//Maximum of source audio is 8,
-		if (countSource == EncoderConstant.MAX_SOURCE_AUDIO_DROPDOWN) {
-			throw new ResourceNotReachableException("The audio source just assign max audio source is 8.");
+
+		//Maximum amount of sources audio is 8 with index from 0-7
+		// if countSource >= 8 throw exception
+		if (countSource >= EncoderConstant.MAX_SOURCE_AUDIO_DROPDOWN) {
+			throw new ResourceNotReachableException("The audio source just assign max audio source is 8 with index source from SourceAudio 0 to SourceAudio 7.");
 		}
 		for (Map.Entry<String, Audio> audioEntry : nameAndSourceAudioMap.entrySet()) {
 			String defaultName = audioNames[0];

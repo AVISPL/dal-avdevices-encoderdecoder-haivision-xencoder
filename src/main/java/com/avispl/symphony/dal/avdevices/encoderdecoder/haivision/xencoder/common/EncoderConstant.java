@@ -132,5 +132,5 @@ public class EncoderConstant {
 	public static final String EIGHTH_STRING_FORMAT = " %s %s %s %s %s %s %s %s ";
 	public static final String ELEVEN_STRING_FORMAT = " %s %s %s %s %s %s %s %s %s %s %s";
 	public static final String SEVEN_STRING_FORMAT = " %s %s %s %s %s %s %s ";
-	public static final String THREE_STRING_FORMAT = " %s %s %s ";
+	public static final String FIVE_STRING_FORMAT = " %s %s %s %s %s ";
 }

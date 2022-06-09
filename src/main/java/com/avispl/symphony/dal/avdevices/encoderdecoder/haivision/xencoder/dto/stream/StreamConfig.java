@@ -814,10 +814,10 @@ public class StreamConfig {
 			paramRequest = String.format(EncoderConstant.EIGHTH_STRING_FORMAT, fecValue, trafficShapingValue, idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, bandwidthOverHeadValue);
 		}
 		if (ProtocolEnum.RTMP.getValue().equals(encapsulation)) {
-			paramRequest = String.format(EncoderConstant.THREE_STRING_FORMAT, publishNameValue, usernameValue, passwordValue);
+			paramRequest = String.format(EncoderConstant.FIVE_STRING_FORMAT, trafficShapingValue, publishNameValue, usernameValue, passwordValue, bandwidthOverHeadValue);
 		}
 		if (ProtocolEnum.DIRECT_RTP.getValue().equals(encapsulation)) {
-			paramRequest = String.format(" %s %s ", mtuValue, bandwidthOverHeadValue);
+			paramRequest = String.format(" %s %s %s", trafficShapingValue, mtuValue, bandwidthOverHeadValue);
 		}
 		if (ProtocolEnum.TS_SRT.getValue().equals(encapsulation)) {
 			paramRequest = String.format(EncoderConstant.ELEVEN_STRING_FORMAT, ttlValue, tosValue, bandwidthOverHeadValue, idleCellsValue, srtModeValue, networkAdaptiveValue, latencyValue, encryptionValue,
