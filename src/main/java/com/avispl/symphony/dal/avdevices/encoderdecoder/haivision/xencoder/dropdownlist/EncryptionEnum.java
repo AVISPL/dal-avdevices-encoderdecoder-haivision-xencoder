@@ -4,28 +4,28 @@
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist;
 
 /**
- * TimeCodeSource class defined the enum for monitoring and controlling process
+ * EncryptionEnum class defined the enum for monitoring and controlling process
  *
  * @author Kevin / Symphony Dev Team<br>
- * Created on 5/10/2022
+ * Created on 5/25/2022
  * @since 1.0.0
  */
-public enum TimeCodeSource {
+public enum EncryptionEnum {
 
-	NONE("None", "None"),
-	VIDEO("Video", "VIDEO"),
-	SYSTEM("System", "SYSTEM");
+	NONE("None", ""),
+	AES_128("AES-128", "128 bits"),
+	AES_256("AES-256", "256 bits");
 
 	private final String name;
 	private final String value;
 
 	/**
-	 * TimeCodeSource instantiation
+	 * EncryptionEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param value {@code {@link #value}}
 	 */
-	TimeCodeSource(String name, String value) {
+	EncryptionEnum(String name, String value) {
 		this.name = name;
 		this.value = value;
 	}

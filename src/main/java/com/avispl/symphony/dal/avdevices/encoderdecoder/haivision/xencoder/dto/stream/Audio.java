@@ -13,6 +13,7 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.
 public class Audio {
 
 	private String audioId;
+	private String audioName;
 
 	/**
 	 * Retrieves {@code {@link #audioId}}
@@ -30,5 +31,23 @@ public class Audio {
 	 */
 	public void setAudioId(String audioId) {
 		this.audioId = audioId;
+	}
+
+	/**
+	 * Retrieves {@code {@link #audioName}}
+	 *
+	 * @return value of {@link #audioName}
+	 */
+	public String getAudioName() {
+		return audioName;
+	}
+
+	/**
+	 * Sets {@code audioName}
+	 *
+	 * @param audioName the {@code java.lang.String} field
+	 */
+	public void setAudioName(String audioName) {
+		this.audioName = audioName;
 	}
 }
