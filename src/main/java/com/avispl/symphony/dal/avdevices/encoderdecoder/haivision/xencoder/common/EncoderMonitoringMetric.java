@@ -22,7 +22,11 @@ public enum EncoderMonitoringMetric {
 	VIDEO_CONFIG("AudioConfig", true),
 	STREAM_STATISTICS("StreamStatistics", true),
 	INPUT("Vidin", true),
-	STREAM_CONFIG("StreamConfig", true);
+	STREAM_CONFIG("StreamConfig", true),
+	STILL_IMAGE("StillImage", true),
+	TALKBACK("TalkBack", true),
+	SESSION("Session", true),
+	SERVICE("Service", true);
 
 	private final String name;
 	private final boolean isMonitoring;

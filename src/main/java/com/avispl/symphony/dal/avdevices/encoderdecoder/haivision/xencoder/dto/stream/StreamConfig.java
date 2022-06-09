@@ -3,10 +3,18 @@
  */
 package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dto.stream;
 
+import static com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.EnumTypeHandler.replaceSpecialCharacter;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ConnectionModeEnum;
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.dropdownlist.ProtocolEnum;
+import com.avispl.symphony.dal.util.StringUtils;
 
 /**
  * StreamStatistics DTO class
@@ -35,6 +43,12 @@ public class StreamConfig {
 	@JsonAlias("UDP Port")
 	private String port;
 
+	@JsonAlias("Destination Port")
+	private String destinationPort;
+
+	@JsonAlias("Source Port")
+	private String sourcePort;
+
 	@JsonAlias("Encapsulation")
 	private String encapsulation;
 
@@ -48,7 +62,7 @@ public class StreamConfig {
 	private String stillImageFile;
 
 	@JsonAlias("Transport Stream ID")
-	private String transportStreamID ;
+	private String transportStreamID;
 
 	@JsonAlias("Program Number")
 	private String programNumber;
@@ -63,13 +77,16 @@ public class StreamConfig {
 	private String tos;
 
 	@JsonAlias("Bandwidth")
-	private String bandwidth;
+	private String averageBandwidth;
 
 	@JsonAlias("Traffic Shaping")
 	private String shaping;
 
 	@JsonAlias("AES Encryption")
 	private String aesEncryption;
+
+	@JsonAlias("Key Length")
+	private String keyLength;
 
 	@JsonAlias("Network Adaptive")
 	private String networkAdaptive;
@@ -82,6 +99,32 @@ public class StreamConfig {
 
 	@JsonAlias("Persistent")
 	private String persistent;
+
+	@JsonAlias("FEC")
+	private String fec;
+
+	@JsonAlias("Idle Cells")
+	private String idleCells;
+
+	@JsonAlias("Delayed Audio")
+	private String delayAudio;
+
+	@JsonAlias("Ceiling")
+	private String bandwidthOverhead;
+
+	@JsonAlias("Publish Name")
+	private String publishName;
+
+	@JsonAlias("TCP Port")
+	private String tcpPort;
+
+	@JsonAlias("User Name")
+	private String username;
+
+	@JsonAlias("Password")
+	private String password;
+
+	private String passphrase;
 
 	/**
 	 * Retrieves {@code {@link #state}}
@@ -390,21 +433,21 @@ public class StreamConfig {
 	}
 
 	/**
-	 * Retrieves {@code {@link #bandwidth}}
+	 * Retrieves {@code {@link #averageBandwidth }}
 	 *
-	 * @return value of {@link #bandwidth}
+	 * @return value of {@link #averageBandwidth}
 	 */
-	public String getBandwidth() {
-		return bandwidth;
+	public String getAverageBandwidth() {
+		return averageBandwidth;
 	}
 
 	/**
 	 * Sets {@code bandwidth}
 	 *
-	 * @param bandwidth the {@code java.lang.String} field
+	 * @param averageBandwidth the {@code java.lang.String} field
 	 */
-	public void setBandwidth(String bandwidth) {
-		this.bandwidth = bandwidth;
+	public void setAverageBandwidth(String averageBandwidth) {
+		this.averageBandwidth = averageBandwidth;
 	}
 
 	/**
@@ -513,5 +556,291 @@ public class StreamConfig {
 	 */
 	public void setPersistent(String persistent) {
 		this.persistent = persistent;
+	}
+
+	/**
+	 * Retrieves {@code {@link #fec}}
+	 *
+	 * @return value of {@link #fec}
+	 */
+	public String getFec() {
+		return fec;
+	}
+
+	/**
+	 * Sets {@code fec}
+	 *
+	 * @param fec the {@code java.lang.String} field
+	 */
+	public void setFec(String fec) {
+		this.fec = fec;
+	}
+
+	/**
+	 * Retrieves {@code {@link #idleCells}}
+	 *
+	 * @return value of {@link #idleCells}
+	 */
+	public String getIdleCells() {
+		return idleCells;
+	}
+
+	/**
+	 * Sets {@code idleCells}
+	 *
+	 * @param idleCells the {@code java.lang.String} field
+	 */
+	public void setIdleCells(String idleCells) {
+		this.idleCells = idleCells;
+	}
+
+	/**
+	 * Retrieves {@code {@link #delayAudio}}
+	 *
+	 * @return value of {@link #delayAudio}
+	 */
+	public String getDelayAudio() {
+		return delayAudio;
+	}
+
+	/**
+	 * Sets {@code delayAudio}
+	 *
+	 * @param delayAudio the {@code java.lang.String} field
+	 */
+	public void setDelayAudio(String delayAudio) {
+		this.delayAudio = delayAudio;
+	}
+
+	/**
+	 * Retrieves {@code {@link #bandwidthOverhead}}
+	 *
+	 * @return value of {@link #bandwidthOverhead}
+	 */
+	public String getBandwidthOverhead() {
+		return bandwidthOverhead;
+	}
+
+	/**
+	 * Sets {@code bandwidthOverhead}
+	 *
+	 * @param bandwidthOverhead the {@code java.lang.String} field
+	 */
+	public void setBandwidthOverhead(String bandwidthOverhead) {
+		this.bandwidthOverhead = bandwidthOverhead;
+	}
+
+	/**
+	 * Retrieves {@code {@link #sourcePort}}
+	 *
+	 * @return value of {@link #sourcePort}
+	 */
+	public String getSourcePort() {
+		return sourcePort;
+	}
+
+	/**
+	 * Sets {@code sourcePort}
+	 *
+	 * @param sourcePort the {@code java.lang.String} field
+	 */
+	public void setSourcePort(String sourcePort) {
+		this.sourcePort = sourcePort;
+	}
+
+	/**
+	 * Retrieves {@code {@link #publishName}}
+	 *
+	 * @return value of {@link #publishName}
+	 */
+	public String getPublishName() {
+		return publishName;
+	}
+
+	/**
+	 * Sets {@code publishName}
+	 *
+	 * @param publishName the {@code java.lang.String} field
+	 */
+	public void setPublishName(String publishName) {
+		this.publishName = publishName;
+	}
+
+	/**
+	 * Retrieves {@code {@link #tcpPort}}
+	 *
+	 * @return value of {@link #tcpPort}
+	 */
+	public String getTcpPort() {
+		return tcpPort;
+	}
+
+	/**
+	 * Sets {@code tcpPort}
+	 *
+	 * @param tcpPort the {@code java.lang.String} field
+	 */
+	public void setTcpPort(String tcpPort) {
+		this.tcpPort = tcpPort;
+	}
+
+	/**
+	 * Retrieves {@code {@link #username}}
+	 *
+	 * @return value of {@link #username}
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * Sets {@code username}
+	 *
+	 * @param username the {@code java.lang.String} field
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * Retrieves {@code {@link #password}}
+	 *
+	 * @return value of {@link #password}
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * Sets {@code password}
+	 *
+	 * @param password the {@code java.lang.String} field
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * Retrieves {@code {@link #passphrase}}
+	 *
+	 * @return value of {@link #passphrase}
+	 */
+	public String getPassphrase() {
+		return passphrase;
+	}
+
+	/**
+	 * Sets {@code passphrase}
+	 *
+	 * @param passphrase the {@code java.lang.String} field
+	 */
+	public void setPassphrase(String passphrase) {
+		this.passphrase = passphrase;
+	}
+
+	/**
+	 * Retrieves {@code {@link #destinationPort}}
+	 *
+	 * @return value of {@link #destinationPort}
+	 */
+	public String getDestinationPort() {
+		return destinationPort;
+	}
+
+	/**
+	 * Sets {@code destinationPort}
+	 *
+	 * @param destinationPort the {@code java.lang.String} field
+	 */
+	public void setDestinationPort(String destinationPort) {
+		this.destinationPort = destinationPort;
+	}
+
+	/**
+	 * Retrieves {@code {@link #keyLength}}
+	 *
+	 * @return value of {@link #keyLength}
+	 */
+	public String getKeyLength() {
+		return keyLength;
+	}
+
+	/**
+	 * Sets {@code keyLength}
+	 *
+	 * @param keyLength the {@code java.lang.String} field
+	 */
+	public void setKeyLength(String keyLength) {
+		this.keyLength = keyLength;
+	}
+
+	/**
+	 * /**
+	 * Get To String of stream configs
+	 *
+	 * @return String is full param of stream config
+	 */
+	@Override
+	public String toString() {
+		String paramRequest = "";
+		String audioSource = audioList.stream().map(Audio::getAudioId).collect(Collectors.toList()).toString();
+		audioSource = audioSource.replace("[", EncoderConstant.EMPTY_STRING).replace("]", EncoderConstant.EMPTY_STRING);
+		String nameValue = getFormatNameByValue(name, "name");
+		String videoSrcValue = getFormatNameByValue(video, "videoSrc");
+		String audioSrcValue = getFormatNameByValue(audioSource, "audioSrc");
+		String protocolValue = getFormatNameByValue(encapsulation, "encapsulation");
+		String addressValue = getFormatNameByValue(address, "addR");
+		String stillImageValue = getFormatNameByValue(stillImageFile, "stillImage");
+		String ttlValue = getFormatNameByValue(ttl, "ttl");
+		String tosValue = getFormatNameByValue(tos, "tos");
+		String portValue = getFormatNameByValue(port, "port");
+		String fecValue = getFormatNameByValue(fec, "fec");
+		String trafficShapingValue = getFormatNameByValue(shaping, "shaping");
+		String idleCellsValue = getFormatNameByValue(idleCells, "idleCells");
+		String delayAudioValue = getFormatNameByValue(delayAudio, "delayAudio");
+		String bandwidthOverHeadValue = getFormatNameByValue(bandwidthOverhead, "ceiling");
+		String mtuValue = getFormatNameByValue(mtu, "mtu");
+		String publishNameValue = getFormatNameByValue(publishName, "publish");
+		String usernameValue = getFormatNameByValue(username, "username");
+		String passwordValue = getFormatNameByValue(password, "password");
+		String sourcePortValue = getFormatNameByValue(sourcePort, "sourcePort");
+		String srtModeValue = getFormatNameByValue(srtMode, "mode");
+		String networkAdaptiveValue = getFormatNameByValue(networkAdaptive, "adaptive");
+		String latencyValue = getFormatNameByValue(networkAdaptive, "latency");
+		String encryptionValue = getFormatNameByValue(aesEncryption, "encryption");
+		String passphraseValue = getFormatNameByValue(passphrase, "passphrase");
+
+		if (ProtocolEnum.TS_UDP.getValue().equals(encapsulation) || ProtocolEnum.TS_RTP.getValue().equals(encapsulation)) {
+			paramRequest = String.format(EncoderConstant.EIGHTH_STRING_FORMAT, fecValue, trafficShapingValue, idleCellsValue, delayAudioValue, mtuValue, ttlValue, tosValue, bandwidthOverHeadValue);
+		}
+		if (ProtocolEnum.RTMP.getValue().equals(encapsulation)) {
+			paramRequest = String.format(EncoderConstant.FIVE_STRING_FORMAT, trafficShapingValue, publishNameValue, usernameValue, passwordValue, bandwidthOverHeadValue);
+		}
+		if (ProtocolEnum.DIRECT_RTP.getValue().equals(encapsulation)) {
+			paramRequest = String.format(" %s %s %s", trafficShapingValue, mtuValue, bandwidthOverHeadValue);
+		}
+		if (ProtocolEnum.TS_SRT.getValue().equals(encapsulation)) {
+			paramRequest = String.format(EncoderConstant.ELEVEN_STRING_FORMAT, ttlValue, tosValue, bandwidthOverHeadValue, idleCellsValue, srtModeValue, networkAdaptiveValue, latencyValue, encryptionValue,
+					passphraseValue, mtuValue, trafficShapingValue);
+			if (ConnectionModeEnum.CALLER.getName().equals(srtMode)) {
+				paramRequest = paramRequest + String.format(" %s ", sourcePortValue);
+			}
+			if (ConnectionModeEnum.LISTENER.getName().equals(srtMode)) {
+				paramRequest = paramRequest + String.format(" %s", bandwidthOverHeadValue);
+			}
+		}
+		paramRequest = paramRequest + String.format(EncoderConstant.SEVEN_STRING_FORMAT, nameValue, videoSrcValue, audioSrcValue, protocolValue, addressValue, stillImageValue, portValue);
+		return paramRequest;
+	}
+
+	/**
+	 * Get format name if value different null or empty
+	 *
+	 * @param value is value of StreamConfig instance
+	 * @param name is name of param request to send command
+	 * @return String is format name or empty string
+	 */
+	private String getFormatNameByValue(String value, String name) {
+		return StringUtils.isNullOrEmpty(value) ? "" : String.format("%s=%s", name, replaceSpecialCharacter(value));
 	}
 }
