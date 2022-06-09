@@ -26,6 +26,8 @@ public class EncoderConstant {
 	public static final String SYSTEM_INFO_STATUS = "System Info Status";
 	public static final String OPERATOR = "Operator";
 	public static final String ADMIN = "Administrator";
+	public static final String GUEST = "Guest";
+	public static final String GUEST_ROLE_MESSAGE = "You have insufficient rights to perform this operation";
 	public static final String STREAM = "Stream";
 	public static final String TRUE = "True";
 	public static final String EMPTY_STRING = "";
@@ -55,7 +57,6 @@ public class EncoderConstant {
 	public static final String STOPPED = "STOPPED";
 	public static final String MUTED = "MUTED";
 	public static final String ERROR_INPUT = "Unable to set property \"input\"";
-	public static final String ERROR_TALKBACK_PORT = "Unable to set property \"port\"";
 	public static final String ERROR_TALKBACK_ACTION_START = "Unable to start talkback: \"Talkback already started\"";
 	public static final String DISABLE = "Disable";
 	public static final String ENABLE = "Enable";
