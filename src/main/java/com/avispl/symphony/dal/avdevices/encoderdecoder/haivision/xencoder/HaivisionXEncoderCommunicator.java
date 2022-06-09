@@ -1031,6 +1031,17 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 						stats.put(property, password);
 					}
 					break;
+				case STREAM_SOURCE_TYPE:
+					protocol = ProtocolEnum.getNameOfProtocolEnumByValue(streamConfig.getEncapsulation());
+					if (ProtocolEnum.DIRECT_RTP.getName().equalsIgnoreCase(protocol)) {
+						String sourceTypeValue = getEmptyValueForNullData(streamConfig.getContents());
+						String sourceType = EncoderConstant.VIDEO;
+						if (sourceTypeValue.contains(EncoderConstant.AUDIO)) {
+							sourceType = EncoderConstant.AUDIO;
+						}
+						stats.put(property, sourceType);
+					}
+					break;
 				case CANCEL:
 				case APPLY_CHANGE:
 					break;
@@ -1782,6 +1793,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String response = send(request);
 			AuthenticationRole authenticationRole = null;
 			if (response != null) {
+				if (response.contains(EncoderConstant.GUEST_ROLE_MESSAGE)) {
+					return EncoderConstant.GUEST;
+				}
 				Map<String, String> result = populateConvertDataToObject(response, request, true);
 				authenticationRole = objectMapper.convertValue(result, AuthenticationRole.class);
 			}
@@ -2149,9 +2163,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String setUdpPortRequest = EncoderCommand.OPERATION_TALKBACK.getName() + EncoderConstant.SPACE + EncoderCommand.SET + " port=" + udpPort;
 		try {
 			String responseData = send(setUdpPortRequest);
-			if (responseData.contains(EncoderConstant.ERROR_TALKBACK_PORT)) {
-				throw new ResourceNotReachableException(String.format("Invalid input value, the adapter doesn't support for port: %s", udpPort));
-			} else if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
+			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new ResourceNotReachableException(responseData);
 			}
 		} catch (Exception e) {
@@ -3391,7 +3403,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					AdvancedControllableProperty idleCellsControlProperty = controlSwitch(stats, idleCellsName, idleCellsValue, EncoderConstant.DISABLE, EncoderConstant.ENABLE);
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, idleCellsControlProperty);
 				}
-				populateBandwidthOverheadWithTrafficShaping(stats, advancedControllableProperties, false, connectionModeValue);
+				populateBandwidthOverheadWithTrafficShaping(stats, advancedControllableProperties, false, ProtocolEnum.TS_SRT.getName());
 				populatePropertyForSRTMode(stats, advancedControllableProperties);
 				stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName());
 				stats.remove(streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName());
@@ -3705,7 +3717,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		stats.remove(delayedAudioName);
 		stats.remove(bandwidthOverheadName);
 
-		String protocolMode = getEmptyValueForNullData(localStatsStreamOutput.get(streamName + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName()));
+		String protocolMode = getEmptyValueForNullData(stats.get(streamName + EncoderConstant.HASH + StreamControllingMetric.STREAMING_PROTOCOL.getName()));
 		if (value.equals(String.valueOf(EncoderConstant.NUMBER_ONE))) {
 			String idleCellsValue = localStatsStreamOutput.get(idleCellsName);
 			String delayedAudioValue = localStatsStreamOutput.get(delayedAudioName);
