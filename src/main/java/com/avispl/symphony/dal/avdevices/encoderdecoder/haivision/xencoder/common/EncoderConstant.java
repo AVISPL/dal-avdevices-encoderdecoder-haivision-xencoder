@@ -24,10 +24,10 @@ public class EncoderConstant {
 	public static final String COMMA = ",";
 	public static final String HASH = "#";
 	public static final String SYSTEM_INFO_STATUS = "System Info Status";
-	public static final String OPERATOR = "Operator";
 	public static final String ADMIN = "Administrator";
-	public static final String GUEST = "Guest";
+	public static final String OPERATOR_GUEST = "Operator/Guest";
 	public static final String GUEST_ROLE_MESSAGE = "You have insufficient rights to perform this operation";
+	public static final String GUEST_ROLE_MESSAGE_ERR = "Your role (Guest) doesn't have sufficient rights to perform this operation.";
 	public static final String STREAM = "Stream";
 	public static final String TRUE = "True";
 	public static final String EMPTY_STRING = "";
@@ -99,6 +99,8 @@ public class EncoderConstant {
 	public static final int MIN_LATENCY = 20;
 	public static final int MAX_LATENCY = 8000;
 	public static final int MIN_PASSPHRASE = 9;
+	public static final int MIN_TALKBACK_PORT = 1;
+	public static final int MAX_TALKBACK_PORT = 65535;
 	public static final String PLUS = "+";
 	public static final String ADDING = "Adding";
 	public static final String HEX_PREFIX = "0x";
