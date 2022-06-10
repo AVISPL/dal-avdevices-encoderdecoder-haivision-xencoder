@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,7 @@ import com.avispl.symphony.dal.util.StringUtils;
  */
 public class HaivisionXEncoderCommunicator extends SshCommunicator implements Monitorable, Controller {
 
-	private boolean isOperatorOrAdministratorRole;
+	private boolean isAdministratorRole;
 	private boolean isConfigManagement;
 	private boolean isEmergencyDelivery;
 	private boolean isCreateStreamCalled;
@@ -408,17 +409,17 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			failedMonitor.clear();
 
 			if (!isEmergencyDelivery) {
-				isOperatorOrAdministratorRole = isOperatorOrAdministratorRole(retrieveUserRole());
+				isAdministratorRole = isAdministratorRole(retrieveUserRole());
 				isConfigManagement = isConfigManagementProperties();
 				populateInformationFromDevice(stats, advancedControllableProperties);
-				if (isOperatorOrAdministratorRole && isConfigManagement) {
+				if (isConfigManagement) {
 					extendedStatistics.setControllableProperties(advancedControllableProperties);
 				}
 				extendedStatistics.setStatistics(stats);
 				localExtendedStatistics = extendedStatistics;
 			}
 
-			if (isOperatorOrAdministratorRole && isConfigManagement) {
+			if (isConfigManagement) {
 				// Populate default create stream and control - this only be called once per monitoring cycle.
 				if (!isCreateStreamCalled) {
 					localCreateOutputStream = new ExtendedStatistics();
@@ -514,13 +515,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	}
 
 	/**
-	 * Check roles based on user as operator or administrator
+	 * Check roles based on user as administrator
 	 *
 	 * @param roleBased the role is String
-	 * @return boolean type, returns true if roleBased is operator or administrator and vice versa
+	 * @return boolean type, returns true if roleBased is administrator and vice versa
 	 */
-	private boolean isOperatorOrAdministratorRole(String roleBased) {
-		return EncoderConstant.OPERATOR.equals(roleBased) || EncoderConstant.ADMIN.equals(roleBased);
+	private boolean isAdministratorRole(String roleBased) {
+		return EncoderConstant.ADMIN.equals(roleBased);
 	}
 
 	/**
@@ -687,6 +688,13 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 		// Talkback
 		talkbackMap.clear();
+
+		//Filter
+		streamConfigPortAndStatusSet.clear();
+		streamConfigNameFilterSet.clear();
+		portNumberList.clear();
+		portNumberRangeList.clear();
+		streamConfigNameFilterSet.clear();
 	}
 
 	/**
@@ -740,7 +748,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void populateConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties, EncoderMonitoringMetric metric) {
 		Objects.requireNonNull(stats);
 		Objects.requireNonNull(advancedControllableProperties);
-		if (isOperatorOrAdministratorRole && isConfigManagement) {
+		if (isConfigManagement) {
 			switch (metric) {
 				case AUDIO_CONFIG:
 					for (AudioConfig audioConfig : audioConfigList) {
@@ -1079,7 +1087,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private void populateServiceConfigData(Map<String, String> stats, List<AdvancedControllableProperty> advancedControllableProperties) {
 		Objects.requireNonNull(stats);
 		Objects.requireNonNull(advancedControllableProperties);
-		if (isOperatorOrAdministratorRole && isConfigManagement) {
+		if (isAdministratorRole && isConfigManagement) {
 			for (Entry<String, Integer> serviceSet : serviceMap.entrySet()) {
 				if (serviceSet.getKey().contains(EncoderConstant.PASS_THROUGH)) {
 					continue;
@@ -1103,7 +1111,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		Objects.requireNonNull(stats);
 		Objects.requireNonNull(advancedControllableProperties);
 		// talkbackMap should contain udp port and talkback state, or else this if is not reachable
-		if (isOperatorOrAdministratorRole && isConfigManagement && talkbackMap.size() == 2) {
+		if (isAdministratorRole && isConfigManagement && talkbackMap.size() == 2) {
 			String groupName = EncoderMonitoringMetric.SERVICE.getName() + EncoderConstant.HASH;
 			String portProperty = groupName + EncoderConstant.TALKBACK_PORT;
 			String port = talkbackMap.get(EncoderConstant.PORT);
@@ -1792,18 +1800,22 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String request = EncoderCommand.ADMIN_ACCOUNT.getName() + getLogin() + EncoderConstant.SPACE + EncoderCommand.GET.getName();
 			String response = send(request);
 			AuthenticationRole authenticationRole = null;
+			String roleBased = EncoderConstant.OPERATOR_GUEST;
 			if (response != null) {
-				if (response.contains(EncoderConstant.GUEST_ROLE_MESSAGE)) {
-					return EncoderConstant.GUEST;
+				if (response.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+					return roleBased;
 				}
 				Map<String, String> result = populateConvertDataToObject(response, request, true);
 				authenticationRole = objectMapper.convertValue(result, AuthenticationRole.class);
 			}
-			if (authenticationRole == null || StringUtils.isNullOrEmpty(authenticationRole.getRole())) {
-				throw new ResourceNotReachableException("Role based is empty");
+			if (authenticationRole != null) {
+				roleBased = authenticationRole.getRole();
 			}
-			return authenticationRole.getRole();
+			return roleBased;
 		} catch (Exception e) {
+			if (e instanceof TimeoutException) {
+				throw new ResourceNotReachableException("Can't monitoring data the request timeout: " + e.getMessage(), e);
+			}
 			throw new ResourceNotReachableException("Retrieve role based error: " + e.getMessage(), e);
 		}
 	}
@@ -2160,6 +2172,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	 * @throws ResourceNotReachableException if set port talkback failed
 	 */
 	private void sendCommandToSavePortTalkbackProperties(String udpPort) {
+		udpPort = String.valueOf(getValueByRange(EncoderConstant.MIN_TALKBACK_PORT, EncoderConstant.MAX_TALKBACK_PORT, udpPort));
 		String setUdpPortRequest = EncoderCommand.OPERATION_TALKBACK.getName() + EncoderConstant.SPACE + EncoderCommand.SET + " port=" + udpPort;
 		try {
 			String responseData = send(setUdpPortRequest);
@@ -2184,6 +2197,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (!EncoderConstant.NONE.equals(action)) {
 			try {
 				String responseData = send(request);
+				if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+					throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
+				}
 				if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 					throw new ResourceNotReachableException(String.format("Change action %s failed", audioConfig.getAction()));
 				}
@@ -2207,6 +2223,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String responseData = send(request);
 			if (responseData.contains(EncoderConstant.ERROR_INPUT)) {
 				throw new ResourceNotReachableException(String.format("The INPUT invalid value, the adapter doesn't support INPUT: %s", audioConfig.getInterfaceName()));
+			} else if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+				throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
 			} else if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new ResourceNotReachableException(responseData);
 			}
@@ -2552,6 +2570,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (!EncoderConstant.NONE.equals(action)) {
 			try {
 				String responseData = send(request);
+				if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+					throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
+				}
 				if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 					throw new ResourceNotReachableException(String.format("Change video %s failed", videoConfigData.getAction()));
 				}
@@ -2573,6 +2594,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String request = EncoderCommand.OPERATION_VIDENC.getName() + videoId + EncoderConstant.SPACE + EncoderCommand.SET + data;
 		try {
 			String responseData = send(request);
+			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+				throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
+			}
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new CommandFailureException(this.host, request, responseData);
 			}
@@ -3782,6 +3806,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String request = EncoderCommand.OPERATION_STREAM.getName() + EncoderCommand.OPERATION_CREATE.getName() + data;
 		try {
 			String responseData = send(request.replace("\r", EncoderConstant.EMPTY_STRING));
+			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+				throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
+			}
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new ResourceNotReachableException(responseData);
 			}
@@ -3808,6 +3835,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				EncoderCommand.OPERATION_SESSION.getName() + EncoderCommand.OPERATION_CREATE.getName() + EncoderCommand.OPERATION_STREAM.getName().trim() + EncoderConstant.EQUAL + idStream + dataRequest;
 		try {
 			String responseData = send(request.replace("\r", EncoderConstant.EMPTY_STRING));
+			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+				throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
+			}
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new ResourceNotReachableException(String.format("Create stream successfully with stream ID: %s. But can't create Transmit SAP session for stream", idStream) + responseData);
 			}
