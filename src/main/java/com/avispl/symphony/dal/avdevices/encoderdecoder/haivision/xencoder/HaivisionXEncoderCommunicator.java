@@ -2963,6 +2963,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (!EncoderConstant.NONE.equals(action)) {
 			try {
 				String responseData = send(request);
+				if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE)) {
+					throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
+				}
 				if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 					throw new ResourceNotReachableException(String.format("Change stream %s failed", action));
 				}
