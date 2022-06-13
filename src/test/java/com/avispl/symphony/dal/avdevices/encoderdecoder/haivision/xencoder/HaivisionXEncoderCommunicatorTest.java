@@ -55,7 +55,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.setHost("***REMOVED***");
 		haivisionXEncoderCommunicator.setPort(22);
 		haivisionXEncoderCommunicator.setLogin("admin");
-		haivisionXEncoderCommunicator.setPassword("AVIadm1n");
+		haivisionXEncoderCommunicator.setPassword("***REMOVED***");
 		haivisionXEncoderCommunicator.init();
 		haivisionXEncoderCommunicator.connect();
 	}
