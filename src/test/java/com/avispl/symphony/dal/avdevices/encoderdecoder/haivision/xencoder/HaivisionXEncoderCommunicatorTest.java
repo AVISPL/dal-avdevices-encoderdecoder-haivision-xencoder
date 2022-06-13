@@ -2852,8 +2852,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		Assertions.assertThrows(ResourceNotReachableException.class, () -> haivisionXEncoderCommunicator.controlProperty(controllableProperty),
 				"Expect throw exception because user with role based is guest");
 	}
-
-
+	
 	/**
 	 * Test control with role based: test role based is guest
 	 *
