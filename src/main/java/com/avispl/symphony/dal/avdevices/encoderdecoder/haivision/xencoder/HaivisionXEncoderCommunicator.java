@@ -13,15 +13,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jcraft.jsch.JSchException;
 
 import com.avispl.symphony.api.dal.control.Controller;
 import com.avispl.symphony.api.dal.dto.control.AdvancedControllableProperty;
@@ -360,7 +361,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	/**
 	 * Set back to default timeout value in {@link SshCommunicator}
 	 */
-	private final int statisticsSSHTimeout = 30000;
+	private static final int statisticsSSHTimeout = 30000;
 
 	/**
 	 * HaivisionXEncoderCommunicator constructor
@@ -897,19 +898,29 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					break;
 				case STREAM_CONNECTION_MODE:
 					protocol = ProtocolEnum.getNameOfProtocolEnumByValue(streamConfig.getEncapsulation());
+					//format stream address "name":UNRESOLVED ifPresent => get the name in address
+					String connectionAddressValue = streamConfig.getAddress();
+					if (connectionAddressValue.contains(EncoderConstant.UNRESOLVED)) {
+						connectionAddressValue = connectionAddressValue.split(EncoderConstant.COLON)[0].replace(EncoderConstant.QUOTES, EncoderConstant.EMPTY_STRING);
+					}
 					if (ProtocolEnum.TS_SRT.getName().equalsIgnoreCase(protocol)) {
 						String connectionMode = streamKey + StreamControllingMetric.STREAM_CONNECTION_MODE.getName();
 						String connectionModeValue = streamConfig.getSrtMode();
 						stats.put(connectionMode, connectionModeValue);
 						String connectionAddress = streamKey + StreamControllingMetric.STREAM_CONNECTION_ADDRESS.getName();
 						if (ConnectionModeEnum.CALLER.getName().equals(connectionModeValue) || ConnectionModeEnum.RENDEZVOUS.getName().equals(connectionModeValue)) {
-							stats.put(connectionAddress, streamConfig.getAddress());
-
 							String connectionDestinationPort = streamKey + StreamControllingMetric.STREAM_CONNECTION_DESTINATION_PORT.getName();
-							stats.put(connectionDestinationPort, streamConfig.getPort());
-
+							String connectionDestinationPortValue = streamConfig.getDestinationPort();
 							String connectionSourcePort = streamKey + StreamControllingMetric.STREAM_CONNECTION_SOURCE_PORT.getName();
-							stats.put(connectionSourcePort, streamConfig.getSourcePort());
+							String sourcePortValue = getEmptyValueForNullData(streamConfig.getSourcePort());
+
+							stats.put(connectionAddress, connectionAddressValue);
+							if (ConnectionModeEnum.RENDEZVOUS.getName().equals(connectionModeValue)) {
+								sourcePortValue = streamConfig.getPort();
+								connectionDestinationPortValue = sourcePortValue;
+							}
+							stats.put(connectionDestinationPort, connectionDestinationPortValue);
+							stats.put(connectionSourcePort, sourcePortValue);
 						}
 						if (ConnectionModeEnum.LISTENER.getName().equals(connectionModeValue)) {
 							String connectionPort = streamKey + StreamControllingMetric.STREAM_CONNECTION_PORT.getName();
@@ -919,10 +930,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					String destinationAddress = streamKey + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
 					String port = streamKey + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
 					if (ProtocolEnum.RTMP.getName().equalsIgnoreCase(protocol)) {
-						stats.put(destinationAddress, streamConfig.getAddress());
+						stats.put(destinationAddress, connectionAddressValue);
 					}
 					if (!ProtocolEnum.TS_SRT.getName().equalsIgnoreCase(protocol) && !ProtocolEnum.RTMP.getName().equalsIgnoreCase(protocol)) {
-						stats.put(destinationAddress, streamConfig.getAddress());
+						stats.put(destinationAddress, connectionAddressValue);
 						stats.put(port, convertValueByIndexOfSpace(streamConfig.getPort()));
 					}
 					break;
@@ -1385,9 +1396,14 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (!streamNameList.isEmpty()) {
 			//Filter stream config by name
 			List<StreamConfig> streamConfigFilter = new ArrayList<>();
-			for (StreamConfig streamConfigItem : streamConfigList) {
-				if (streamNameList.contains(streamConfigItem.getName())) {
-					streamConfigFilter.add(streamConfigItem);
+			for (Entry<String, String> streamName : nameAndIdForStreamConfigMap.entrySet()) {
+				//The format stream name: Stream + Space + Name. SubString to get Name in the stream name.
+				String streamNameValue = streamName.getKey().substring(EncoderConstant.STREAM.length() + EncoderConstant.SPACE.length());
+				if (streamNameList.contains(streamNameValue)) {
+					Optional<StreamConfig> streamConfigItem = streamConfigList.stream().filter(item -> item.getId().equals(streamName.getValue())).findFirst();
+					if (streamConfigItem.isPresent()) {
+						streamConfigFilter.add(streamConfigItem.get());
+					}
 				}
 			}
 			streamConfigNameFilterSet.addAll(streamConfigFilter);
@@ -1812,10 +1828,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				roleBased = authenticationRole.getRole();
 			}
 			return roleBased;
+		} catch (JSchException ex) {
+			throw new ResourceNotReachableException("Can't monitoring data the request timeout: " + ex.getMessage(), ex);
 		} catch (Exception e) {
-			if (e instanceof TimeoutException) {
-				throw new ResourceNotReachableException("Can't monitoring data the request timeout: " + e.getMessage(), e);
-			}
 			throw new ResourceNotReachableException("Retrieve role based error: " + e.getMessage(), e);
 		}
 	}
@@ -1870,6 +1885,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				if (ProtocolEnum.RTMP.getName().equals(protocol)) {
 					port = streamConfigItem.getTcpPort();
 					streamName = String.format("%s:%s", address, port);
+					if (!address.contains(EncoderConstant.ADDRESS_FORMAT)) {
+						address = EncoderConstant.ADDRESS_FORMAT + address.trim();
+						streamName = address;
+					}
 					if (address.contains(port)) {
 						streamName = String.format("%s", address);
 					}
@@ -2197,7 +2216,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (!EncoderConstant.NONE.equals(action)) {
 			try {
 				String responseData = send(request);
-				if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+				if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE)) {
 					throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
 				}
 				if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
@@ -2223,9 +2242,11 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 			String responseData = send(request);
 			if (responseData.contains(EncoderConstant.ERROR_INPUT)) {
 				throw new ResourceNotReachableException(String.format("The INPUT invalid value, the adapter doesn't support INPUT: %s", audioConfig.getInterfaceName()));
-			} else if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+			}
+			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE)) {
 				throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
-			} else if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
+			}
+			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
 				throw new ResourceNotReachableException(responseData);
 			}
 		} catch (Exception e) {
@@ -2570,7 +2591,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (!EncoderConstant.NONE.equals(action)) {
 			try {
 				String responseData = send(request);
-				if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+				if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE)) {
 					throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
 				}
 				if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
@@ -2594,7 +2615,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String request = EncoderCommand.OPERATION_VIDENC.getName() + videoId + EncoderConstant.SPACE + EncoderCommand.SET + data;
 		try {
 			String responseData = send(request);
-			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE)) {
 				throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
 			}
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
@@ -3806,7 +3827,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		String request = EncoderCommand.OPERATION_STREAM.getName() + EncoderCommand.OPERATION_CREATE.getName() + data;
 		try {
 			String responseData = send(request.replace("\r", EncoderConstant.EMPTY_STRING));
-			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE)) {
 				throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
 			}
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
@@ -3835,7 +3856,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				EncoderCommand.OPERATION_SESSION.getName() + EncoderCommand.OPERATION_CREATE.getName() + EncoderCommand.OPERATION_STREAM.getName().trim() + EncoderConstant.EQUAL + idStream + dataRequest;
 		try {
 			String responseData = send(request.replace("\r", EncoderConstant.EMPTY_STRING));
-			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE_ERR)) {
+			if (responseData.contains(EncoderConstant.GUEST_ROLE_MESSAGE)) {
 				throw new ResourceNotReachableException(EncoderConstant.GUEST_ROLE_MESSAGE_ERR);
 			}
 			if (!responseData.contains(EncoderConstant.SUCCESS_RESPONSE)) {
