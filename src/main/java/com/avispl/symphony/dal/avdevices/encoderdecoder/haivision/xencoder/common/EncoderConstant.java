@@ -26,8 +26,8 @@ public class EncoderConstant {
 	public static final String SYSTEM_INFO_STATUS = "System Info Status";
 	public static final String ADMIN = "Administrator";
 	public static final String OPERATOR_GUEST = "Operator/Guest";
-	public static final String GUEST_ROLE_MESSAGE = "You have insufficient rights to perform this operation";
-	public static final String GUEST_ROLE_MESSAGE_ERR = "Your role (Guest) doesn't have sufficient rights to perform this operation.";
+	public static final String GUEST_ROLE_MESSAGE = "You have insufficient privileges to perform this operation";
+	public static final String GUEST_ROLE_MESSAGE_ERR = "Your role (Guest) doesn't have sufficient privileges to perform this operation.";
 	public static final String STREAM = "Stream";
 	public static final String TRUE = "True";
 	public static final String EMPTY_STRING = "";
@@ -132,6 +132,7 @@ public class EncoderConstant {
 	public static final String PASS_THROUGH = "passthrough";
 	public static final String STATE = "State";
 	public static final String UDP_PORT = "UDP Port";
+	public static final String UNRESOLVED = "UNRESOLVED";
 	public static final String EIGHTH_STRING_FORMAT = " %s %s %s %s %s %s %s %s ";
 	public static final String ELEVEN_STRING_FORMAT = " %s %s %s %s %s %s %s %s %s %s %s";
 	public static final String SEVEN_STRING_FORMAT = " %s %s %s %s %s %s %s ";
