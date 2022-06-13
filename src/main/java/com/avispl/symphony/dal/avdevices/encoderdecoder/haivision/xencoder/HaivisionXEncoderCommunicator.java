@@ -2669,6 +2669,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (FrameRateEnum.FAME_RATE_0.getName().equals(frameRate)) {
 			frameRate = EncoderConstant.AUTO;
 		}
+		if (AspectRatioEnum.ASPECT_RATIO_0.getName().equals(aspectRatio)) {
+			aspectRatio = EncoderConstant.AUTO;
+		}
 		if (cropping != null) {
 			String croppingValue = EncoderConstant.SCALE;
 			if (EncoderConstant.NUMBER_ONE == Integer.parseInt(cropping)) {
