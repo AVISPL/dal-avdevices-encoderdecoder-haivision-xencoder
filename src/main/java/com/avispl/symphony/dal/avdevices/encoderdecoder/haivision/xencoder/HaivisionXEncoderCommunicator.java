@@ -1885,8 +1885,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 						port = convertValueByIndexOfSpace(streamConfigItem.getPort());
 					}
 				}
-				streamName = String.format("%s://@%s:%s", protocol, address, port);
-				if (ProtocolEnum.RTMP.getName().equals(protocol)) {
+				streamName = String.format("%s://@%s:%s", protocolValue, address, port);
+				if (ProtocolEnum.RTMP.getName().equals(protocolValue)) {
 					port = streamConfigItem.getTcpPort();
 					streamName = String.format("%s:%s", address, port);
 					if (!address.contains(EncoderConstant.ADDRESS_FORMAT)) {
@@ -1896,6 +1896,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					if (address.contains(port)) {
 						streamName = String.format("%s", address);
 					}
+					streamName = streamName.toUpperCase();
 				}
 				break;
 			}
