@@ -1878,7 +1878,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					address = address.split(EncoderConstant.COLON)[0].replace(EncoderConstant.QUOTES, EncoderConstant.EMPTY_STRING);
 				}
 				String port = convertValueByIndexOfSpace(streamConfigItem.getPort());
-				String protocolValue = ProtocolEnum.getNameOfProtocolEnumByValue(protocol);
+				String protocolValue = ProtocolEnum.getProtocolByValue(protocol);
 				if (ProtocolEnum.TS_SRT.getName().equals(protocolValue)) {
 					port = convertValueByIndexOfSpace(streamConfigItem.getDestinationPort());
 					if (StringUtils.isNullOrEmpty(port)) {
