@@ -12,24 +12,27 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.drop
  */
 public enum ProtocolEnum {
 
-	TS_UDP("TS over UDP", "ts-udp"),
-	TS_RTP("TS over RTP", "ts-rtp"),
-	TS_SRT("TS over SRT", "ts-srt"),
-	DIRECT_RTP("Direct-RTP", "direct-rtp"),
-	RTMP("RTMP", "rtmp");
+	TS_UDP("TS over UDP", "ts-udp", "UDP"),
+	TS_RTP("TS over RTP", "ts-rtp", "RTP"),
+	TS_SRT("TS over SRT", "ts-srt", "SRT"),
+	DIRECT_RTP("Direct RTP", "direct-rtp", "Direct-RTP"),
+	RTMP("RTMP", "rtmp", "RTMP");
 
 	private final String name;
 	private final String value;
+	private final String protocol;
 
 	/**
 	 * ProtocolEnum instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param value {@code {@link #value}}
+	 * @param protocol {@code {@link #protocol}}
 	 */
-	ProtocolEnum(String name, String value) {
+	ProtocolEnum(String name, String value, String protocol) {
 		this.name = name;
 		this.value = value;
+		this.protocol = protocol;
 	}
 
 	/**
@@ -48,6 +51,15 @@ public enum ProtocolEnum {
 	 */
 	public String getValue() {
 		return value;
+	}
+
+	/**
+	 * Retrieves {@code {@link #protocol}}
+	 *
+	 * @return value of {@link #protocol}
+	 */
+	public String getProtocol() {
+		return protocol;
 	}
 
 	/**
@@ -78,6 +90,23 @@ public enum ProtocolEnum {
 		for (ProtocolEnum protocolEnum : ProtocolEnum.values()) {
 			if (protocolEnum.getValue().equalsIgnoreCase(value)) {
 				defaultValue = protocolEnum.getName();
+				break;
+			}
+		}
+		return defaultValue;
+	}
+
+	/**
+	 * Get protocol by value
+	 *
+	 * @param value the value is value of ProtocolEnum
+	 * @return String is protocol
+	 */
+	public static String getProtocolByValue(String value) {
+		String defaultValue = value;
+		for (ProtocolEnum protocolEnum : ProtocolEnum.values()) {
+			if (protocolEnum.getValue().equalsIgnoreCase(value)) {
+				defaultValue = protocolEnum.getProtocol();
 				break;
 			}
 		}
