@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import com.avispl.symphony.api.dal.dto.control.ControllableProperty;
 import com.avispl.symphony.api.dal.dto.monitor.ExtendedStatistics;
+import com.avispl.symphony.api.dal.error.ResourceNotReachableException;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioControllingMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.AudioMonitoringMetric;
 import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.common.EncoderConstant;
@@ -54,7 +55,7 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.setHost("***REMOVED***");
 		haivisionXEncoderCommunicator.setPort(22);
 		haivisionXEncoderCommunicator.setLogin("admin");
-		haivisionXEncoderCommunicator.setPassword("AVIadm1n");
+		haivisionXEncoderCommunicator.setPassword("***REMOVED***");
 		haivisionXEncoderCommunicator.init();
 		haivisionXEncoderCommunicator.connect();
 	}
@@ -165,6 +166,30 @@ public class HaivisionXEncoderCommunicatorTest {
 		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
 
 		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
+	 * Test get Audio control: with Input properties is SDI 2 (1-2)
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlInputSDI2() throws Exception {
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.INPUT.getName();
+		String propValue = InputEnum.SDI_2_1_2.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameApplyChange = "Audio Encoder 0#" + AudioControllingMetric.APPLY_CHANGE.getName();
+		String propValueApplyChange = "1";
+		controllableProperty.setProperty(propNameApplyChange);
+		controllableProperty.setValue(propValueApplyChange);
+		Assertions.assertThrows(ResourceNotReachableException.class, () -> haivisionXEncoderCommunicator.controlProperty(controllableProperty), "expect throw exception because SDI mode note exits");
 	}
 
 	/**
@@ -2793,5 +2818,126 @@ public class HaivisionXEncoderCommunicatorTest {
 		Assertions.assertNull(stats.get(audioName5));
 		Assertions.assertNull(stats.get(audioName6));
 		Assertions.assertNull(stats.get(audioName7));
+	}
+
+	/**
+	 * Test Video control: with Apply change Aspect Ratio properties is mode 3:2
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlApplyChangeAspectRatioMode_3_2() throws Exception {
+		haivisionXEncoderCommunicator.destroy();
+		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
+		haivisionXEncoderCommunicator.setConfigManagement("true");
+		haivisionXEncoderCommunicator.setHost("***REMOVED***");
+		haivisionXEncoderCommunicator.setPort(22);
+		haivisionXEncoderCommunicator.setLogin("tmaguest");
+		haivisionXEncoderCommunicator.setPassword("11111111");
+		haivisionXEncoderCommunicator.init();
+		haivisionXEncoderCommunicator.connect();
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.ASPECT_RATIO.getName();
+		String propValue = "3:2";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameApplyChange = "HD Video Encoder 0#" + AudioControllingMetric.APPLY_CHANGE.getName();
+		String propValueApplyChange = "1";
+		controllableProperty.setProperty(propNameApplyChange);
+		controllableProperty.setValue(propValueApplyChange);
+		Assertions.assertThrows(ResourceNotReachableException.class, () -> haivisionXEncoderCommunicator.controlProperty(controllableProperty),
+				"Expect throw exception because user with role based is guest");
+	}
+
+	/**
+	 * Test control with role based: test role based is guest
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testControlWithRoleBased() throws Exception {
+		haivisionXEncoderCommunicator.destroy();
+		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
+		haivisionXEncoderCommunicator.setConfigManagement("true");
+		haivisionXEncoderCommunicator.setHost("***REMOVED***");
+		haivisionXEncoderCommunicator.setPort(22);
+		haivisionXEncoderCommunicator.setLogin("tmaguest");
+		haivisionXEncoderCommunicator.setPassword("11111111");
+		haivisionXEncoderCommunicator.init();
+		haivisionXEncoderCommunicator.connect();
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "Audio Encoder 0#" + AudioControllingMetric.INPUT.getName();
+		String propValue = InputEnum.SDI_1_3_4.getValue();
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameApplyChange = "Audio Encoder 0#" + AudioControllingMetric.APPLY_CHANGE.getName();
+		String propValueApplyChange = "1";
+		controllableProperty.setProperty(propNameApplyChange);
+		controllableProperty.setValue(propValueApplyChange);
+		Assertions.assertThrows(ResourceNotReachableException.class, () -> haivisionXEncoderCommunicator.controlProperty(controllableProperty),
+				"Expect throw exception because user with role based is guest");
+	}
+
+	/**
+	 * Test create stream with role based: create stream with role is guest
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testCreateStreamWithRoleGuest() throws Exception {
+		haivisionXEncoderCommunicator.destroy();
+		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
+		haivisionXEncoderCommunicator.setConfigManagement("true");
+		haivisionXEncoderCommunicator.setHost("***REMOVED***");
+		haivisionXEncoderCommunicator.setPort(22);
+		haivisionXEncoderCommunicator.setLogin("tmaguest");
+		haivisionXEncoderCommunicator.setPassword("11111111");
+		haivisionXEncoderCommunicator.init();
+		haivisionXEncoderCommunicator.connect();
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.SAP_TRANSMIT.getName();
+		String propValue = "1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		propName = EncoderConstant.CREATE_STREAM + "#" + StreamControllingMetric.SAP_NAME.getName();
+		propValue = "TEST0002s";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.NAME.getName();
+		propValue = "TEST000s2";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_DESTINATION_PORT.getName();
+		propValue = "12611";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.STREAMING_DESTINATION_ADDRESS.getName();
+		propValue = "129.0.0.6";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		propName = EncoderConstant.CREATE_STREAM + EncoderConstant.HASH + StreamControllingMetric.ACTION.getName();
+		propValue = "1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		Assertions.assertThrows(ResourceNotReachableException.class, () -> haivisionXEncoderCommunicator.controlProperty(controllableProperty),
+				"Expect throw exception because user with role based is guest");
 	}
 }
