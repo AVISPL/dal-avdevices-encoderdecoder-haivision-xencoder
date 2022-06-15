@@ -26,7 +26,7 @@ public enum EncoderMonitoringMetric {
 	STILL_IMAGE("StillImage", true),
 	TALKBACK("TalkBack", true),
 	SESSION("Session", true),
-	SERVICE("Service", true);
+	SERVICE("Services", true);
 
 	private final String name;
 	private final boolean isMonitoring;
