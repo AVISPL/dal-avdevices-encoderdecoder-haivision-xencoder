@@ -331,6 +331,33 @@ public class HaivisionXEncoderCommunicatorTest {
 	// UT for video Control--------------------------------------------------------------------------------------------------------------------------
 
 	/**
+	 * Test Video control: with Input properties is BNC-1 and sent action applyChange
+	 *
+	 * @throws Exception When fail to controlProperty
+	 */
+	@Test
+	@Tag("RealDevice")
+	void testVideoControlInputAndActionAplyCahnge() throws Exception {
+		haivisionXEncoderCommunicator.getMultipleStatistics();
+		ControllableProperty controllableProperty = new ControllableProperty();
+		String propName = "HD Video Encoder 0#" + VideoControllingMetric.INPUT.getName();
+		String propValue = "BNC-1";
+		controllableProperty.setProperty(propName);
+		controllableProperty.setValue(propValue);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		String propNameApplyChange = "HD Video Encoder 0#" + VideoControllingMetric.APPLY_CHANGE.getName();
+		String propValueApplyChange  = "1";
+		controllableProperty.setProperty(propNameApplyChange);
+		controllableProperty.setValue(propValueApplyChange);
+		haivisionXEncoderCommunicator.controlProperty(controllableProperty);
+
+		ExtendedStatistics extendedStatistics = (ExtendedStatistics) haivisionXEncoderCommunicator.getMultipleStatistics().get(0);
+		Map<String, String> stats = extendedStatistics.getStatistics();
+		Assertions.assertEquals(propValue, stats.get(propName));
+	}
+
+	/**
 	 * Test Video control: with Input properties is BNC-1
 	 *
 	 * @throws Exception When fail to controlProperty
