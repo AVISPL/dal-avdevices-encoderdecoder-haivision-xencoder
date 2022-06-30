@@ -2384,6 +2384,9 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 					break;
 				case ASPECT_RATIO:
 					value = videoConfig.getAspectRatio();
+					if (EncoderConstant.AUTO_DETECT.equals(value)) {
+						value = AspectRatioEnum.ASPECT_RATIO_0.getName();
+					}
 					AdvancedControllableProperty aspectRatioControlProperty = controlDropdown(stats, dropdownAspectRatio, videoKeyName, value);
 					addOrUpdateAdvanceControlProperties(advancedControllableProperties, aspectRatioControlProperty);
 					break;
