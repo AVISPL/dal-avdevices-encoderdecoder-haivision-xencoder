@@ -633,17 +633,14 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		}
 		if (failedMonitor.size() == noOfMonitoringMetric) {
 			StringBuilder stringBuilder = new StringBuilder();
-			Set<String> failedMonitoringMessage = new HashSet<>();
 			for (Map.Entry<String, String> messageFailed : failedMonitor.entrySet()) {
-				failedMonitoringMessage.add(messageFailed.getValue());
-				stringBuilder.append(messageFailed.getKey() + EncoderConstant.COLON + messageFailed.getValue());
+				String value = messageFailed.getValue();
+				if (!stringBuilder.toString().contains(value)) {
+					stringBuilder.append(value + EncoderConstant.SPACE);
+				}
 			}
 			failedMonitor.clear();
-			if (failedMonitoringMessage.size() <= EncoderConstant.NUMBER_ONE) {
-				throw new ResourceNotReachableException("Can't monitoring data: " + failedMonitoringMessage.stream().map(String::toString).findFirst().get());
-			} else {
-				throw new ResourceNotReachableException("Get monitoring data failed: " + stringBuilder);
-			}
+			throw new ResourceNotReachableException("Get monitoring data failed: " + stringBuilder);
 		}
 		getFilteredForEncoderStatistics();
 		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
