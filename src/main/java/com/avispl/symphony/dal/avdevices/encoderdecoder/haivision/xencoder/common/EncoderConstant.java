@@ -138,5 +138,5 @@ public class EncoderConstant {
 	public static final String SEVEN_STRING_FORMAT = " %s %s %s %s %s %s %s ";
 	public static final String FIVE_STRING_FORMAT = " %s %s %s %s %s ";
 	public static final String AUTO_DETECT = "Auto-Detect";
-	public static final String MESSAGE_SOCKET_TIMEOUT = "timeout: socket is not established";
+	public static final String MESSAGE_SOCKET_TIMEOUT = "socket is not established";
 }
