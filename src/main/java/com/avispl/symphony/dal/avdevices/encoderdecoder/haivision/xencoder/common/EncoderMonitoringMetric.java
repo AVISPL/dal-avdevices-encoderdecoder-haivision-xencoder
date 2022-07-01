@@ -12,21 +12,23 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.comm
  */
 public enum EncoderMonitoringMetric {
 
-	ROLE_BASED("RoleBased", false),
-	ACCOUNT("Account", false),
+
+	//  ToDo: comment out controlling capabilities, filtering and config management
+//	ROLE_BASED("RoleBased", false),
+//	ACCOUNT("Account", false),
+//	STILL_IMAGE("StillImage", true),
+//	TALKBACK("TalkBack", true),
+//	SERVICE("Services", true);
 	TEMPERATURE("Temperature", true),
 	SYSTEM_INFORMATION("SystemInformation", true),
 	AUDIO_STATISTICS("AudioStatistics", true),
 	AUDIO_CONFIG("AudioConfig", true),
-	VIDEO_STATISTICS("AudioStatistics", true),
-	VIDEO_CONFIG("AudioConfig", true),
+	VIDEO_STATISTICS("VideoStatistics", true),
+	VIDEO_CONFIG("VideoConfig", true),
 	STREAM_STATISTICS("StreamStatistics", true),
 	INPUT("Vidin", true),
 	STREAM_CONFIG("StreamConfig", true),
-	STILL_IMAGE("StillImage", true),
-	TALKBACK("TalkBack", true),
-	SESSION("Session", true),
-	SERVICE("Services", true);
+	SESSION("Session", true);
 
 	private final String name;
 	private final boolean isMonitoring;
