@@ -640,7 +640,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				}
 			}
 			failedMonitor.clear();
-			throw new ResourceNotReachableException("Get monitoring data failed: " + stringBuilder);
+			throw new ResourceNotReachableException("Can't get monitoring data: " + stringBuilder);
 		}
 		getFilteredForEncoderStatistics();
 		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
