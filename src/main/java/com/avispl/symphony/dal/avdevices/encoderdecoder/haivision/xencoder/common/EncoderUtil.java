@@ -42,17 +42,18 @@ public class EncoderUtil {
 				return EncoderCommand.OPERATION_TEMPERATURE.getName() + EncoderCommand.GET.getName();
 			case INPUT:
 				return EncoderCommand.OPERATION_VIDIN.getName() + EncoderCommand.GET.getName() + EncoderCommand.ALL.getName();
-			case STILL_IMAGE:
-				return EncoderCommand.OPERATION_STILL.getName() + EncoderCommand.LIST;
-			case SERVICE:
-				return EncoderCommand.ADMIN_SERVICE.getName() + EncoderCommand.ALL.getName() + EncoderCommand.ADMIN_STATUS.getName();
-			case TALKBACK:
-				return EncoderCommand.OPERATION_TALKBACK.getName() + EncoderCommand.GET.getName() + EncoderCommand.ALL.getName();
+			//  ToDo: comment out controlling capabilities, filtering and config management
+//			case STILL_IMAGE:
+//				return EncoderCommand.OPERATION_STILL.getName() + EncoderCommand.LIST;
+//			case SERVICE:
+//				return EncoderCommand.ADMIN_SERVICE.getName() + EncoderCommand.ALL.getName() + EncoderCommand.ADMIN_STATUS.getName();
+//			case TALKBACK:
+//				return EncoderCommand.OPERATION_TALKBACK.getName() + EncoderCommand.GET.getName() + EncoderCommand.ALL.getName();
 			case SESSION:
 				return EncoderCommand.OPERATION_SESSION.getName() + EncoderCommand.ALL.getName() + EncoderCommand.GET.getName();
-			case ACCOUNT:
-			case ROLE_BASED:
-				return EncoderConstant.NONE;
+//			case ACCOUNT:
+//			case ROLE_BASED:
+//				return EncoderConstant.NONE;
 			default:
 				throw new IllegalArgumentException("Do not support encoderMonitoringMetric: " + encoderMonitoringMetric.name());
 		}

@@ -51,7 +51,8 @@ public class HaivisionXEncoderCommunicatorTest {
 	@BeforeEach()
 	public void setUp() throws Exception {
 		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
-		haivisionXEncoderCommunicator.setConfigManagement("true");
+		//  ToDo: comment out controlling capabilities, filtering and config management
+//		haivisionXEncoderCommunicator.setConfigManagement("true");
 		haivisionXEncoderCommunicator.setHost("10.8.51.54");
 		haivisionXEncoderCommunicator.setPort(22);
 		haivisionXEncoderCommunicator.setLogin("admin");
@@ -2857,7 +2858,8 @@ public class HaivisionXEncoderCommunicatorTest {
 	void testVideoControlApplyChangeAspectRatioMode_3_2() throws Exception {
 		haivisionXEncoderCommunicator.destroy();
 		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
-		haivisionXEncoderCommunicator.setConfigManagement("true");
+		//  ToDo: comment out controlling capabilities, filtering and config management
+//		haivisionXEncoderCommunicator.setConfigManagement("true");
 		haivisionXEncoderCommunicator.setHost("10.8.51.54");
 		haivisionXEncoderCommunicator.setPort(22);
 		haivisionXEncoderCommunicator.setLogin("tmaguest");
@@ -2890,7 +2892,8 @@ public class HaivisionXEncoderCommunicatorTest {
 	void testControlWithRoleBased() throws Exception {
 		haivisionXEncoderCommunicator.destroy();
 		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
-		haivisionXEncoderCommunicator.setConfigManagement("true");
+		//  ToDo: comment out controlling capabilities, filtering and config management
+//		haivisionXEncoderCommunicator.setConfigManagement("true");
 		haivisionXEncoderCommunicator.setHost("10.8.51.54");
 		haivisionXEncoderCommunicator.setPort(22);
 		haivisionXEncoderCommunicator.setLogin("tmaguest");
@@ -2924,11 +2927,12 @@ public class HaivisionXEncoderCommunicatorTest {
 	void testCreateStreamWithRoleGuest() throws Exception {
 		haivisionXEncoderCommunicator.destroy();
 		haivisionXEncoderCommunicator = new HaivisionXEncoderCommunicator();
-		haivisionXEncoderCommunicator.setConfigManagement("true");
+		//  ToDo: comment out controlling capabilities, filtering and config management
+//		haivisionXEncoderCommunicator.setConfigManagement("true");
 		haivisionXEncoderCommunicator.setHost("10.8.51.54");
 		haivisionXEncoderCommunicator.setPort(22);
-		haivisionXEncoderCommunicator.setLogin("tmaguest");
-		haivisionXEncoderCommunicator.setPassword("11111111");
+		haivisionXEncoderCommunicator.setLogin("admin");
+		haivisionXEncoderCommunicator.setPassword("AVIadm2n");
 		haivisionXEncoderCommunicator.init();
 		haivisionXEncoderCommunicator.connect();
 		haivisionXEncoderCommunicator.getMultipleStatistics();
