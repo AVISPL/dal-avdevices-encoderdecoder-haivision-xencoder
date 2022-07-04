@@ -553,7 +553,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 //		// retrieve talkback udp port
 //		retrieveTalkbackUdpPort();
 		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
-				//  ToDo: comment out controlling capabilities and config management
+			//  ToDo: comment out controlling capabilities and config management
 //			if (EncoderMonitoringMetric.ACCOUNT.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.STILL_IMAGE.equals(encoderMonitoringMetric)
 //					|| EncoderMonitoringMetric.SERVICE.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.TALKBACK.equals(encoderMonitoringMetric)) {
 //				continue;
@@ -569,7 +569,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		if (failedMonitor.size() == noOfMonitoringMetric) {
 			StringBuilder stringBuilder = new StringBuilder();
 			for (Map.Entry<String, String> messageFailed : failedMonitor.entrySet()) {
-				stringBuilder.append(messageFailed.getValue());
+				String value = messageFailed.getValue();
+				if (!stringBuilder.toString().contains(value)) {
+					stringBuilder.append(value + EncoderConstant.SPACE);
+				}
 			}
 			failedMonitor.clear();
 			throw new ResourceNotReachableException("Get monitoring data failed: " + stringBuilder);
