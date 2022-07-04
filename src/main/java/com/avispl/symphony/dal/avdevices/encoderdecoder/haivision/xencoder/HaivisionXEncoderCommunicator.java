@@ -120,9 +120,10 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private String streamNameFilter;
 	private String portNumberFilter;
 	private String streamStatusFilter;
-	private String configManagement;
 	private String audioFilter;
 	private String videoFilter;
+//  ToDo: comment out controlling capabilities and config management
+//	private String configManagement;
 
 	/**
 	 * Retrieves {@code {@link #streamNameFilter}}
@@ -214,23 +215,24 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		this.videoFilter = videoFilter;
 	}
 
-	/**
-	 * Retrieves {@code {@link #configManagement}}
-	 *
-	 * @return value of {@link #configManagement}
-	 */
-	public String getConfigManagement() {
-		return configManagement;
-	}
-
-	/**
-	 * Sets {@code configManagement}
-	 *
-	 * @param configManagement the {@code java.lang.String} field
-	 */
-	public void setConfigManagement(String configManagement) {
-		this.configManagement = configManagement;
-	}
+//  ToDo: comment out controlling capabilities and config management
+//	/**
+//	 * Retrieves {@code {@link #configManagement}}
+//	 *
+//	 * @return value of {@link #configManagement}
+//	 */
+//	public String getConfigManagement() {
+//		return configManagement;
+//	}
+//
+//	/**
+//	 * Sets {@code configManagement}
+//	 *
+//	 * @param configManagement the {@code java.lang.String} field
+//	 */
+//	public void setConfigManagement(String configManagement) {
+//		this.configManagement = configManagement;
+//	}
 
 	/**
 	 * List of audio statistics
@@ -411,7 +413,8 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 			if (!isEmergencyDelivery) {
 				isAdministratorRole = isAdministratorRole(retrieveUserRole());
-				isConfigManagement = isConfigManagementProperties();
+//  ToDo: comment out controlling capabilities and config management
+//				isConfigManagement = isConfigManagementProperties();
 				populateInformationFromDevice(stats, advancedControllableProperties);
 				if (isConfigManagement) {
 					extendedStatistics.setControllableProperties(advancedControllableProperties);
@@ -535,17 +538,30 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 
 		//clear data before fetching data
 		clearBeforeFetchingData();
-		retrieveStillImageList();
-		// retrieve list of services and its statues
-		retrieveServiceList();
-		// retrieve talkback udp port
-		retrieveTalkbackUdpPort();
+
+		//  ToDo: comment out controlling capabilities and config management
+		if (isConfigManagement) {
+			retrieveStillImageList();
+			// retrieve list of services and its statues
+			retrieveServiceList();
+			// retrieve talkback udp port
+			retrieveTalkbackUdpPort();
+		}
+//		retrieveStillImageList();
+//		// retrieve list of services and its statues
+//		retrieveServiceList();
+//		// retrieve talkback udp port
+//		retrieveTalkbackUdpPort();
 		for (EncoderMonitoringMetric encoderMonitoringMetric : EncoderMonitoringMetric.values()) {
-			if (EncoderMonitoringMetric.ACCOUNT.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.STILL_IMAGE.equals(encoderMonitoringMetric)
-					|| EncoderMonitoringMetric.SERVICE.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.TALKBACK.equals(encoderMonitoringMetric)) {
-				continue;
+				//  ToDo: comment out controlling capabilities and config management
+//			if (EncoderMonitoringMetric.ACCOUNT.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.STILL_IMAGE.equals(encoderMonitoringMetric)
+//					|| EncoderMonitoringMetric.SERVICE.equals(encoderMonitoringMetric) || EncoderMonitoringMetric.TALKBACK.equals(encoderMonitoringMetric)) {
+//				continue;
+//			}
+			//  ToDo: comment out controlling capabilities and config management
+			if (!encoderMonitoringMetric.isControlling()) {
+				retrieveDataByMetric(stats, encoderMonitoringMetric);
 			}
-			retrieveDataByMetric(stats, encoderMonitoringMetric);
 		}
 		if (noOfMonitoringMetric == 0) {
 			noOfMonitoringMetric = getNumberMonitoringMetric();
@@ -1939,14 +1955,15 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		}
 	}
 
-	/**
-	 * This method is used to handle input from adapter properties in case is config management
-	 *
-	 * @return boolean is configManagement
-	 */
-	private boolean isConfigManagementProperties() {
-		return !StringUtils.isNullOrEmpty(configManagement) && EncoderConstant.TRUE.equalsIgnoreCase(configManagement);
-	}
+//  ToDo: comment out controlling capabilities and config management
+//	/**
+//	 * This method is used to handle input from adapter properties in case is config management
+//	 *
+//	 * @return boolean is configManagement
+//	 */
+//	private boolean isConfigManagementProperties() {
+//		return !StringUtils.isNullOrEmpty(configManagement) && EncoderConstant.TRUE.equalsIgnoreCase(configManagement);
+//	}
 
 	//region perform controls
 	//--------------------------------------------------------------------------------------------------------------------------------
