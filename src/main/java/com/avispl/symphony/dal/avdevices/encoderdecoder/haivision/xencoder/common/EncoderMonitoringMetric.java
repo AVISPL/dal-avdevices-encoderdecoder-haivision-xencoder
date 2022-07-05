@@ -12,34 +12,37 @@ package com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.comm
  */
 public enum EncoderMonitoringMetric {
 
-	ROLE_BASED("RoleBased", false),
-	ACCOUNT("Account", false),
-	TEMPERATURE("Temperature", true),
-	SYSTEM_INFORMATION("SystemInformation", true),
-	AUDIO_STATISTICS("AudioStatistics", true),
-	AUDIO_CONFIG("AudioConfig", true),
-	VIDEO_STATISTICS("AudioStatistics", true),
-	VIDEO_CONFIG("AudioConfig", true),
-	STREAM_STATISTICS("StreamStatistics", true),
-	INPUT("Vidin", true),
-	STREAM_CONFIG("StreamConfig", true),
-	STILL_IMAGE("StillImage", true),
-	TALKBACK("TalkBack", true),
-	SESSION("Session", true),
-	SERVICE("Services", true);
+	ROLE_BASED("RoleBased", false, true),
+	ACCOUNT("Account", false, true),
+	TEMPERATURE("Temperature", true, false),
+	SYSTEM_INFORMATION("SystemInformation", true, false),
+	AUDIO_STATISTICS("AudioStatistics", true, false),
+	AUDIO_CONFIG("AudioConfig", true, false),
+	VIDEO_STATISTICS("VideoStatistics", true, false),
+	VIDEO_CONFIG("VideoConfig", true, false),
+	STREAM_STATISTICS("StreamStatistics", true, false),
+	INPUT("Vidin", true, true),
+	STREAM_CONFIG("StreamConfig", true, false),
+	STILL_IMAGE("StillImage", true, true),
+	TALKBACK("TalkBack", true, true),
+	SESSION("Session", true, false),
+	SERVICE("Services", true, true);
 
 	private final String name;
 	private final boolean isMonitoring;
+	private final boolean isControlling;
 
 	/**
 	 * EncoderMonitoringMetric instantiation
 	 *
 	 * @param name {@code {@link #name}}
 	 * @param isMonitoring {@code {@link #isMonitoring}}
+	 * @param isControlling {@code {@link #isControlling}}
 	 */
-	EncoderMonitoringMetric(String name, boolean isMonitoring) {
+	EncoderMonitoringMetric(String name, boolean isMonitoring, boolean isControlling) {
 		this.name = name;
 		this.isMonitoring = isMonitoring;
+		this.isControlling = isControlling;
 	}
 
 	/**
@@ -58,5 +61,14 @@ public enum EncoderMonitoringMetric {
 	 */
 	public boolean isMonitoring() {
 		return isMonitoring;
+	}
+
+	/**
+	 * Retrieves {@code {@link #isControlling}}
+	 *
+	 * @return value of {@link #isControlling}
+	 */
+	public boolean isControlling() {
+		return isControlling;
 	}
 }
