@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import com.avispl.symphony.dal.avdevices.encoderdecoder.haivision.xencoder.statistics.DynamicStatisticsDefinitions;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -124,6 +125,28 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 	private String videoFilter;
 //  ToDo: comment out controlling capabilities and config management
 //	private String configManagement;
+	/**
+	 * Configurable property for historical properties, comma separated values
+	 * */
+	private String historicalProperties;
+
+	/**
+	 * Retrieves {@link #historicalProperties}
+	 *
+	 * @return value of {@link #historicalProperties}
+	 */
+	public String getHistoricalProperties() {
+		return historicalProperties;
+	}
+
+	/**
+	 * Sets {@link #historicalProperties} value
+	 *
+	 * @param historicalProperties new value of {@link #historicalProperties}
+	 */
+	public void setHistoricalProperties(String historicalProperties) {
+		this.historicalProperties = historicalProperties;
+	}
 
 	/**
 	 * Retrieves {@code {@link #streamNameFilter}}
@@ -419,7 +442,7 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 				if (isConfigManagement) {
 					extendedStatistics.setControllableProperties(advancedControllableProperties);
 				}
-				extendedStatistics.setStatistics(stats);
+				provisionTypedStatistics(stats, extendedStatistics);
 				localExtendedStatistics = extendedStatistics;
 			}
 
@@ -4304,6 +4327,28 @@ public class HaivisionXEncoderCommunicator extends SshCommunicator implements Mo
 		button.setLabelPressed(labelPressed);
 		button.setGracePeriod(gracePeriod);
 		return new AdvancedControllableProperty(name, new Date(), button, EncoderConstant.EMPTY_STRING);
+	}
+
+	/**
+	 * Add a property as a regular statistics property, or as dynamic one, based on the {@link #historicalProperties} configuration
+	 * and DynamicStatisticsDefinitions static definitions.
+	 *
+	 * @param statistics map of all device properties
+	 * @param extendedStatistics device statistics object
+	 * */
+	private void provisionTypedStatistics(Map<String, String> statistics, ExtendedStatistics extendedStatistics) {
+		Map<String, String> dynamicStatistics = new HashMap<>();
+		Map<String, String> staticStatistics = new HashMap<>();
+		statistics.forEach((s, s2) -> {
+			if (!StringUtils.isNullOrEmpty(historicalProperties) && historicalProperties.contains(s)
+					&& DynamicStatisticsDefinitions.checkIfExists(s)) {
+				dynamicStatistics.put(s, s2);
+			} else {
+				staticStatistics.put(s, s2);
+			}
+		});
+		extendedStatistics.setDynamicStatistics(dynamicStatistics);
+		extendedStatistics.setStatistics(staticStatistics);
 	}
 	//--------------------------------------------------------------------------------------------------------------------------------
 	//endregion
