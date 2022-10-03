@@ -15,7 +15,6 @@ import java.util.Optional;
 public enum DynamicStatisticsDefinitions {
     Temperature("Temperature"),
     EncodedBitrate("EncodedBitrate (kbps)"),
-    EncoderLoad("EncoderLoad (%)"),
     Bitrate("Bitrate (kbps)"),
     Buffer("Buffer (ms)"),
     Latency("Latency (ms)"),
