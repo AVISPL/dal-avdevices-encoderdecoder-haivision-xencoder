@@ -19,6 +19,7 @@ public enum DynamicStatisticsDefinitions {
     Buffer("Buffer (ms)"),
     Latency("Latency (ms)"),
     MaxBandwidth("MaxBandwidth (kbps)"),
+    PathMaxBandwidth("PathMaxBandwidth"),
     RTT("RTT (ms)");
 
     private final String name;
